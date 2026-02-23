@@ -18,7 +18,7 @@
   --r:8px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px}
-#titlebar{height:36px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-bottom:1px solid var(--border);-webkit-app-region:drag;flex-shrink:0;position:relative;z-index:100}
+#titlebar{height:36px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-bottom:1px solid var(--border);-webkit-app-region:drag;flex-shrink:0;z-index:100}
 #titlebar span{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
 #app{display:flex;flex-direction:column;height:calc(100vh - 36px)}
 #toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
@@ -62,17 +62,17 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;transform:translateX(-50%);box-shadow:0 0 8px var(--accent)}
 #waveform-time-overlay{position:absolute;top:4px;left:8px;font-family:var(--mono);font-size:10px;color:var(--muted);pointer-events:none}
 
-#word-editor{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--muted);pointer-events:none}
+#word-editor{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;position:relative}
+#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;position:absolute;inset:0;gap:10px;color:var(--muted);pointer-events:none;z-index:2;background:var(--bg)}
 #empty-state.hidden{display:none}
 #empty-state svg{width:40px;height:40px;color:var(--muted2)}
 
-.line-timing-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);flex-wrap:wrap}
+.line-timing-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);flex-wrap:wrap;flex-shrink:0}
 .line-timing-row label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .timing-sm{width:88px;padding:4px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
 .timing-sm:focus{border-color:rgba(200,255,87,.4)}
 
-.word-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.word-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
 .word-row-header{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .word-row-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
 .word-row-label.lbl-bg{color:var(--purple)}
@@ -84,17 +84,21 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 
 .words-container{display:flex;flex-wrap:wrap;gap:5px;padding:10px}
 
-.word-chip{position:relative;display:flex;flex-direction:column;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .1s,background .1s;min-width:36px}
+.word-chip{display:flex;flex-direction:column;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;min-width:36px}
 .word-chip:hover{border-color:var(--border2);background:var(--surface3)}
 .word-chip.selected{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 1px var(--accent)}
-.word-chip.active-now{border-color:var(--accent);background:rgba(200,255,87,.18)}
+.word-chip.active-now{border-color:rgba(200,255,87,.7);background:rgba(200,255,87,.15);box-shadow:0 0 6px rgba(200,255,87,.2)}
 .word-chip.bg-chip{border-color:rgba(192,87,255,.2)}
+.word-chip.bg-chip.active-now{border-color:rgba(192,87,255,.7);background:rgba(192,87,255,.15);box-shadow:0 0 6px rgba(192,87,255,.2)}
 .word-chip.duo-chip{border-color:rgba(255,170,87,.2)}
+.word-chip.duo-chip.active-now{border-color:rgba(255,170,87,.7);background:rgba(255,170,87,.15);box-shadow:0 0 6px rgba(255,170,87,.2)}
 .word-chip.no-time{border-color:rgba(255,87,87,.25)}
 .word-chip.no-time .wt span{color:var(--red)!important}
 .wt-text{padding:5px 8px 1px;font-size:13px;color:var(--text)}
 .wt{padding:1px 6px 4px;font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;gap:3px}
 .wt span{color:var(--accent)}
+.word-chip.bg-chip .wt span{color:var(--purple)}
+.word-chip.duo-chip .wt span{color:var(--orange)}
 
 #timing-bar{flex-shrink:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 #tw-label{font-size:13px;color:var(--muted);min-width:80px;font-style:italic}
@@ -116,18 +120,24 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .pline.current{opacity:1}
 .pline.future{opacity:.35}
 .pline-text{font-size:17px;font-weight:600;line-height:1.4;color:var(--text);letter-spacing:-.01em}
-.pline.current .pline-text{color:var(--accent)}
-.pw{display:inline;transition:color .08s}
-.pw.lit{color:var(--accent)}
-.pline-bg{font-size:12px;color:var(--purple);opacity:.75;margin-top:2px;font-style:italic}
-.pline-duo{font-size:12px;color:var(--orange);opacity:.75;margin-top:2px}
+.pline.current .pline-text{color:var(--text)}
+.pw{display:inline;transition:color .06s,text-shadow .06s}
+.pw.lit{color:var(--accent);text-shadow:0 0 12px rgba(200,255,87,.4)}
+.pline-bg{font-size:12px;color:var(--purple);margin-top:3px;display:flex;flex-wrap:wrap;gap:2px}
+.pline-duo{font-size:13px;color:var(--orange);margin-top:3px;display:flex;flex-wrap:wrap;gap:2px}
+.pbw{display:inline;transition:color .06s,opacity .06s}
+.pbw.lit{opacity:1;text-shadow:0 0 10px rgba(192,87,255,.5)}
+.pdw{display:inline;transition:color .06s,opacity .06s}
+.pdw.lit{opacity:1;text-shadow:0 0 10px rgba(255,170,87,.5)}
+.pline-bg .pbw{opacity:.6}
+.pline-duo .pdw{opacity:.6}
 
 #transport{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
 #play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 #play-btn:hover{background:#d4ff6a;transform:scale(1.05)}
 #play-btn svg{width:15px;height:15px;color:#000}
-#prog-track{flex:1;height:3px;background:var(--surface3);border-radius:2px;cursor:pointer;position:relative}
-#prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .1s linear}
+#prog-track{flex:1;height:3px;background:var(--surface3);border-radius:2px;cursor:pointer}
+#prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0%}
 #vol-slider{width:56px;accent-color:var(--accent);cursor:pointer}
 #tp-time{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
@@ -162,12 +172,25 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .tag-synced{background:var(--accent-dim);color:var(--accent)}
 .tag-plain{background:var(--surface3);color:var(--muted)}
 .tag-dur{background:var(--surface3);color:var(--muted)}
-#lrclib-spinner{text-align:center;padding:20px;color:var(--muted);font-size:12px}
 
-.export-success{text-align:center;padding:8px 0}
-.export-success .es-icon{font-size:32px;margin-bottom:8px}
-.export-success .es-path{font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--surface2);padding:6px 10px;border-radius:6px;margin:10px 0;word-break:break-all}
-.export-success .es-note{font-size:12px;color:var(--muted);line-height:1.6}
+.export-success{text-align:center;padding:4px 0}
+.es-icon{font-size:28px;margin-bottom:8px}
+.es-path{font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--surface2);padding:6px 10px;border-radius:6px;margin:10px 0;word-break:break-all;text-align:left}
+.es-note{font-size:12px;color:var(--muted);line-height:1.7;text-align:left}
+
+.settings-section{margin-bottom:18px}
+.settings-section h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px}
+.settings-row label{font-size:12px;color:var(--text)}
+.settings-row .desc{font-size:11px;color:var(--muted);margin-top:2px}
+.settings-toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+.settings-toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--surface3);border-radius:10px;cursor:pointer;transition:background .2s;border:1px solid var(--border2)}
+.settings-toggle input:checked+.toggle-track{background:var(--accent-dim);border-color:rgba(200,255,87,.4)}
+.toggle-track::after{content:'';position:absolute;left:3px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.settings-toggle input:checked+.toggle-track::after{transform:translateX(16px);background:var(--accent)}
+.settings-select{padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--font);font-size:12px;outline:none}
+.settings-select:focus{border-color:rgba(200,255,87,.4)}
 </style>
 </head>
 <body>
@@ -193,7 +216,7 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
     </button>
     <div class="tb-sep"></div>
     <span style="font-size:11px;color:var(--muted2)">
-      <kbd>S</kbd> start &nbsp;<kbd>E</kbd> end &nbsp;<kbd>Space</kbd> play &nbsp;<kbd>Tab</kbd> next word &nbsp;<kbd>←→</kbd> 0.1s
+      <kbd>S</kbd> start &nbsp;<kbd>E</kbd> end &nbsp;<kbd>Space</kbd> play &nbsp;<kbd>Tab</kbd> next &nbsp;<kbd>←→</kbd> 0.1s
     </span>
     <div id="track-info">
       <span id="track-name">No audio loaded</span>
@@ -201,6 +224,9 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
       <button class="tb-btn accent" onclick="exportTTML()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export TTML
+      </button>
+      <button class="tb-btn" onclick="showSettings()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
   </div>
@@ -224,19 +250,17 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
         <div id="playhead" style="left:0"></div>
         <div id="waveform-time-overlay">0:00.000</div>
       </div>
-
       <div id="word-editor">
         <div id="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           <p style="font-size:13px">Select a line to edit word timings</p>
         </div>
       </div>
-
       <div id="timing-bar">
         <span id="tw-label">No word selected</span>
         <div class="tb-sep"></div>
         <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Start</label>
-        <input id="timing-start" type="text" placeholder="0.000" oninput="updateWordTime('start',this.value)">
+        <input id="timing-start" type="text" placeholder="0.000" oninput="updateWordTime('time',this.value)">
         <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">End</label>
         <input id="timing-end" type="text" placeholder="0.000" oninput="updateWordTime('end',this.value)">
         <button id="set-start-btn" onclick="setStartNow()">Set Start <kbd>S</kbd></button>
@@ -299,21 +323,23 @@ let filterText = ''
 
 function genId() { return 'l' + Math.random().toString(36).slice(2, 9) }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
-
 function fmtMs(t) {
   if (t == null) return '--:--.---'
   const m = Math.floor(t/60), s = Math.floor(t%60).toString().padStart(2,'0')
   const ms = Math.round((t%1)*1000).toString().padStart(3,'0')
   return `${m}:${s}.${ms}`
 }
-function fmtSec(t) {
-  return `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}`
-}
+function fmtSec(t) { return `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}` }
 function fmtTTML(t) {
   if (t == null) t = 0
   const h = Math.floor(t/3600), m = Math.floor((t%3600)/60)
   const s = (t%60).toFixed(3).padStart(6,'0')
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${s}`
+}
+
+function splitWords(text) {
+  if (!text) return []
+  return text.match(/\S+/g) || []
 }
 
 async function openAudio() {
@@ -349,9 +375,9 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('tp-time').textContent = fmtSec(t)
   document.getElementById('prog-fill').style.width = (audioDuration ? t/audioDuration*100 : 0) + '%'
   if (audioDuration) {
-    const x = t/audioDuration * document.getElementById('waveform-canvas').offsetWidth
-    document.getElementById('playhead').style.left = x + 'px'
+    document.getElementById('playhead').style.left = (t/audioDuration * document.getElementById('waveform-canvas').offsetWidth) + 'px'
   }
+  updateEditorActiveWords(t)
   updatePreviewLive(t)
 })
 
@@ -399,7 +425,7 @@ function parseLRC(lrc) {
     const nextTime = arr[i+1]?.time
     const end = nextTime || line.time+3
     const dur = Math.max(0.01, end-line.time)
-    const rawW = line.text.split(/\s+/).filter(Boolean)
+    const rawW = splitWords(line.text)
     const words = rawW.map((w,wi) => ({
       word:w, time:line.time+(wi*dur/rawW.length), end:line.time+((wi+1)*dur/rawW.length)
     }))
@@ -420,7 +446,7 @@ function parseTTML(xml) {
   }
   function extractRole(str, role) {
     const results = []
-    const openReg = new RegExp(`<span\\b[^>]*\\b(?:ttm:role|role)\\s*=\\s*(['"\\s])\\s*${role}\\s*\\1[^>]*>`,'ig')
+    const openReg = new RegExp(`<span\\b[^>]*\\b(?:ttm:role|role)\\s*=\\s*"\\s*${role}\\s*"[^>]*>`,'ig')
     let m
     while ((m = openReg.exec(str)) !== null) {
       const oi = m.index, ot = m[0]
@@ -448,14 +474,20 @@ function parseTTML(xml) {
     const words = []
     const wr = /<span\b[^>]*\bbegin="([^"]+)"(?:[^>]*\bend="([^"]+)")?[^>]*>([\s\S]*?)<\/span>/ig
     for (const wm of inner.matchAll(wr)) {
-      const raw = (wm[3]||'').replace(/<[^>]+>/g,'').trim()
-      if (!raw) continue
-      const pieces = raw.split(/\s+/).filter(Boolean)
+      const raw = (wm[3]||'').replace(/<[^>]+>/g,'')
+      const trimmed = raw.replace(/^\s+|\s+$/g,'')
+      if (!trimmed) continue
       const st = pt(wm[1]), en = wm[2]?pt(wm[2]):null
-      if (pieces.length===1) { words.push({word:pieces[0],time:st,end:en}) }
-      else {
-        const dur = Math.max(0.001,(en?en-st:pieces.length*0.3))
-        pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length)}))
+      const hasTrailingSpace = raw.endsWith(' ')
+      if (!hasTrailingSpace && trimmed.indexOf(' ') === -1) {
+        words.push({word:trimmed, time:st, end:en})
+      } else {
+        const pieces = splitWords(trimmed)
+        if (pieces.length === 1) { words.push({word:pieces[0],time:st,end:en}) }
+        else {
+          const dur = Math.max(0.001,(en?en-st:pieces.length*0.3))
+          pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length)}))
+        }
       }
     }
     return words
@@ -478,7 +510,7 @@ function parseTTML(xml) {
     if (mw.length||bgText||duoText) {
       out.push({
         id:genId(), time:ls, end:le, text,
-        words:mw, bgWords, bgText:bgText?`(${bgText})`:null,
+        words:mw, bgWords, bgText:bgText||null,
         duoWords, duoText:duoText||null
       })
     }
@@ -492,7 +524,11 @@ async function openLyricsFile() {
   const { content, ext } = result
   if (ext==='lrc') lines = parseLRC(content)
   else if (ext==='ttml'||ext==='xml') lines = parseTTML(content)
-  else lines = content.split('\n').filter(l=>l.trim()).map(l=>({ id:genId(),time:null,end:null,text:l.trim(),words:l.trim().split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null }))
+  else lines = content.split('\n').filter(l=>l.trim()).map(l=>({
+    id:genId(),time:null,end:null,text:l.trim(),
+    words:splitWords(l.trim()).map(w=>({word:w,time:null,end:null})),
+    bgWords:[],bgText:null,duoWords:[],duoText:null
+  }))
   renderAll(); drawWaveform()
 }
 
@@ -501,17 +537,25 @@ async function showLRCLIBModal() {
   showModal('Search LRCLIB', `
     <div class="mf"><label>Track Title</label><input class="mi" id="lr-title" value="${esc(title)}" placeholder="Song title"></div>
     <div class="mf"><label>Artist</label><input class="mi" id="lr-artist" placeholder="Artist name"></div>
-    <div id="lrclib-spinner" style="display:none">Searching…</div>
+    <div id="lrclib-spinner" style="display:none;text-align:center;padding:16px;color:var(--muted);font-size:12px">Searching…</div>
     <div id="lrclib-results"></div>
   `, [
     { label:'Cancel', fn:closeModal },
     { label:'Search', primary:true, fn:searchLRCLIB }
   ])
+  setTimeout(() => {
+    const titleEl = document.getElementById('lr-title')
+    if (titleEl) { titleEl.focus(); titleEl.select() }
+    const enterHandler = (e) => { if (e.key==='Enter') { document.removeEventListener('keydown',enterHandler); searchLRCLIB() } }
+    document.addEventListener('keydown', enterHandler)
+  }, 50)
 }
 
 async function searchLRCLIB() {
-  const t = document.getElementById('lr-title')?.value?.trim()
-  const a = document.getElementById('lr-artist')?.value?.trim()
+  const titleEl = document.getElementById('lr-title')
+  const artistEl = document.getElementById('lr-artist')
+  const t = titleEl?.value?.trim()
+  const a = artistEl?.value?.trim()
   if (!t) return
   document.getElementById('lrclib-spinner').style.display = 'block'
   document.getElementById('lrclib-results').innerHTML = ''
@@ -527,18 +571,16 @@ async function searchLRCLIB() {
       const dur = r.duration ? `${Math.floor(r.duration/60)}:${String(Math.floor(r.duration%60)).padStart(2,'0')}` : ''
       const el = document.createElement('div')
       el.className = 'lrclib-result'
-      el.innerHTML = `
-        <div class="rt">${esc(r.trackName)}</div>
-        <div class="ra">${esc(r.artistName)}${r.albumName?' · '+esc(r.albumName):''}</div>
-        <div class="rb">
-          ${r.syncedLyrics?'<span class="lrclib-tag tag-synced">Synced</span>':'<span class="lrclib-tag tag-plain">Plain</span>'}
-          ${dur?`<span class="lrclib-tag tag-dur">${dur}</span>`:''}
-        </div>`
-      el.onclick = () => {
+      el.innerHTML = `<div class="rt">${esc(r.trackName)}</div><div class="ra">${esc(r.artistName)}${r.albumName?' · '+esc(r.albumName):''}</div><div class="rb">${r.syncedLyrics?'<span class="lrclib-tag tag-synced">Synced</span>':'<span class="lrclib-tag tag-plain">Plain</span>'}${dur?`<span class="lrclib-tag tag-dur">${dur}</span>`:''}</div>`
+      el.addEventListener('click', () => {
         if (r.syncedLyrics) lines = parseLRC(r.syncedLyrics)
-        else if (r.plainLyrics) lines = r.plainLyrics.split('\n').filter(l=>l.trim()).map(l=>({id:genId(),time:null,end:null,text:l.trim(),words:l.trim().split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null}))
+        else if (r.plainLyrics) lines = r.plainLyrics.split('\n').filter(l=>l.trim()).map(l=>({
+          id:genId(),time:null,end:null,text:l.trim(),
+          words:splitWords(l.trim()).map(w=>({word:w,time:null,end:null})),
+          bgWords:[],bgText:null,duoWords:[],duoText:null
+        }))
         closeModal(); renderAll(); drawWaveform()
-      }
+      })
       container.appendChild(el)
     }
   } catch(e) {
@@ -548,7 +590,7 @@ async function searchLRCLIB() {
 }
 
 function renderAll() {
-  renderLines(); renderEditor(); renderPreview(audio.currentTime||0); updateStatus()
+  renderLines(); renderEditorFull(); renderPreview(audio.currentTime||0); updateStatus()
 }
 
 function renderLines() {
@@ -560,65 +602,70 @@ function renderLines() {
     el.className = 'line-item' + (line.id===selectedLineId?' active':'')
     el.dataset.id = line.id
     const untimed = line.words.filter(w=>w.time==null).length
-    el.innerHTML = `
-      <div class="line-time">${fmtMs(line.time)}</div>
-      <div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div>
-      <div class="line-badges">
-        <span class="badge badge-main">${line.words.length}w</span>
-        ${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}
-        ${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}
-        ${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}
-      </div>`
+    el.innerHTML = `<div class="line-time">${fmtMs(line.time)}</div><div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div><div class="line-badges"><span class="badge badge-main">${line.words.length}w</span>${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}</div>`
     el.addEventListener('click', () => {
       selectedLineId = line.id
       selectedWord = null
+      document.getElementById('tw-label').textContent = 'No word selected'
+      document.getElementById('tw-label').style.color = 'var(--muted)'
+      document.getElementById('timing-start').value = ''
+      document.getElementById('timing-end').value = ''
       renderLines()
-      renderEditor()
+      renderEditorFull()
     })
     list.appendChild(el)
   }
   document.getElementById('line-count').textContent = lines.length
 }
 
-function renderEditor() {
+function effectiveEnd(line) {
+  let end = line.end ?? 0
+  const bgLast = line.bgWords?.length ? (line.bgWords[line.bgWords.length-1].end ?? 0) : 0
+  const duoLast = line.duoWords?.length ? (line.duoWords[line.duoWords.length-1].end ?? 0) : 0
+  return Math.max(end, bgLast, duoLast)
+}
+
+function renderEditorFull() {
   const editor = document.getElementById('word-editor')
   const empty = document.getElementById('empty-state')
-  if (!selectedLineId) { empty.classList.remove('hidden'); editor.innerHTML = ''; editor.appendChild(empty); return }
+
+  if (!selectedLineId) {
+    empty.classList.remove('hidden')
+    Array.from(editor.children).forEach(c => { if (c !== empty) c.remove() })
+    return
+  }
+
   empty.classList.add('hidden')
   const line = lines.find(l=>l.id===selectedLineId)
   if (!line) return
-  editor.innerHTML = ''
+
+  Array.from(editor.children).forEach(c => { if (c !== empty) c.remove() })
 
   const timingRow = document.createElement('div')
   timingRow.className = 'line-timing-row'
-  timingRow.innerHTML = `
-    <label>Line Start</label>
-    <input class="timing-sm" id="ls-input" value="${line.time!=null?line.time.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('time',this.value)">
-    <label>End</label>
-    <input class="timing-sm" id="le-input" value="${line.end!=null?line.end.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('end',this.value)">
-    <button class="sm-btn" onclick="setLineFieldNow('time')">↙ Now</button>
-    <button class="sm-btn" onclick="setLineFieldNow('end')">↗ Now</button>
-    <button class="sm-btn danger" style="margin-left:auto" onclick="deleteLine('${line.id}')">Delete</button>
-  `
+  timingRow.innerHTML = `<label>Line Start</label><input class="timing-sm" id="ls-input" value="${line.time!=null?line.time.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('time',this.value)"><label>End</label><input class="timing-sm" id="le-input" value="${line.end!=null?line.end.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('end',this.value)"><button class="sm-btn" onclick="setLineFieldNow('time')">↙ Now</button><button class="sm-btn" onclick="setLineFieldNow('end')">↗ Now</button><button class="sm-btn danger" style="margin-left:auto" onclick="deleteLine('${line.id}')">Delete</button>`
   editor.appendChild(timingRow)
+
   editor.appendChild(buildWordRow(line.words, 'Main Vocals', '', line.id, 'main'))
   if (line.bgWords?.length) editor.appendChild(buildWordRow(line.bgWords, 'Background Vocals', 'lbl-bg', line.id, 'bg'))
   if (line.duoWords?.length) editor.appendChild(buildWordRow(line.duoWords, 'Duo / Harmony', 'lbl-duo', line.id, 'duo'))
 
   const addRow = document.createElement('div')
-  addRow.style.cssText = 'display:flex;gap:8px'
+  addRow.style.cssText = 'display:flex;gap:8px;flex-shrink:0'
   if (!line.bgWords?.length) {
     const b = document.createElement('button')
-    b.className = 'sm-btn'; b.style.cssText = 'flex:1;padding:8px;border-style:dashed;color:var(--purple);border-color:rgba(192,87,255,.3)'
+    b.className = 'sm-btn'
+    b.style.cssText = 'flex:1;padding:8px;border-style:dashed;color:var(--purple);border-color:rgba(192,87,255,.3)'
     b.textContent = '+ Background Vocals'
-    b.onclick = () => addVocalLayer(line.id, 'bg')
+    b.addEventListener('click', () => addVocalLayer(line.id, 'bg'))
     addRow.appendChild(b)
   }
   if (!line.duoWords?.length) {
     const b = document.createElement('button')
-    b.className = 'sm-btn'; b.style.cssText = 'flex:1;padding:8px;border-style:dashed;color:var(--orange);border-color:rgba(255,170,87,.3)'
+    b.className = 'sm-btn'
+    b.style.cssText = 'flex:1;padding:8px;border-style:dashed;color:var(--orange);border-color:rgba(255,170,87,.3)'
     b.textContent = '+ Duo / Harmony'
-    b.onclick = () => addVocalLayer(line.id, 'duo')
+    b.addEventListener('click', () => addVocalLayer(line.id, 'duo'))
     addRow.appendChild(b)
   }
   if (addRow.children.length) editor.appendChild(addRow)
@@ -627,39 +674,90 @@ function renderEditor() {
 function buildWordRow(words, label, labelClass, lineId, type) {
   const row = document.createElement('div')
   row.className = 'word-row'
-  row.innerHTML = `
-    <div class="word-row-header">
-      <span class="word-row-label ${labelClass}">${label}</span>
-      <div class="word-row-actions">
-        <button class="sm-btn" onclick="editWordsText('${lineId}','${type}')">Edit Text</button>
-        ${type!=='main'?`<button class="sm-btn danger" onclick="removeVocalLayer('${lineId}','${type}')">Remove</button>`:''}
-      </div>
-    </div>
-    <div class="words-container" id="wc-${lineId}-${type}"></div>`
-  const container = row.querySelector('.words-container')
+  const header = document.createElement('div')
+  header.className = 'word-row-header'
+  header.innerHTML = `<span class="word-row-label ${labelClass}">${label}</span>`
+  const actions = document.createElement('div')
+  actions.className = 'word-row-actions'
+  const editBtn = document.createElement('button')
+  editBtn.className = 'sm-btn'
+  editBtn.textContent = 'Edit Text'
+  editBtn.addEventListener('click', () => editWordsText(lineId, type))
+  actions.appendChild(editBtn)
+  if (type !== 'main') {
+    const rmBtn = document.createElement('button')
+    rmBtn.className = 'sm-btn danger'
+    rmBtn.textContent = 'Remove'
+    rmBtn.addEventListener('click', () => removeVocalLayer(lineId, type))
+    actions.appendChild(rmBtn)
+  }
+  header.appendChild(actions)
+  row.appendChild(header)
+
+  const container = document.createElement('div')
+  container.className = 'words-container'
+  container.id = `wc-${lineId}-${type}`
   words.forEach((w, i) => {
     const chip = document.createElement('div')
     const isSel = selectedWord && selectedWord.lineId===lineId && selectedWord.idx===i && selectedWord.type===type
-    const chipClass = type==='bg'?'bg-chip':type==='duo'?'duo-chip':''
-    chip.className = `word-chip ${chipClass} ${isSel?'selected':''} ${w.time==null?'no-time':''}`
-    chip.innerHTML = `<div class="wt-text">${esc(w.word)}</div><div class="wt"><span>${w.time!=null?w.time.toFixed(2):'??'}</span><span style="color:var(--muted)">→</span><span>${w.end!=null?w.end.toFixed(2):'??'}</span></div>`
+    const typeClass = type==='bg'?'bg-chip':type==='duo'?'duo-chip':''
+    chip.className = `word-chip ${typeClass} ${isSel?'selected':''} ${w.time==null?'no-time':''}`
+    chip.dataset.idx = i
+    const wtText = document.createElement('div')
+    wtText.className = 'wt-text'
+    wtText.textContent = w.word
+    const wtTimes = document.createElement('div')
+    wtTimes.className = 'wt'
+    const s1 = document.createElement('span'); s1.textContent = w.time!=null?w.time.toFixed(2):'??'
+    const arrow = document.createElement('span'); arrow.style.color='var(--muted)'; arrow.textContent='→'
+    const s2 = document.createElement('span'); s2.textContent = w.end!=null?w.end.toFixed(2):'??'
+    wtTimes.appendChild(s1); wtTimes.appendChild(arrow); wtTimes.appendChild(s2)
+    chip.appendChild(wtText)
+    if (settings.showTimecodes) chip.appendChild(wtTimes)
     chip.addEventListener('click', () => selectWord(lineId, i, type))
     chip.addEventListener('dblclick', () => { if (w.time!=null) { audio.currentTime=w.time; audio.play(); setPlayIcon(false) } })
     container.appendChild(chip)
   })
+  row.appendChild(container)
   return row
 }
 
 function selectWord(lineId, idx, type) {
   selectedWord = { lineId, idx, type }
   const line = lines.find(l=>l.id===lineId)
+  if (!line) return
   const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
   const w = words[idx]
   document.getElementById('tw-label').textContent = `"${w.word}"`
   document.getElementById('tw-label').style.color = 'var(--text)'
   document.getElementById('timing-start').value = w.time!=null?w.time.toFixed(3):''
   document.getElementById('timing-end').value = w.end!=null?w.end.toFixed(3):''
-  renderEditor()
+
+  document.querySelectorAll('.word-chip.selected').forEach(c => c.classList.remove('selected'))
+  const container = document.getElementById(`wc-${lineId}-${type}`)
+  if (container) container.children[idx]?.classList.add('selected')
+}
+
+function updateEditorActiveWords(t) {
+  if (!selectedLineId) return
+  const line = lines.find(l=>l.id===selectedLineId)
+  if (!line) return
+  const allTypes = [
+    { words: line.words, type: 'main' },
+    { words: line.bgWords||[], type: 'bg' },
+    { words: line.duoWords||[], type: 'duo' }
+  ]
+  for (const { words, type } of allTypes) {
+    const container = document.getElementById(`wc-${selectedLineId}-${type}`)
+    if (!container) continue
+    words.forEach((w, i) => {
+      const chip = container.children[i]
+      if (!chip) return
+      const isActive = w.time!=null && t>=w.time && (w.end==null||t<w.end)
+      const isSel = selectedWord && selectedWord.lineId===selectedLineId && selectedWord.idx===i && selectedWord.type===type
+      chip.classList.toggle('active-now', isActive && !isSel)
+    })
+  }
 }
 
 function updateWordTime(field, val) {
@@ -677,12 +775,14 @@ function updateWordTime(field, val) {
       if (es.length) line.end = Math.max(...es)
     }
     renderLines(); updateStatus(); drawWaveform()
-    const chip = document.querySelector(`#wc-${selectedWord.lineId}-${selectedWord.type}`)?.children[selectedWord.idx]
+    const container = document.getElementById(`wc-${selectedWord.lineId}-${selectedWord.type}`)
+    const chip = container?.children[selectedWord.idx]
     if (chip) {
       const spans = chip.querySelectorAll('.wt span')
-      if (spans[0]) spans[0].textContent = words[selectedWord.idx].time!=null?words[selectedWord.idx].time.toFixed(2):'??'
-      if (spans[2]) spans[2].textContent = words[selectedWord.idx].end!=null?words[selectedWord.idx].end.toFixed(2):'??'
-      chip.classList.toggle('no-time', words[selectedWord.idx].time==null)
+      const w = words[selectedWord.idx]
+      if (spans[0]) spans[0].textContent = w.time!=null?w.time.toFixed(2):'??'
+      if (spans[2]) spans[2].textContent = w.end!=null?w.end.toFixed(2):'??'
+      chip.classList.toggle('no-time', w.time==null)
     }
   }
 }
@@ -699,12 +799,11 @@ function setEndNow() {
   document.getElementById('timing-end').value = t.toFixed(3)
   updateWordTime('end', t)
 }
-
 function updateLineField(field, val) {
   const line = lines.find(l=>l.id===selectedLineId)
   if (!line) return
   const t = parseFloat(val)
-  if (!isNaN(t)) { line[field==='time'?'time':'end'] = t; renderLines(); drawWaveform() }
+  if (!isNaN(t)) { line[field==='time'?'time':'end']=t; renderLines(); drawWaveform() }
 }
 function setLineFieldNow(field) {
   const line = lines.find(l=>l.id===selectedLineId)
@@ -721,28 +820,28 @@ function deleteLine(id) {
 }
 
 function addVocalLayer(lineId, type) {
-  const labelMap = {bg:'Background Vocals',duo:'Duo / Harmony'}
-  showModal(`Add ${labelMap[type]}`, `
-    <div class="mf"><label>Words (space-separated)</label><textarea class="mi mta" id="vl-text" placeholder="e.g. ooh yeah ooh"></textarea></div>
-  `,[
+  const labels = {bg:'Background Vocals',duo:'Duo / Harmony'}
+  showModal(`Add ${labels[type]}`, `<div class="mf"><label>Words</label><textarea class="mi mta" id="vl-text" placeholder="Enter words…"></textarea></div>`, [
     {label:'Cancel',fn:closeModal},
     {label:'Add',primary:true,fn:()=>{
       const text = document.getElementById('vl-text').value.trim()
       if (!text) return
       const line = lines.find(l=>l.id===lineId)
-      const words = text.split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null}))
-      if (type==='bg') { line.bgWords=words; line.bgText=`(${text})` }
+      const words = splitWords(text).map(w=>({word:w,time:null,end:null}))
+      if (type==='bg') { line.bgWords=words; line.bgText=text }
       else { line.duoWords=words; line.duoText=text }
       closeModal(); renderAll()
     }}
   ])
+  setTimeout(()=>document.getElementById('vl-text')?.focus(),50)
 }
+
 function removeVocalLayer(lineId, type) {
   const line = lines.find(l=>l.id===lineId)
   if (!line) return
   if (type==='bg') { line.bgWords=[]; line.bgText=null }
   else { line.duoWords=[]; line.duoText=null }
-  renderEditor(); renderPreview(audio.currentTime||0)
+  renderEditorFull(); renderPreview(audio.currentTime||0)
 }
 
 function editWordsText(lineId, type) {
@@ -750,33 +849,32 @@ function editWordsText(lineId, type) {
   if (!line) return
   const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
   const current = words.map(w=>w.word).join(' ')
-  showModal('Edit Words', `
-    <div class="mf"><label>Words (space-separated — timings preserved by position)</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea></div>
-  `,[
+  showModal('Edit Words', `<div class="mf"><label>Words — timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea></div>`, [
     {label:'Cancel',fn:closeModal},
     {label:'Update',primary:true,fn:()=>{
-      const newWords = document.getElementById('ew-text').value.trim().split(/\s+/).filter(Boolean)
-      const updated = newWords.map((w,i)=>({word:w, time:words[i]?.time??null, end:words[i]?.end??null}))
-      if (type==='bg') { line.bgWords=updated; line.bgText=updated.length?`(${updated.map(w=>w.word).join(' ')})`:null }
+      const newWords = splitWords(document.getElementById('ew-text').value)
+      const updated = newWords.map((w,i)=>({word:w,time:words[i]?.time??null,end:words[i]?.end??null}))
+      if (type==='bg') { line.bgWords=updated; line.bgText=updated.length?updated.map(w=>w.word).join(' '):null }
       else if (type==='duo') { line.duoWords=updated; line.duoText=updated.length?updated.map(w=>w.word).join(' '):null }
       else { line.words=updated; line.text=updated.map(w=>w.word).join(' ') }
       closeModal(); renderAll()
     }}
   ])
+  setTimeout(()=>document.getElementById('ew-text')?.focus(),50)
 }
 
 function addLineModal() {
   showModal('Add Line', `
     <div class="mf"><label>Lyrics Text</label><textarea class="mi mta" id="al-text" placeholder="Enter line of lyrics…"></textarea></div>
     <div class="mf" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="al-now"><label for="al-now" style="text-transform:none;letter-spacing:0;font-size:13px">Use current time (${fmtMs(audio.currentTime)}) as start</label></div>
-  `,[
+  `, [
     {label:'Cancel',fn:closeModal},
     {label:'Add',primary:true,fn:()=>{
       const text = document.getElementById('al-text').value.trim()
       if (!text) return
       const useNow = document.getElementById('al-now').checked
       const time = useNow ? audio.currentTime : null
-      lines.push({id:genId(),time,end:null,text,words:text.split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null})
+      lines.push({id:genId(),time,end:null,text,words:splitWords(text).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null})
       sortLines(); closeModal(); renderAll(); drawWaveform()
     }}
   ])
@@ -794,18 +892,66 @@ function renderPreview(t) {
   const container = document.getElementById('lyrics-preview')
   container.innerHTML = ''
   for (const line of lines) {
-    const past = line.end!=null && t>line.end
-    const cur = line.time!=null && t>=line.time && (line.end==null||t<=line.end)
+    const effEnd = effectiveEnd(line)
+    const past = effEnd > 0 && t > effEnd
+    const cur = line.time!=null && t>=line.time && !past
     const div = document.createElement('div')
     div.className = `pline ${past?'past':cur?'current':'future'}`
-    if (cur && previewMode==='karaoke') {
-      const wh = line.words.map(w=>`<span class="pw ${w.time!=null&&t>=w.time?'lit':''}">${esc(w.word)} </span>`).join('')
-      div.innerHTML = `<div class="pline-text">${wh}</div>`
+
+    const mainDiv = document.createElement('div')
+    mainDiv.className = 'pline-text'
+    if (previewMode==='karaoke') {
+      line.words.forEach((w,i) => {
+        const sp = document.createElement('span')
+        const lit = w.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
+        sp.className = 'pw' + (lit?' lit':'')
+        sp.dataset.wi = i
+        sp.textContent = (i>0?' ':'')+w.word
+        mainDiv.appendChild(sp)
+      })
     } else {
-      div.innerHTML = `<div class="pline-text">${esc(line.text)}</div>`
+      mainDiv.textContent = line.text
     }
-    if (line.bgText) { const b=document.createElement('div'); b.className='pline-bg'; b.textContent=line.bgText; div.appendChild(b) }
-    if (line.duoText) { const d=document.createElement('div'); d.className='pline-duo'; d.textContent=line.duoText; div.appendChild(d) }
+    div.appendChild(mainDiv)
+
+    if (line.bgWords?.length) {
+      const bgDiv = document.createElement('div')
+      bgDiv.className = 'pline-bg'
+      line.bgWords.forEach((w,i) => {
+        const sp = document.createElement('span')
+        const lit = w.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
+        sp.className = 'pbw' + (lit?' lit':'')
+        sp.dataset.wi = i
+        sp.textContent = (i>0?' ':'')+w.word
+        bgDiv.appendChild(sp)
+      })
+      div.appendChild(bgDiv)
+    } else if (line.bgText) {
+      const bgDiv = document.createElement('div')
+      bgDiv.className = 'pline-bg'
+      bgDiv.textContent = line.bgText
+      div.appendChild(bgDiv)
+    }
+
+    if (line.duoWords?.length) {
+      const duoDiv = document.createElement('div')
+      duoDiv.className = 'pline-duo'
+      line.duoWords.forEach((w,i) => {
+        const sp = document.createElement('span')
+        const lit = w.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
+        sp.className = 'pdw' + (lit?' lit':'')
+        sp.dataset.wi = i
+        sp.textContent = (i>0?' ':'')+w.word
+        duoDiv.appendChild(sp)
+      })
+      div.appendChild(duoDiv)
+    } else if (line.duoText) {
+      const duoDiv = document.createElement('div')
+      duoDiv.className = 'pline-duo'
+      duoDiv.textContent = line.duoText
+      div.appendChild(duoDiv)
+    }
+
     container.appendChild(div)
     if (cur) setTimeout(()=>div.scrollIntoView({behavior:'smooth',block:'center'}),0)
   }
@@ -816,16 +962,114 @@ function updatePreviewLive(t) {
   plines.forEach((el, i) => {
     if (i>=lines.length) return
     const line = lines[i]
-    const past = line.end!=null && t>line.end
-    const cur = line.time!=null && t>=line.time && (line.end==null||t<=line.end)
-    el.className = `pline ${past?'past':cur?'current':'future'}`
+    const effEnd = effectiveEnd(line)
+    const past = effEnd > 0 && t > effEnd
+    const cur = line.time!=null && t>=line.time && (!past)
+    const newClass = `pline ${past&&settings.dimPast?'past':cur?'current':'future'}`
+    if (el.className !== newClass) el.className = newClass
+
     if (cur && previewMode==='karaoke') {
-      el.querySelectorAll('.pw').forEach((pw, wi) => {
-        pw.classList.toggle('lit', line.words[wi]?.time!=null && t>=line.words[wi].time)
-      })
-      el.scrollIntoView({behavior:'smooth',block:'center'})
+      if (settings.wordGlowStyle !== 'none') {
+        el.querySelectorAll('.pw').forEach((sp,wi) => {
+          const w = line.words[wi]
+          const lit = w?.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
+          sp.classList.toggle('lit', lit)
+        })
+      }
+      if (settings.wordGlowStyle === 'all' || settings.wordGlowStyle === 'both') {
+        el.querySelectorAll('.pbw').forEach((sp,wi) => {
+          const w = line.bgWords?.[wi]
+          const lit = w?.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
+          sp.classList.toggle('lit', lit)
+        })
+        el.querySelectorAll('.pdw').forEach((sp,wi) => {
+          const w = line.duoWords?.[wi]
+          const lit = w?.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
+          sp.classList.toggle('lit', lit)
+        })
+      }
+      if (settings.scrollPreview) el.scrollIntoView({behavior:'smooth',block:'center'})
     }
   })
+}
+
+let settings = {
+  scrollPreview: true,
+  wordGlowStyle: 'both',
+  previewFontSize: 17,
+  dimPast: true,
+  showTimecodes: true,
+}
+
+function loadSettings() {
+  try {
+    const s = localStorage.getItem('ttml-editor-settings')
+    if (s) settings = { ...settings, ...JSON.parse(s) }
+  } catch {}
+}
+
+function saveSettings() {
+  try { localStorage.setItem('ttml-editor-settings', JSON.stringify(settings)) } catch {}
+}
+
+function applySettings() {
+  document.querySelectorAll('.pline-text').forEach(el => el.style.fontSize = settings.previewFontSize + 'px')
+}
+
+function showSettings() {
+  showModal('Settings', `
+    <div class="settings-section">
+      <h4>Preview</h4>
+      <div class="settings-row">
+        <div><div>Font size</div><div class="desc">Preview lyrics text size</div></div>
+        <select class="settings-select" id="s-fontsize">
+          <option value="13" ${settings.previewFontSize===13?'selected':''}>Small</option>
+          <option value="17" ${settings.previewFontSize===17?'selected':''}>Medium</option>
+          <option value="22" ${settings.previewFontSize===22?'selected':''}>Large</option>
+          <option value="28" ${settings.previewFontSize===28?'selected':''}>XL</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div><div>Auto-scroll preview</div><div class="desc">Scroll to current line during playback</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-scroll" ${settings.scrollPreview?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Dim past lines</div><div class="desc">Fade out lyrics that already played</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-dim" ${settings.dimPast?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h4>Word Glow</h4>
+      <div class="settings-row">
+        <div><div>Glow style</div><div class="desc">Which vocal layers light up word-by-word</div></div>
+        <select class="settings-select" id="s-glow">
+          <option value="all" ${settings.wordGlowStyle==='all'?'selected':''}>All layers</option>
+          <option value="both" ${settings.wordGlowStyle==='both'?'selected':''}>Main + bg/duo</option>
+          <option value="main" ${settings.wordGlowStyle==='main'?'selected':''}>Main only</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h4>Editor</h4>
+      <div class="settings-row">
+        <div><div>Show timecodes on chips</div><div class="desc">Show start/end times below each word</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-timecodes" ${settings.showTimecodes?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted2);padding-top:4px">Settings are saved locally in your browser.</div>
+  `, [
+    { label: 'Close', fn: () => {
+      settings.previewFontSize = parseInt(document.getElementById('s-fontsize').value)
+      settings.scrollPreview = document.getElementById('s-scroll').checked
+      settings.dimPast = document.getElementById('s-dim').checked
+      settings.wordGlowStyle = document.getElementById('s-glow').value
+      settings.showTimecodes = document.getElementById('s-timecodes').checked
+      saveSettings()
+      applySettings()
+      closeModal()
+      renderPreview(audio.currentTime||0)
+    }}
+  ])
 }
 
 function exportTTML() {
@@ -835,15 +1079,9 @@ function exportTTML() {
 <tt xml:lang="en" xmlns="http://www.w3.org/ns/ttml"
     xmlns:ttm="http://www.w3.org/ns/ttml#metadata">
   <head>
-    <metadata>
-      <ttm:title>${esc(audioFileName||'Unknown')}</ttm:title>
-    </metadata>
-    <styling>
-      <style xml:id="s1" tts:fontFamily="Arial" tts:fontSize="100%" tts:color="white" xmlns:tts="http://www.w3.org/ns/ttml#styling"/>
-    </styling>
-    <layout>
-      <region xml:id="r1" tts:textAlign="center" tts:displayAlign="after" xmlns:tts="http://www.w3.org/ns/ttml#styling"/>
-    </layout>
+    <metadata><ttm:title>${esc(audioFileName||'Unknown')}</ttm:title></metadata>
+    <styling><style xml:id="s1" tts:fontFamily="Arial" tts:fontSize="100%" tts:color="white" xmlns:tts="http://www.w3.org/ns/ttml#styling"/></styling>
+    <layout><region xml:id="r1" tts:textAlign="center" tts:displayAlign="after" xmlns:tts="http://www.w3.org/ns/ttml#styling"/></layout>
   </head>
   <body>
     <div region="r1">\n`
@@ -866,17 +1104,10 @@ function exportTTML() {
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.ttml'
   window.api.saveTTML(xml, suggestedName).then(fp => {
     if (!fp) return
-    const dirParts = fp.replace(/\\/g,'/').split('/')
-    const fileName = dirParts.pop()
-    const dir = dirParts.join('/')
-    showModal('Export Successful', `
-      <div class="export-success">
-        <div class="es-icon">✓</div>
-        <div>Saved as <strong>${esc(fileName)}</strong></div>
-        <div class="es-path">${esc(dir)}</div>
-        <div class="es-note">Feel free to use this in Lokal by importing it from the lyrics view, or use it in any other program that supports TTML lyric files. Thanks for using Lokal TTML Editor ^v^ !</div>
-      </div>
-    `,[{label:'Close',fn:closeModal}])
+    const parts = fp.replace(/\\/g,'/').split('/')
+    const fileName = parts.pop()
+    const dir = parts.join('/')
+    showModal('Saved!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(fileName)}</strong><div class="es-path">${esc(dir)}</div><div class="es-note">Feel free to use this in Lokal by importing it from the lyrics view, or use it in any other program that supports TTML files. Thanks!</div></div>`, [{label:'Close',fn:closeModal}])
   })
 }
 
@@ -887,10 +1118,10 @@ function sortLines() {
 function filterLines(val) { filterText=val; renderLines() }
 function updateStatus() {
   document.getElementById('sb-lines').textContent = lines.length
-  let t=0,m=0
-  for (const l of lines) for (const w of l.words) { w.time!=null?t++:m++ }
-  document.getElementById('sb-timed').textContent = t
-  document.getElementById('sb-missing').textContent = m
+  let timed=0, missing=0
+  for (const l of lines) for (const w of l.words) { w.time!=null?timed++:missing++ }
+  document.getElementById('sb-timed').textContent = timed
+  document.getElementById('sb-missing').textContent = missing
 }
 
 function showModal(title, bodyHtml, buttons) {
@@ -902,13 +1133,15 @@ function showModal(title, bodyHtml, buttons) {
     const btn = document.createElement('button')
     btn.className = 'mbtn'+(b.primary?' primary':'')
     btn.textContent = b.label
-    btn.onclick = b.fn
+    btn.addEventListener('click', b.fn)
     acts.appendChild(btn)
   }
   document.getElementById('modal-overlay').classList.remove('hidden')
 }
 function closeModal() { document.getElementById('modal-overlay').classList.add('hidden') }
-document.getElementById('modal-overlay').addEventListener('mousedown', e => { if (e.target===document.getElementById('modal-overlay')) closeModal() })
+document.getElementById('modal-overlay').addEventListener('mousedown', e => {
+  if (e.target===document.getElementById('modal-overlay')) closeModal()
+})
 
 document.addEventListener('keydown', e => {
   const tag = document.activeElement.tagName.toLowerCase()
@@ -928,7 +1161,6 @@ document.addEventListener('keydown', e => {
   }
 })
 
+loadSettings()
 renderAll()
 </script>
-</body>
-</html>
