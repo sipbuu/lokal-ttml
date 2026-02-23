@@ -1,4 +1,4 @@
-# Lokal TTML Editor
+# ![Local TTML Editor](https://i.imgur.com/NzDrtAq.png)
 
 ![icon](https://i.imgur.com/3Id3RPj.png)
 ![kuro!!!](https://i.imgur.com/3LoTeml.png)
