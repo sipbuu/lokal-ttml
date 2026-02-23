@@ -1,0 +1,42 @@
+{
+  "name": "lokal-ttml",
+  "version": "1.0.0",
+  "description": "TTML Editor for the Lokal program, used to create Apple-Like synced lyrics.",
+  "author": "sipbuu",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.lokal.ttml-editor",
+    "productName": "Lokal TTML Editor",
+    "copyright": "Copyright © 2026 sipbuu",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/.cache"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/icon.png"
+    },
+    "portable": {
+      "artifactName": "Lokal-TTML-Editor.exe"
+    }
+  }
+}

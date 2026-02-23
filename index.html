@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lokal TTML Editor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--surface3:#222;
+  --border:#2a2a2a;--border2:#333;--text:#e8e8e8;--muted:#666;--muted2:#444;
+  --accent:#c8ff57;--accent-dim:rgba(200,255,87,0.12);--accent-dim2:rgba(200,255,87,0.06);
+  --red:#ff5757;--red-dim:rgba(255,87,87,0.12);
+  --blue:#57b8ff;--blue-dim:rgba(87,184,255,0.12);
+  --purple:#c057ff;--purple-dim:rgba(192,87,255,0.12);
+  --orange:#ffaa57;--orange-dim:rgba(255,170,87,0.12);
+  --r:8px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px}
+#titlebar{height:36px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-bottom:1px solid var(--border);-webkit-app-region:drag;flex-shrink:0;position:relative;z-index:100}
+#titlebar span{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+#app{display:flex;flex-direction:column;height:calc(100vh - 36px)}
+#toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+#main{display:flex;flex:1;min-height:0}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{background:var(--surface3);border-color:var(--border2)}
+.tb-btn.accent{background:var(--accent-dim);border-color:rgba(200,255,87,.3);color:var(--accent)}
+.tb-btn.accent:hover{background:rgba(200,255,87,.2)}
+.tb-btn svg{width:14px;height:14px;flex-shrink:0}
+.tb-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px solid var(--border2);border-radius:3px;font-family:var(--mono);font-size:9px;color:var(--muted)}
+#track-info{display:flex;align-items:center;gap:10px;margin-left:auto}
+#track-name{font-size:12px;color:var(--muted);max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#track-time{font-family:var(--mono);font-size:12px;color:var(--accent);min-width:80px;text-align:right}
+
+#lines-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface)}
+#lines-header{padding:12px 14px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#lines-header h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+#lines-search-wrap{padding:6px 8px;border-bottom:1px solid var(--border)}
+#lines-search{width:100%;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;outline:none}
+#lines-search:focus{border-color:rgba(200,255,87,.3)}
+#lines-list{flex:1;overflow-y:auto;padding:4px}
+.line-item{padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:1px;transition:all .1s;user-select:none}
+.line-item:hover{background:var(--surface2)}
+.line-item.active{background:var(--accent-dim);border-color:rgba(200,255,87,.25)}
+.line-item.playing{border-color:rgba(200,255,87,.5)!important}
+.line-time{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:3px}
+.line-text-preview{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
+.badge{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:500}
+.badge-main{background:var(--accent-dim);color:var(--accent)}
+.badge-bg{background:var(--purple-dim);color:var(--purple)}
+.badge-duo{background:var(--orange-dim);color:var(--orange)}
+.badge-notimed{background:var(--red-dim);color:var(--red)}
+#add-line-btn{margin:6px;padding:8px;background:var(--surface2);border:1px dashed var(--border2);border-radius:6px;color:var(--muted);cursor:pointer;text-align:center;font-size:12px;transition:all .15s}
+#add-line-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim2)}
+
+#editor-panel{flex:1;display:flex;flex-direction:column;min-width:0}
+#waveform-area{height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);position:relative;cursor:crosshair;overflow:hidden}
+#waveform-canvas{width:100%;height:100%;display:block}
+#playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;transform:translateX(-50%);box-shadow:0 0 8px var(--accent)}
+#waveform-time-overlay{position:absolute;top:4px;left:8px;font-family:var(--mono);font-size:10px;color:var(--muted);pointer-events:none}
+
+#word-editor{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--muted);pointer-events:none}
+#empty-state.hidden{display:none}
+#empty-state svg{width:40px;height:40px;color:var(--muted2)}
+
+.line-timing-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);flex-wrap:wrap}
+.line-timing-row label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.timing-sm{width:88px;padding:4px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
+.timing-sm:focus{border-color:rgba(200,255,87,.4)}
+
+.word-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.word-row-header{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.word-row-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+.word-row-label.lbl-bg{color:var(--purple)}
+.word-row-label.lbl-duo{color:var(--orange)}
+.word-row-actions{margin-left:auto;display:flex;gap:5px}
+.sm-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface3);color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--font);transition:all .1s}
+.sm-btn:hover{color:var(--text);border-color:var(--border2)}
+.sm-btn.danger:hover{color:var(--red);border-color:var(--red);background:var(--red-dim)}
+
+.words-container{display:flex;flex-wrap:wrap;gap:5px;padding:10px}
+
+.word-chip{position:relative;display:flex;flex-direction:column;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .1s,background .1s;min-width:36px}
+.word-chip:hover{border-color:var(--border2);background:var(--surface3)}
+.word-chip.selected{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 1px var(--accent)}
+.word-chip.active-now{border-color:var(--accent);background:rgba(200,255,87,.18)}
+.word-chip.bg-chip{border-color:rgba(192,87,255,.2)}
+.word-chip.duo-chip{border-color:rgba(255,170,87,.2)}
+.word-chip.no-time{border-color:rgba(255,87,87,.25)}
+.word-chip.no-time .wt span{color:var(--red)!important}
+.wt-text{padding:5px 8px 1px;font-size:13px;color:var(--text)}
+.wt{padding:1px 6px 4px;font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;gap:3px}
+.wt span{color:var(--accent)}
+
+#timing-bar{flex-shrink:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#tw-label{font-size:13px;color:var(--muted);min-width:80px;font-style:italic}
+#timing-start,#timing-end{width:88px;padding:4px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
+#timing-start:focus,#timing-end:focus{border-color:rgba(200,255,87,.4)}
+#set-start-btn,#set-end-btn{padding:5px 11px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:11px;font-family:var(--font);transition:all .15s}
+#set-start-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+#set-end-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+
+#preview-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--surface)}
+#preview-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#preview-header h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+.mode-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--font)}
+.mode-btn.active{background:var(--accent-dim);border-color:rgba(200,255,87,.3);color:var(--accent)}
+#preview-body{flex:1;overflow:hidden;position:relative;background:#050505}
+#lyrics-preview{position:absolute;inset:0;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth}
+.pline{padding:6px 4px;border-radius:5px;transition:opacity .25s}
+.pline.past{opacity:.2}
+.pline.current{opacity:1}
+.pline.future{opacity:.35}
+.pline-text{font-size:17px;font-weight:600;line-height:1.4;color:var(--text);letter-spacing:-.01em}
+.pline.current .pline-text{color:var(--accent)}
+.pw{display:inline;transition:color .08s}
+.pw.lit{color:var(--accent)}
+.pline-bg{font-size:12px;color:var(--purple);opacity:.75;margin-top:2px;font-style:italic}
+.pline-duo{font-size:12px;color:var(--orange);opacity:.75;margin-top:2px}
+
+#transport{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+#play-btn:hover{background:#d4ff6a;transform:scale(1.05)}
+#play-btn svg{width:15px;height:15px;color:#000}
+#prog-track{flex:1;height:3px;background:var(--surface3);border-radius:2px;cursor:pointer;position:relative}
+#prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .1s linear}
+#vol-slider{width:56px;accent-color:var(--accent);cursor:pointer}
+#tp-time{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+#status-bar{padding:3px 14px;background:var(--bg);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;gap:16px;flex-shrink:0}
+#status-bar b{color:var(--text);font-weight:500}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center}
+#modal-overlay.hidden{display:none}
+#modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:500px;max-height:80vh;overflow-y:auto}
+#modal h3{font-size:14px;font-weight:600;margin-bottom:16px}
+.mf{margin-bottom:12px}
+.mf label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.08em}
+.mi{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:13px;outline:none}
+.mi:focus{border-color:rgba(200,255,87,.4)}
+.mta{min-height:100px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.6}
+.macts{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.mbtn{padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:var(--font);font-size:12px}
+.mbtn.primary{background:var(--accent-dim);border-color:rgba(200,255,87,.3);color:var(--accent)}
+.mbtn:hover{background:var(--surface3)}
+.mbtn.primary:hover{background:rgba(200,255,87,.2)}
+
+.lrclib-result{padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:all .1s}
+.lrclib-result:hover{background:var(--surface2);border-color:var(--border2)}
+.lrclib-result .rt{font-size:13px;font-weight:500;color:var(--text)}
+.lrclib-result .ra{font-size:11px;color:var(--muted);margin-top:2px}
+.lrclib-result .rb{display:flex;gap:6px;margin-top:5px}
+.lrclib-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:500}
+.tag-synced{background:var(--accent-dim);color:var(--accent)}
+.tag-plain{background:var(--surface3);color:var(--muted)}
+.tag-dur{background:var(--surface3);color:var(--muted)}
+#lrclib-spinner{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+
+.export-success{text-align:center;padding:8px 0}
+.export-success .es-icon{font-size:32px;margin-bottom:8px}
+.export-success .es-path{font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--surface2);padding:6px 10px;border-radius:6px;margin:10px 0;word-break:break-all}
+.export-success .es-note{font-size:12px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+<div id="titlebar"><span>Lokal TTML Editor</span></div>
+<div id="app">
+  <div id="toolbar">
+    <button class="tb-btn" onclick="openAudio()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Open Audio
+    </button>
+    <button class="tb-btn" onclick="showLRCLIBModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search LRCLIB
+    </button>
+    <button class="tb-btn" onclick="openLyricsFile()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Import File
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="addLineModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Line
+    </button>
+    <div class="tb-sep"></div>
+    <span style="font-size:11px;color:var(--muted2)">
+      <kbd>S</kbd> start &nbsp;<kbd>E</kbd> end &nbsp;<kbd>Space</kbd> play &nbsp;<kbd>Tab</kbd> next word &nbsp;<kbd>←→</kbd> 0.1s
+    </span>
+    <div id="track-info">
+      <span id="track-name">No audio loaded</span>
+      <span id="track-time">0:00.000</span>
+      <button class="tb-btn accent" onclick="exportTTML()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export TTML
+      </button>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="lines-panel">
+      <div id="lines-header">
+        <h2>Lines <span id="line-count" style="color:var(--accent)">0</span></h2>
+        <button class="sm-btn" onclick="sortLines()">↕ Sort</button>
+      </div>
+      <div id="lines-search-wrap">
+        <input id="lines-search" placeholder="Filter lines…" oninput="filterLines(this.value)">
+      </div>
+      <div id="lines-list"></div>
+      <div id="add-line-btn" onclick="addLineModal()">+ Add Line</div>
+    </div>
+
+    <div id="editor-panel">
+      <div id="waveform-area" onmousedown="waveformSeek(event)" onmousemove="waveformDrag(event)">
+        <canvas id="waveform-canvas"></canvas>
+        <div id="playhead" style="left:0"></div>
+        <div id="waveform-time-overlay">0:00.000</div>
+      </div>
+
+      <div id="word-editor">
+        <div id="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <p style="font-size:13px">Select a line to edit word timings</p>
+        </div>
+      </div>
+
+      <div id="timing-bar">
+        <span id="tw-label">No word selected</span>
+        <div class="tb-sep"></div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Start</label>
+        <input id="timing-start" type="text" placeholder="0.000" oninput="updateWordTime('start',this.value)">
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">End</label>
+        <input id="timing-end" type="text" placeholder="0.000" oninput="updateWordTime('end',this.value)">
+        <button id="set-start-btn" onclick="setStartNow()">Set Start <kbd>S</kbd></button>
+        <button id="set-end-btn" onclick="setEndNow()">Set End <kbd>E</kbd></button>
+        <span style="font-size:10px;color:var(--muted2);margin-left:auto"><kbd>Tab</kbd> next · <kbd>Shift+Tab</kbd> prev</span>
+      </div>
+    </div>
+
+    <div id="preview-panel">
+      <div id="preview-header">
+        <h2>Live Preview</h2>
+        <div style="display:flex;gap:4px">
+          <button class="mode-btn active" id="mode-kara" onclick="setMode('karaoke')">Karaoke</button>
+          <button class="mode-btn" id="mode-plain" onclick="setMode('plain')">Plain</button>
+        </div>
+      </div>
+      <div id="preview-body">
+        <div id="lyrics-preview"></div>
+      </div>
+      <div id="transport">
+        <button id="play-btn" onclick="togglePlay()">
+          <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        </button>
+        <div id="prog-track" onmousedown="progressSeek(event)">
+          <div id="prog-fill"></div>
+        </div>
+        <span id="tp-time">0:00</span>
+        <input id="vol-slider" type="range" min="0" max="1" step="0.01" value="0.8" oninput="audio.volume=this.value">
+      </div>
+    </div>
+  </div>
+
+  <div id="status-bar">
+    <span>Lines: <b id="sb-lines">0</b></span>
+    <span>Timed words: <b id="sb-timed">0</b></span>
+    <span>Missing: <b id="sb-missing">0</b></span>
+    <span id="sb-file" style="margin-left:auto"></span>
+  </div>
+</div>
+
+<div id="modal-overlay" class="hidden">
+  <div id="modal">
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+    <div class="macts" id="modal-actions"></div>
+  </div>
+</div>
+
+<audio id="audio-el" style="display:none"></audio>
+
+<script>
+const audio = document.getElementById('audio-el')
+let lines = []
+let selectedLineId = null
+let selectedWord = null
+let audioDuration = 0
+let audioFileName = ''
+let previewMode = 'karaoke'
+let filterText = ''
+
+function genId() { return 'l' + Math.random().toString(36).slice(2, 9) }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+function fmtMs(t) {
+  if (t == null) return '--:--.---'
+  const m = Math.floor(t/60), s = Math.floor(t%60).toString().padStart(2,'0')
+  const ms = Math.round((t%1)*1000).toString().padStart(3,'0')
+  return `${m}:${s}.${ms}`
+}
+function fmtSec(t) {
+  return `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}`
+}
+function fmtTTML(t) {
+  if (t == null) t = 0
+  const h = Math.floor(t/3600), m = Math.floor((t%3600)/60)
+  const s = (t%60).toFixed(3).padStart(6,'0')
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${s}`
+}
+
+async function openAudio() {
+  const fp = await window.api.openAudio()
+  if (!fp) return
+  audioFileName = fp.split(/[\\/]/).pop()
+  document.getElementById('track-name').textContent = audioFileName
+  document.getElementById('track-name').style.color = 'var(--text)'
+  const b64 = await window.api.readBinary(fp)
+  const ext = fp.split('.').pop().toLowerCase()
+  const mimes = {mp3:'audio/mpeg',flac:'audio/flac',m4a:'audio/mp4',ogg:'audio/ogg',wav:'audio/wav',aac:'audio/aac',opus:'audio/ogg'}
+  audio.src = `data:${mimes[ext]||'audio/*'};base64,${b64}`
+  audio.load()
+  audio.onloadedmetadata = () => { audioDuration = audio.duration; drawWaveform() }
+  document.getElementById('sb-file').textContent = audioFileName
+}
+
+function togglePlay() {
+  if (!audio.src) return
+  if (audio.paused) { audio.play(); setPlayIcon(false) }
+  else { audio.pause(); setPlayIcon(true) }
+}
+function setPlayIcon(paused) {
+  document.getElementById('play-icon').innerHTML = paused
+    ? '<polygon points="5,3 19,12 5,21"/>'
+    : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+}
+audio.addEventListener('ended', () => setPlayIcon(true))
+audio.addEventListener('timeupdate', () => {
+  const t = audio.currentTime
+  document.getElementById('track-time').textContent = fmtMs(t)
+  document.getElementById('waveform-time-overlay').textContent = fmtMs(t)
+  document.getElementById('tp-time').textContent = fmtSec(t)
+  document.getElementById('prog-fill').style.width = (audioDuration ? t/audioDuration*100 : 0) + '%'
+  if (audioDuration) {
+    const x = t/audioDuration * document.getElementById('waveform-canvas').offsetWidth
+    document.getElementById('playhead').style.left = x + 'px'
+  }
+  updatePreviewLive(t)
+})
+
+function progressSeek(e) {
+  if (!audioDuration) return
+  const r = document.getElementById('prog-track').getBoundingClientRect()
+  audio.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * audioDuration
+}
+function waveformSeek(e) {
+  if (!audioDuration) return
+  const r = document.getElementById('waveform-canvas').getBoundingClientRect()
+  audio.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * audioDuration
+}
+function waveformDrag(e) { if (e.buttons===1) waveformSeek(e) }
+
+function drawWaveform() {
+  const c = document.getElementById('waveform-canvas')
+  const W = c.offsetWidth, H = c.offsetHeight
+  c.width = W; c.height = H
+  const ctx = c.getContext('2d')
+  ctx.fillStyle = '#111'; ctx.fillRect(0,0,W,H)
+  if (!audioDuration) return
+  ctx.strokeStyle = '#1e1e1e'; ctx.lineWidth = 1
+  for (let s = 0; s <= audioDuration; s += Math.max(1,Math.floor(audioDuration/20))) {
+    const x = s/audioDuration*W
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke()
+  }
+  for (const line of lines) {
+    if (line.time == null) continue
+    const x1 = line.time/audioDuration*W
+    const x2 = line.end ? line.end/audioDuration*W : x1+3
+    ctx.fillStyle = 'rgba(200,255,87,0.07)'; ctx.fillRect(x1,0,Math.max(2,x2-x1),H)
+    ctx.fillStyle = 'rgba(200,255,87,0.55)'; ctx.fillRect(x1,0,2,H)
+  }
+}
+
+function parseLRC(lrc) {
+  if (!lrc) return []
+  const base = lrc.split('\n').map(raw => {
+    const m = raw.match(/\[(\d+):(\d+\.?\d*)\](.*)/)
+    if (!m) return null
+    return { time: parseInt(m[1])*60+parseFloat(m[2]), text: m[3].trim() }
+  }).filter(l => l && l.text).sort((a,b) => a.time-b.time)
+  return base.map((line, i, arr) => {
+    const nextTime = arr[i+1]?.time
+    const end = nextTime || line.time+3
+    const dur = Math.max(0.01, end-line.time)
+    const rawW = line.text.split(/\s+/).filter(Boolean)
+    const words = rawW.map((w,wi) => ({
+      word:w, time:line.time+(wi*dur/rawW.length), end:line.time+((wi+1)*dur/rawW.length)
+    }))
+    return { id:genId(), time:line.time, end, text:line.text, words, bgWords:[], bgText:null, duoWords:[], duoText:null }
+  })
+}
+
+function parseTTML(xml) {
+  if (!xml) return []
+  const out = []
+  const norm = xml.replace(/\r/g,'').replace(/\n+/g,' ')
+  function pt(t) {
+    if (!t) return null
+    const p = t.split(':')
+    if (p.length===3) return +p[0]*3600 + +p[1]*60 + parseFloat(p[2])
+    if (p.length===2) return +p[0]*60 + parseFloat(p[1])
+    return parseFloat(p[0])
+  }
+  function extractRole(str, role) {
+    const results = []
+    const openReg = new RegExp(`<span\\b[^>]*\\b(?:ttm:role|role)\\s*=\\s*(['"\\s])\\s*${role}\\s*\\1[^>]*>`,'ig')
+    let m
+    while ((m = openReg.exec(str)) !== null) {
+      const oi = m.index, ot = m[0]
+      let depth = 1
+      const nr = /<\/?span\b/ig; nr.lastIndex = oi+ot.length
+      let nm
+      while ((nm = nr.exec(str)) !== null) {
+        const ti = nm.index
+        if (str.slice(ti,ti+7).toLowerCase().startsWith('</span')) {
+          depth--
+          const cgt = str.indexOf('>',ti)
+          if (depth===0) {
+            const fe = cgt!==-1?cgt+1:ti+7
+            const fg = str.indexOf('>',oi)
+            results.push({ full:str.slice(oi,fe), inner:fg!==-1?str.slice(fg+1,ti):'' })
+            openReg.lastIndex = fe; break
+          } else { nr.lastIndex = cgt+1 }
+        } else { depth++; nr.lastIndex = ti+6 }
+      }
+      if (nm===null) break
+    }
+    return results
+  }
+  function parseTimedWords(inner) {
+    const words = []
+    const wr = /<span\b[^>]*\bbegin="([^"]+)"(?:[^>]*\bend="([^"]+)")?[^>]*>([\s\S]*?)<\/span>/ig
+    for (const wm of inner.matchAll(wr)) {
+      const raw = (wm[3]||'').replace(/<[^>]+>/g,'').trim()
+      if (!raw) continue
+      const pieces = raw.split(/\s+/).filter(Boolean)
+      const st = pt(wm[1]), en = wm[2]?pt(wm[2]):null
+      if (pieces.length===1) { words.push({word:pieces[0],time:st,end:en}) }
+      else {
+        const dur = Math.max(0.001,(en?en-st:pieces.length*0.3))
+        pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length)}))
+      }
+    }
+    return words
+  }
+  const pReg = /<p\b[^>]*\bbegin="([^"]+)"(?:[^>]*\bend="([^"]+)")?[^>]*>([\s\S]*?)<\/p>/ig
+  for (const pm of norm.matchAll(pReg)) {
+    const ls = pt(pm[1]), le = pm[2]?pt(pm[2]):null
+    let inner = (pm[3]||'').trim()
+    const bgMatches = extractRole(inner, 'x-bg')
+    const duoMatches = extractRole(inner, 'x-alt')
+    let bgWords = [], bgText = '', duoWords = [], duoText = ''
+    for (const bm of bgMatches) { const w = parseTimedWords(bm.inner); bgWords.push(...w); bgText += (bgText?' ':'')+w.map(x=>x.word).join(' ') }
+    for (const dm of duoMatches) { const w = parseTimedWords(dm.inner); duoWords.push(...w); duoText += (duoText?' ':'')+w.map(x=>x.word).join(' ') }
+    for (const bm of [...bgMatches,...duoMatches]) inner = inner.split(bm.full).join(' ')
+    const mw = parseTimedWords(inner)
+    for (let i = 0; i < mw.length; i++) { if (mw[i].end==null) mw[i].end = mw[i+1]?.time||(le||(mw[i].time+0.5)) }
+    for (let i = 0; i < bgWords.length; i++) { if (bgWords[i].end==null) bgWords[i].end = bgWords[i+1]?.time||(le||(bgWords[i].time+0.5)) }
+    for (let i = 0; i < duoWords.length; i++) { if (duoWords[i].end==null) duoWords[i].end = duoWords[i+1]?.time||(le||(duoWords[i].time+0.5)) }
+    const text = mw.map(w=>w.word).join(' ')
+    if (mw.length||bgText||duoText) {
+      out.push({
+        id:genId(), time:ls, end:le, text,
+        words:mw, bgWords, bgText:bgText?`(${bgText})`:null,
+        duoWords, duoText:duoText||null
+      })
+    }
+  }
+  return out.sort((a,b)=>(a.time||0)-(b.time||0))
+}
+
+async function openLyricsFile() {
+  const result = await window.api.openLyrics()
+  if (!result) return
+  const { content, ext } = result
+  if (ext==='lrc') lines = parseLRC(content)
+  else if (ext==='ttml'||ext==='xml') lines = parseTTML(content)
+  else lines = content.split('\n').filter(l=>l.trim()).map(l=>({ id:genId(),time:null,end:null,text:l.trim(),words:l.trim().split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null }))
+  renderAll(); drawWaveform()
+}
+
+async function showLRCLIBModal() {
+  const title = audioFileName.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ')
+  showModal('Search LRCLIB', `
+    <div class="mf"><label>Track Title</label><input class="mi" id="lr-title" value="${esc(title)}" placeholder="Song title"></div>
+    <div class="mf"><label>Artist</label><input class="mi" id="lr-artist" placeholder="Artist name"></div>
+    <div id="lrclib-spinner" style="display:none">Searching…</div>
+    <div id="lrclib-results"></div>
+  `, [
+    { label:'Cancel', fn:closeModal },
+    { label:'Search', primary:true, fn:searchLRCLIB }
+  ])
+}
+
+async function searchLRCLIB() {
+  const t = document.getElementById('lr-title')?.value?.trim()
+  const a = document.getElementById('lr-artist')?.value?.trim()
+  if (!t) return
+  document.getElementById('lrclib-spinner').style.display = 'block'
+  document.getElementById('lrclib-results').innerHTML = ''
+  try {
+    const q = new URLSearchParams({track_name:t})
+    if (a) q.set('artist_name',a)
+    const res = await fetch(`https://lrclib.net/api/search?${q}`)
+    const data = await res.json()
+    document.getElementById('lrclib-spinner').style.display = 'none'
+    if (!data.length) { document.getElementById('lrclib-results').innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:12px">No results found</p>'; return }
+    const container = document.getElementById('lrclib-results')
+    for (const r of data.slice(0,12)) {
+      const dur = r.duration ? `${Math.floor(r.duration/60)}:${String(Math.floor(r.duration%60)).padStart(2,'0')}` : ''
+      const el = document.createElement('div')
+      el.className = 'lrclib-result'
+      el.innerHTML = `
+        <div class="rt">${esc(r.trackName)}</div>
+        <div class="ra">${esc(r.artistName)}${r.albumName?' · '+esc(r.albumName):''}</div>
+        <div class="rb">
+          ${r.syncedLyrics?'<span class="lrclib-tag tag-synced">Synced</span>':'<span class="lrclib-tag tag-plain">Plain</span>'}
+          ${dur?`<span class="lrclib-tag tag-dur">${dur}</span>`:''}
+        </div>`
+      el.onclick = () => {
+        if (r.syncedLyrics) lines = parseLRC(r.syncedLyrics)
+        else if (r.plainLyrics) lines = r.plainLyrics.split('\n').filter(l=>l.trim()).map(l=>({id:genId(),time:null,end:null,text:l.trim(),words:l.trim().split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null}))
+        closeModal(); renderAll(); drawWaveform()
+      }
+      container.appendChild(el)
+    }
+  } catch(e) {
+    document.getElementById('lrclib-spinner').style.display = 'none'
+    document.getElementById('lrclib-results').innerHTML = '<p style="color:var(--red);font-size:12px;text-align:center;padding:12px">Failed to connect to LRCLIB</p>'
+  }
+}
+
+function renderAll() {
+  renderLines(); renderEditor(); renderPreview(audio.currentTime||0); updateStatus()
+}
+
+function renderLines() {
+  const list = document.getElementById('lines-list')
+  list.innerHTML = ''
+  const filtered = lines.filter(l => !filterText || l.text.toLowerCase().includes(filterText.toLowerCase()))
+  for (const line of filtered) {
+    const el = document.createElement('div')
+    el.className = 'line-item' + (line.id===selectedLineId?' active':'')
+    el.dataset.id = line.id
+    const untimed = line.words.filter(w=>w.time==null).length
+    el.innerHTML = `
+      <div class="line-time">${fmtMs(line.time)}</div>
+      <div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div>
+      <div class="line-badges">
+        <span class="badge badge-main">${line.words.length}w</span>
+        ${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}
+        ${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}
+        ${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}
+      </div>`
+    el.addEventListener('click', () => {
+      selectedLineId = line.id
+      selectedWord = null
+      renderLines()
+      renderEditor()
+    })
+    list.appendChild(el)
+  }
+  document.getElementById('line-count').textContent = lines.length
+}
+
+function renderEditor() {
+  const editor = document.getElementById('word-editor')
+  const empty = document.getElementById('empty-state')
+  if (!selectedLineId) { empty.classList.remove('hidden'); editor.innerHTML = ''; editor.appendChild(empty); return }
+  empty.classList.add('hidden')
+  const line = lines.find(l=>l.id===selectedLineId)
+  if (!line) return
+  editor.innerHTML = ''
+
+  const timingRow = document.createElement('div')
+  timingRow.className = 'line-timing-row'
+  timingRow.innerHTML = `
+    <label>Line Start</label>
+    <input class="timing-sm" id="ls-input" value="${line.time!=null?line.time.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('time',this.value)">
+    <label>End</label>
+    <input class="timing-sm" id="le-input" value="${line.end!=null?line.end.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('end',this.value)">
+    <button class="sm-btn" onclick="setLineFieldNow('time')">↙ Now</button>
+    <button class="sm-btn" onclick="setLineFieldNow('end')">↗ Now</button>
+    <button class="sm-btn danger" style="margin-left:auto" onclick="deleteLine('${line.id}')">Delete</button>
+  `
+  editor.appendChild(timingRow)
+  editor.appendChild(buildWordRow(line.words, 'Main Vocals', '', line.id, 'main'))
+  if (line.bgWords?.length) editor.appendChild(buildWordRow(line.bgWords, 'Background Vocals', 'lbl-bg', line.id, 'bg'))
+  if (line.duoWords?.length) editor.appendChild(buildWordRow(line.duoWords, 'Duo / Harmony', 'lbl-duo', line.id, 'duo'))
+
+  const addRow = document.createElement('div')
+  addRow.style.cssText = 'display:flex;gap:8px'
+  if (!line.bgWords?.length) {
+    const b = document.createElement('button')
+    b.className = 'sm-btn'; b.style.cssText = 'flex:1;padding:8px;border-style:dashed;color:var(--purple);border-color:rgba(192,87,255,.3)'
+    b.textContent = '+ Background Vocals'
+    b.onclick = () => addVocalLayer(line.id, 'bg')
+    addRow.appendChild(b)
+  }
+  if (!line.duoWords?.length) {
+    const b = document.createElement('button')
+    b.className = 'sm-btn'; b.style.cssText = 'flex:1;padding:8px;border-style:dashed;color:var(--orange);border-color:rgba(255,170,87,.3)'
+    b.textContent = '+ Duo / Harmony'
+    b.onclick = () => addVocalLayer(line.id, 'duo')
+    addRow.appendChild(b)
+  }
+  if (addRow.children.length) editor.appendChild(addRow)
+}
+
+function buildWordRow(words, label, labelClass, lineId, type) {
+  const row = document.createElement('div')
+  row.className = 'word-row'
+  row.innerHTML = `
+    <div class="word-row-header">
+      <span class="word-row-label ${labelClass}">${label}</span>
+      <div class="word-row-actions">
+        <button class="sm-btn" onclick="editWordsText('${lineId}','${type}')">Edit Text</button>
+        ${type!=='main'?`<button class="sm-btn danger" onclick="removeVocalLayer('${lineId}','${type}')">Remove</button>`:''}
+      </div>
+    </div>
+    <div class="words-container" id="wc-${lineId}-${type}"></div>`
+  const container = row.querySelector('.words-container')
+  words.forEach((w, i) => {
+    const chip = document.createElement('div')
+    const isSel = selectedWord && selectedWord.lineId===lineId && selectedWord.idx===i && selectedWord.type===type
+    const chipClass = type==='bg'?'bg-chip':type==='duo'?'duo-chip':''
+    chip.className = `word-chip ${chipClass} ${isSel?'selected':''} ${w.time==null?'no-time':''}`
+    chip.innerHTML = `<div class="wt-text">${esc(w.word)}</div><div class="wt"><span>${w.time!=null?w.time.toFixed(2):'??'}</span><span style="color:var(--muted)">→</span><span>${w.end!=null?w.end.toFixed(2):'??'}</span></div>`
+    chip.addEventListener('click', () => selectWord(lineId, i, type))
+    chip.addEventListener('dblclick', () => { if (w.time!=null) { audio.currentTime=w.time; audio.play(); setPlayIcon(false) } })
+    container.appendChild(chip)
+  })
+  return row
+}
+
+function selectWord(lineId, idx, type) {
+  selectedWord = { lineId, idx, type }
+  const line = lines.find(l=>l.id===lineId)
+  const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
+  const w = words[idx]
+  document.getElementById('tw-label').textContent = `"${w.word}"`
+  document.getElementById('tw-label').style.color = 'var(--text)'
+  document.getElementById('timing-start').value = w.time!=null?w.time.toFixed(3):''
+  document.getElementById('timing-end').value = w.end!=null?w.end.toFixed(3):''
+  renderEditor()
+}
+
+function updateWordTime(field, val) {
+  if (!selectedWord) return
+  const line = lines.find(l=>l.id===selectedWord.lineId)
+  if (!line) return
+  const words = selectedWord.type==='bg'?line.bgWords:selectedWord.type==='duo'?line.duoWords:line.words
+  const t = parseFloat(val)
+  if (!isNaN(t)) {
+    words[selectedWord.idx][field] = t
+    if (selectedWord.type==='main') {
+      const ts = line.words.map(x=>x.time).filter(x=>x!=null)
+      const es = line.words.map(x=>x.end).filter(x=>x!=null)
+      if (ts.length) line.time = Math.min(...ts)
+      if (es.length) line.end = Math.max(...es)
+    }
+    renderLines(); updateStatus(); drawWaveform()
+    const chip = document.querySelector(`#wc-${selectedWord.lineId}-${selectedWord.type}`)?.children[selectedWord.idx]
+    if (chip) {
+      const spans = chip.querySelectorAll('.wt span')
+      if (spans[0]) spans[0].textContent = words[selectedWord.idx].time!=null?words[selectedWord.idx].time.toFixed(2):'??'
+      if (spans[2]) spans[2].textContent = words[selectedWord.idx].end!=null?words[selectedWord.idx].end.toFixed(2):'??'
+      chip.classList.toggle('no-time', words[selectedWord.idx].time==null)
+    }
+  }
+}
+
+function setStartNow() {
+  if (!selectedWord) return
+  const t = audio.currentTime
+  document.getElementById('timing-start').value = t.toFixed(3)
+  updateWordTime('time', t)
+}
+function setEndNow() {
+  if (!selectedWord) return
+  const t = audio.currentTime
+  document.getElementById('timing-end').value = t.toFixed(3)
+  updateWordTime('end', t)
+}
+
+function updateLineField(field, val) {
+  const line = lines.find(l=>l.id===selectedLineId)
+  if (!line) return
+  const t = parseFloat(val)
+  if (!isNaN(t)) { line[field==='time'?'time':'end'] = t; renderLines(); drawWaveform() }
+}
+function setLineFieldNow(field) {
+  const line = lines.find(l=>l.id===selectedLineId)
+  if (!line) return
+  line[field] = audio.currentTime
+  const el = document.getElementById(field==='time'?'ls-input':'le-input')
+  if (el) el.value = line[field].toFixed(3)
+  renderLines(); drawWaveform()
+}
+function deleteLine(id) {
+  lines = lines.filter(l=>l.id!==id)
+  if (selectedLineId===id) { selectedLineId=null; selectedWord=null }
+  renderAll(); drawWaveform()
+}
+
+function addVocalLayer(lineId, type) {
+  const labelMap = {bg:'Background Vocals',duo:'Duo / Harmony'}
+  showModal(`Add ${labelMap[type]}`, `
+    <div class="mf"><label>Words (space-separated)</label><textarea class="mi mta" id="vl-text" placeholder="e.g. ooh yeah ooh"></textarea></div>
+  `,[
+    {label:'Cancel',fn:closeModal},
+    {label:'Add',primary:true,fn:()=>{
+      const text = document.getElementById('vl-text').value.trim()
+      if (!text) return
+      const line = lines.find(l=>l.id===lineId)
+      const words = text.split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null}))
+      if (type==='bg') { line.bgWords=words; line.bgText=`(${text})` }
+      else { line.duoWords=words; line.duoText=text }
+      closeModal(); renderAll()
+    }}
+  ])
+}
+function removeVocalLayer(lineId, type) {
+  const line = lines.find(l=>l.id===lineId)
+  if (!line) return
+  if (type==='bg') { line.bgWords=[]; line.bgText=null }
+  else { line.duoWords=[]; line.duoText=null }
+  renderEditor(); renderPreview(audio.currentTime||0)
+}
+
+function editWordsText(lineId, type) {
+  const line = lines.find(l=>l.id===lineId)
+  if (!line) return
+  const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
+  const current = words.map(w=>w.word).join(' ')
+  showModal('Edit Words', `
+    <div class="mf"><label>Words (space-separated — timings preserved by position)</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea></div>
+  `,[
+    {label:'Cancel',fn:closeModal},
+    {label:'Update',primary:true,fn:()=>{
+      const newWords = document.getElementById('ew-text').value.trim().split(/\s+/).filter(Boolean)
+      const updated = newWords.map((w,i)=>({word:w, time:words[i]?.time??null, end:words[i]?.end??null}))
+      if (type==='bg') { line.bgWords=updated; line.bgText=updated.length?`(${updated.map(w=>w.word).join(' ')})`:null }
+      else if (type==='duo') { line.duoWords=updated; line.duoText=updated.length?updated.map(w=>w.word).join(' '):null }
+      else { line.words=updated; line.text=updated.map(w=>w.word).join(' ') }
+      closeModal(); renderAll()
+    }}
+  ])
+}
+
+function addLineModal() {
+  showModal('Add Line', `
+    <div class="mf"><label>Lyrics Text</label><textarea class="mi mta" id="al-text" placeholder="Enter line of lyrics…"></textarea></div>
+    <div class="mf" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="al-now"><label for="al-now" style="text-transform:none;letter-spacing:0;font-size:13px">Use current time (${fmtMs(audio.currentTime)}) as start</label></div>
+  `,[
+    {label:'Cancel',fn:closeModal},
+    {label:'Add',primary:true,fn:()=>{
+      const text = document.getElementById('al-text').value.trim()
+      if (!text) return
+      const useNow = document.getElementById('al-now').checked
+      const time = useNow ? audio.currentTime : null
+      lines.push({id:genId(),time,end:null,text,words:text.split(/\s+/).filter(Boolean).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null})
+      sortLines(); closeModal(); renderAll(); drawWaveform()
+    }}
+  ])
+  setTimeout(()=>document.getElementById('al-text')?.focus(),50)
+}
+
+function setMode(mode) {
+  previewMode = mode
+  document.getElementById('mode-kara').className = 'mode-btn'+(mode==='karaoke'?' active':'')
+  document.getElementById('mode-plain').className = 'mode-btn'+(mode==='plain'?' active':'')
+  renderPreview(audio.currentTime||0)
+}
+
+function renderPreview(t) {
+  const container = document.getElementById('lyrics-preview')
+  container.innerHTML = ''
+  for (const line of lines) {
+    const past = line.end!=null && t>line.end
+    const cur = line.time!=null && t>=line.time && (line.end==null||t<=line.end)
+    const div = document.createElement('div')
+    div.className = `pline ${past?'past':cur?'current':'future'}`
+    if (cur && previewMode==='karaoke') {
+      const wh = line.words.map(w=>`<span class="pw ${w.time!=null&&t>=w.time?'lit':''}">${esc(w.word)} </span>`).join('')
+      div.innerHTML = `<div class="pline-text">${wh}</div>`
+    } else {
+      div.innerHTML = `<div class="pline-text">${esc(line.text)}</div>`
+    }
+    if (line.bgText) { const b=document.createElement('div'); b.className='pline-bg'; b.textContent=line.bgText; div.appendChild(b) }
+    if (line.duoText) { const d=document.createElement('div'); d.className='pline-duo'; d.textContent=line.duoText; div.appendChild(d) }
+    container.appendChild(div)
+    if (cur) setTimeout(()=>div.scrollIntoView({behavior:'smooth',block:'center'}),0)
+  }
+}
+
+function updatePreviewLive(t) {
+  const plines = document.querySelectorAll('.pline')
+  plines.forEach((el, i) => {
+    if (i>=lines.length) return
+    const line = lines[i]
+    const past = line.end!=null && t>line.end
+    const cur = line.time!=null && t>=line.time && (line.end==null||t<=line.end)
+    el.className = `pline ${past?'past':cur?'current':'future'}`
+    if (cur && previewMode==='karaoke') {
+      el.querySelectorAll('.pw').forEach((pw, wi) => {
+        pw.classList.toggle('lit', line.words[wi]?.time!=null && t>=line.words[wi].time)
+      })
+      el.scrollIntoView({behavior:'smooth',block:'center'})
+    }
+  })
+}
+
+function exportTTML() {
+  if (!lines.length) return
+  const sorted = [...lines].sort((a,b)=>(a.time||0)-(b.time||0))
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<tt xml:lang="en" xmlns="http://www.w3.org/ns/ttml"
+    xmlns:ttm="http://www.w3.org/ns/ttml#metadata">
+  <head>
+    <metadata>
+      <ttm:title>${esc(audioFileName||'Unknown')}</ttm:title>
+    </metadata>
+    <styling>
+      <style xml:id="s1" tts:fontFamily="Arial" tts:fontSize="100%" tts:color="white" xmlns:tts="http://www.w3.org/ns/ttml#styling"/>
+    </styling>
+    <layout>
+      <region xml:id="r1" tts:textAlign="center" tts:displayAlign="after" xmlns:tts="http://www.w3.org/ns/ttml#styling"/>
+    </layout>
+  </head>
+  <body>
+    <div region="r1">\n`
+  for (const line of sorted) {
+    xml += `      <p begin="${fmtTTML(line.time)}" end="${fmtTTML(line.end)}">\n`
+    for (const w of line.words) xml += `        <span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)} </span>\n`
+    if (line.bgWords?.length) {
+      xml += `        <span ttm:role="x-bg">\n`
+      for (const w of line.bgWords) xml += `          <span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)} </span>\n`
+      xml += `        </span>\n`
+    }
+    if (line.duoWords?.length) {
+      xml += `        <span ttm:role="x-alt">\n`
+      for (const w of line.duoWords) xml += `          <span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)} </span>\n`
+      xml += `        </span>\n`
+    }
+    xml += `      </p>\n`
+  }
+  xml += `    </div>\n  </body>\n</tt>`
+  const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.ttml'
+  window.api.saveTTML(xml, suggestedName).then(fp => {
+    if (!fp) return
+    const dirParts = fp.replace(/\\/g,'/').split('/')
+    const fileName = dirParts.pop()
+    const dir = dirParts.join('/')
+    showModal('Export Successful', `
+      <div class="export-success">
+        <div class="es-icon">✓</div>
+        <div>Saved as <strong>${esc(fileName)}</strong></div>
+        <div class="es-path">${esc(dir)}</div>
+        <div class="es-note">Feel free to use this in Lokal by importing it from the lyrics view, or use it in any other program that supports TTML lyric files. Thanks for using Lokal TTML Editor ^v^ !</div>
+      </div>
+    `,[{label:'Close',fn:closeModal}])
+  })
+}
+
+function sortLines() {
+  lines.sort((a,b)=>(a.time??Infinity)-(b.time??Infinity))
+  renderAll()
+}
+function filterLines(val) { filterText=val; renderLines() }
+function updateStatus() {
+  document.getElementById('sb-lines').textContent = lines.length
+  let t=0,m=0
+  for (const l of lines) for (const w of l.words) { w.time!=null?t++:m++ }
+  document.getElementById('sb-timed').textContent = t
+  document.getElementById('sb-missing').textContent = m
+}
+
+function showModal(title, bodyHtml, buttons) {
+  document.getElementById('modal-title').textContent = title
+  document.getElementById('modal-body').innerHTML = bodyHtml
+  const acts = document.getElementById('modal-actions')
+  acts.innerHTML = ''
+  for (const b of buttons) {
+    const btn = document.createElement('button')
+    btn.className = 'mbtn'+(b.primary?' primary':'')
+    btn.textContent = b.label
+    btn.onclick = b.fn
+    acts.appendChild(btn)
+  }
+  document.getElementById('modal-overlay').classList.remove('hidden')
+}
+function closeModal() { document.getElementById('modal-overlay').classList.add('hidden') }
+document.getElementById('modal-overlay').addEventListener('mousedown', e => { if (e.target===document.getElementById('modal-overlay')) closeModal() })
+
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement.tagName.toLowerCase()
+  if (tag==='input'||tag==='textarea') return
+  if (e.code==='Space') { e.preventDefault(); togglePlay() }
+  if (e.code==='KeyS') { e.preventDefault(); setStartNow() }
+  if (e.code==='KeyE') { e.preventDefault(); setEndNow() }
+  if (e.code==='ArrowRight') { e.preventDefault(); audio.currentTime=Math.min(audioDuration,audio.currentTime+(e.shiftKey?1:.1)) }
+  if (e.code==='ArrowLeft') { e.preventDefault(); audio.currentTime=Math.max(0,audio.currentTime-(e.shiftKey?1:.1)) }
+  if (e.code==='Tab' && selectedWord) {
+    e.preventDefault()
+    const line = lines.find(l=>l.id===selectedWord.lineId)
+    if (!line) return
+    const words = selectedWord.type==='bg'?line.bgWords:selectedWord.type==='duo'?line.duoWords:line.words
+    const next = e.shiftKey ? selectedWord.idx-1 : selectedWord.idx+1
+    if (next>=0 && next<words.length) selectWord(selectedWord.lineId, next, selectedWord.type)
+  }
+})
+
+renderAll()
+</script>
+</body>
+</html>
