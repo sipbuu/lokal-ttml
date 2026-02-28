@@ -20,9 +20,18 @@
     "directories": {
       "output": "release"
     },
+    "asar": true,
     "files": [
-      "**/*",
-      "!node_modules/.cache"
+      "main.js",
+      "index.html",
+      "preload.js",
+      "public/**/*",
+      "dist/**/*",
+      "package.json",
+      "!node_modules/${indexedDB,history,desktop-capturer}/**",
+      "!**/*.map",
+      "!**/*.ts",
+      "!release/**/*"
     ],
     "win": {
       "target": [
@@ -36,7 +45,8 @@
       "icon": "public/icon.png"
     },
     "portable": {
-      "artifactName": "Lokal-TTML-Editor.exe"
+      "artifactName": "Lokal-TTML-Editor.exe",
+      "unpackDirName": "lokal-ttml-temp"
     }
   }
 }
