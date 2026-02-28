@@ -26,12 +26,7 @@
       "index.html",
       "preload.js",
       "public/**/*",
-      "dist/**/*",
-      "package.json",
-      "!node_modules/${indexedDB,history,desktop-capturer}/**",
-      "!**/*.map",
-      "!**/*.ts",
-      "!release/**/*"
+      "package.json"
     ],
     "win": {
       "target": [
