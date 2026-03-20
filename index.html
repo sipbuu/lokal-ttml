@@ -11,22 +11,34 @@
   --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--surface3:#222;
   --border:#2a2a2a;--border2:#333;--text:#e8e8e8;--muted:#666;--muted2:#444;
   --accent:#c8ff57;--accent-dim:rgba(200,255,87,0.12);--accent-dim2:rgba(200,255,87,0.06);
+  --accent-20:rgba(200,255,87,0.2);--accent-25:rgba(200,255,87,0.25);--accent-30:rgba(200,255,87,0.3);--accent-40:rgba(200,255,87,0.4);--accent-50:rgba(200,255,87,0.5);--accent-70:rgba(200,255,87,0.7);
   --red:#ff5757;--red-dim:rgba(255,87,87,0.12);
   --blue:#57b8ff;--blue-dim:rgba(87,184,255,0.12);
   --purple:#c057ff;--purple-dim:rgba(192,87,255,0.12);
   --orange:#ffaa57;--orange-dim:rgba(255,170,87,0.12);
+  --text-scale:1;--bg-image:none;--bg-overlay:0;--bg-blur:0px;--bg-size:cover;--bg-position:center;
   --r:8px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px}
-#titlebar{height:36px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-bottom:1px solid var(--border);-webkit-app-region:drag;flex-shrink:0;z-index:100}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:calc(13px * var(--text-scale))}
+body{position:relative}
+#theme-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:var(--bg-image);background-size:var(--bg-size);background-position:var(--bg-position);background-repeat:no-repeat;filter:blur(var(--bg-blur));transform:scale(1.03);opacity:1}
+#theme-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background:var(--bg);opacity:var(--bg-overlay)}
+#titlebar{height:36px;display:grid;grid-template-columns:1fr 138px;align-items:center;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:5}
+#titlebar-drag{height:100%;-webkit-app-region:drag}
+#titlebar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;height:100%;pointer-events:none;-webkit-app-region:drag}
 #titlebar span{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
-#app{display:flex;flex-direction:column;height:calc(100vh - 36px)}
+#window-controls{display:flex;justify-content:flex-end;align-items:center;height:100%;min-width:138px;-webkit-app-region:no-drag;background:transparent;gap:6px;padding:0 8px}
+.wc-btn{width:38px;height:26px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;appearance:none}
+.wc-btn:hover{background:var(--surface3);border-color:var(--border2);color:var(--text)}
+.wc-btn.close:hover{background:var(--red-dim);border-color:var(--red);color:#fff}
+.wc-btn svg{width:12px;height:12px}
+#app{display:flex;flex-direction:column;height:calc(100vh - 36px);position:relative;z-index:1}
 #toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
 #main{display:flex;flex:1;min-height:0}
 .tb-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;transition:all .15s;white-space:nowrap}
 .tb-btn:hover{background:var(--surface3);border-color:var(--border2)}
-.tb-btn.accent{background:var(--accent-dim);border-color:rgba(200,255,87,.3);color:var(--accent)}
-.tb-btn.accent:hover{background:rgba(200,255,87,.2)}
+.tb-btn.accent{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
+.tb-btn.accent:hover{background:var(--accent-20)}
 .tb-btn svg{width:14px;height:14px;flex-shrink:0}
 .tb-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
 kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px solid var(--border2);border-radius:3px;font-family:var(--mono);font-size:9px;color:var(--muted)}
@@ -39,12 +51,12 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #lines-header h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
 #lines-search-wrap{padding:6px 8px;border-bottom:1px solid var(--border)}
 #lines-search{width:100%;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;outline:none}
-#lines-search:focus{border-color:rgba(200,255,87,.3)}
+#lines-search:focus{border-color:var(--accent-30)}
 #lines-list{flex:1;overflow-y:auto;padding:4px}
 .line-item{padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:1px;transition:all .1s;user-select:none}
 .line-item:hover{background:var(--surface2)}
-.line-item.active{background:var(--accent-dim);border-color:rgba(200,255,87,.25)}
-.line-item.playing{border-color:rgba(200,255,87,.5)!important}
+.line-item.active{background:var(--accent-dim);border-color:var(--accent-25)}
+.line-item.playing{border-color:var(--accent-50)!important}
 .line-time{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:3px}
 .line-text-preview{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .line-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
@@ -57,10 +69,11 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #add-line-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim2)}
 
 #editor-panel{flex:1;display:flex;flex-direction:column;min-width:0}
-#waveform-area{height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);position:relative;cursor:crosshair;overflow:hidden}
+#waveform-area{height:88px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);position:relative;cursor:crosshair;overflow:hidden}
 #waveform-canvas{width:100%;height:100%;display:block}
 #playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;transform:translateX(-50%);box-shadow:0 0 8px var(--accent)}
 #waveform-time-overlay{position:absolute;top:4px;left:8px;font-family:var(--mono);font-size:10px;color:var(--muted);pointer-events:none}
+#waveform-zoom-overlay{position:absolute;top:4px;right:8px;font-family:var(--mono);font-size:10px;color:var(--muted2);pointer-events:none}
 
 #word-editor{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;position:relative}
 #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;position:absolute;inset:0;gap:10px;color:var(--muted);pointer-events:none;z-index:2;background:var(--bg)}
@@ -70,7 +83,7 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .line-timing-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);flex-wrap:wrap;flex-shrink:0}
 .line-timing-row label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .timing-sm{width:88px;padding:4px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
-.timing-sm:focus{border-color:rgba(200,255,87,.4)}
+.timing-sm:focus{border-color:var(--accent-40)}
 
 .word-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
 .word-row-header{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border)}
@@ -87,7 +100,7 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .word-chip{display:flex;flex-direction:column;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;min-width:36px}
 .word-chip:hover{border-color:var(--border2);background:var(--surface3)}
 .word-chip.selected{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 1px var(--accent)}
-.word-chip.active-now{border-color:rgba(200,255,87,.7);background:rgba(200,255,87,.15);box-shadow:0 0 6px rgba(200,255,87,.2)}
+.word-chip.active-now{border-color:var(--accent-70);background:var(--accent-dim);box-shadow:0 0 6px var(--accent-20)}
 .word-chip.bg-chip{border-color:rgba(192,87,255,.2)}
 .word-chip.bg-chip.active-now{border-color:rgba(192,87,255,.7);background:rgba(192,87,255,.15);box-shadow:0 0 6px rgba(192,87,255,.2)}
 .word-chip.duo-chip{border-color:rgba(255,170,87,.2)}
@@ -103,7 +116,7 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #timing-bar{flex-shrink:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 #tw-label{font-size:13px;color:var(--muted);min-width:80px;font-style:italic}
 #timing-start,#timing-end{width:88px;padding:4px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
-#timing-start:focus,#timing-end:focus{border-color:rgba(200,255,87,.4)}
+#timing-start:focus,#timing-end:focus{border-color:var(--accent-40)}
 #set-start-btn,#set-end-btn{padding:5px 11px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:11px;font-family:var(--font);transition:all .15s}
 #set-start-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 #set-end-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
@@ -112,8 +125,8 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #preview-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 #preview-header h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
 .mode-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--font)}
-.mode-btn.active{background:var(--accent-dim);border-color:rgba(200,255,87,.3);color:var(--accent)}
-#preview-body{flex:1;overflow:hidden;position:relative;background:#050505}
+.mode-btn.active{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
+#preview-body{flex:1;overflow:hidden;position:relative;background:var(--bg)}
 #lyrics-preview{position:absolute;inset:0;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth}
 .pline{padding:6px 4px;border-radius:5px;transition:opacity .25s}
 .pline.past{opacity:.2}
@@ -122,7 +135,9 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .pline-text{font-size:17px;font-weight:600;line-height:1.4;color:var(--text);letter-spacing:-.01em}
 .pline.current .pline-text{color:var(--text)}
 .pw{display:inline;transition:color .06s,text-shadow .06s}
-.pw.lit{color:var(--accent);text-shadow:0 0 12px rgba(200,255,87,.4)}
+.pw.lit{color:var(--accent);text-shadow:0 0 12px var(--accent-40)}
+.pc{transition:opacity .06s,color .06s,text-shadow .06s;opacity:.34}
+.pc.lit{color:inherit}
 .pline-bg{font-size:12px;color:var(--purple);margin-top:3px;display:flex;flex-wrap:wrap;gap:2px}
 .pline-duo{font-size:13px;color:var(--orange);margin-top:3px;display:flex;flex-wrap:wrap;gap:2px}
 .pbw{display:inline;transition:color .06s,opacity .06s}
@@ -134,15 +149,22 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 
 #transport{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
 #play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-#play-btn:hover{background:#d4ff6a;transform:scale(1.05)}
+#play-btn:hover{background:var(--accent);filter:brightness(1.08);transform:scale(1.05)}
 #play-btn svg{width:15px;height:15px;color:#000}
-#prog-track{flex:1;height:3px;background:var(--surface3);border-radius:2px;cursor:pointer}
-#prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0%}
+#prog-track{flex:1;height:34px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;position:relative;overflow:hidden}
+#prog-waveform{position:absolute;inset:0;width:100%;height:100%;display:block}
+#prog-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent-dim2),var(--accent-dim));border-right:1px solid var(--accent-40);width:0%}
+#prog-playhead{position:absolute;top:5px;bottom:5px;width:2px;background:var(--accent);box-shadow:0 0 8px var(--accent);transform:translateX(-50%)}
 #vol-slider{width:56px;accent-color:var(--accent);cursor:pointer}
 #tp-time{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
 #status-bar{padding:3px 14px;background:var(--bg);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;gap:16px;flex-shrink:0}
 #status-bar b{color:var(--text);font-weight:500}
+#error-log{position:fixed;right:12px;bottom:12px;width:420px;max-height:220px;overflow:auto;background:rgba(10,10,10,.94);border:1px solid rgba(255,87,87,.25);border-radius:10px;padding:10px 12px;z-index:2000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#error-log.visible{display:block}
+#error-log h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#ff8c8c;margin-bottom:8px}
+#error-log pre{white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:11px;line-height:1.45;color:#ffd7d7}
+#error-log button{margin-top:8px}
 
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -155,11 +177,11 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .mf{margin-bottom:12px}
 .mf label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.08em}
 .mi{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:13px;outline:none}
-.mi:focus{border-color:rgba(200,255,87,.4)}
+.mi:focus{border-color:var(--accent-40)}
 .mta{min-height:100px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.6}
 .macts{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
 .mbtn{padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:var(--font);font-size:12px}
-.mbtn.primary{background:var(--accent-dim);border-color:rgba(200,255,87,.3);color:var(--accent)}
+.mbtn.primary{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
 .mbtn:hover{background:var(--surface3)}
 .mbtn.primary:hover{background:rgba(200,255,87,.2)}
 
@@ -186,15 +208,52 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .settings-toggle{position:relative;width:36px;height:20px;flex-shrink:0}
 .settings-toggle input{opacity:0;width:0;height:0}
 .toggle-track{position:absolute;inset:0;background:var(--surface3);border-radius:10px;cursor:pointer;transition:background .2s;border:1px solid var(--border2)}
-.settings-toggle input:checked+.toggle-track{background:var(--accent-dim);border-color:rgba(200,255,87,.4)}
+.settings-toggle input:checked+.toggle-track{background:var(--accent-dim);border-color:var(--accent-40)}
 .toggle-track::after{content:'';position:absolute;left:3px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
 .settings-toggle input:checked+.toggle-track::after{transform:translateX(16px);background:var(--accent)}
 .settings-select{padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--font);font-size:12px;outline:none}
-.settings-select:focus{border-color:rgba(200,255,87,.4)}
+.settings-select:focus{border-color:var(--accent-40)}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.theme-option{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);cursor:pointer;transition:all .15s;font-family:var(--font);color:var(--text);text-align:left}
+.theme-option.active{border-color:var(--accent);background:var(--accent-dim)}
+.theme-option-name{font-size:12px;color:var(--text);font-weight:600;margin-bottom:6px}
+.theme-swatches{display:flex;gap:4px}
+.theme-swatches span{width:14px;height:14px;border-radius:999px;border:1px solid rgba(255,255,255,.08)}
+.accent-grid{display:flex;flex-wrap:wrap;gap:6px}
+.accent-option{width:24px;height:24px;border-radius:7px;border:1px solid var(--border2);cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+.accent-option.active{transform:scale(1.08);box-shadow:0 0 0 2px rgba(255,255,255,.12);border-color:var(--text)}
+.settings-range{width:100%;accent-color:var(--accent)}
+.settings-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.settings-hidden{display:none}
+.settings-code{font-family:var(--mono)}
+.bg-preview{width:100%;height:120px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);background-size:var(--bg-size);background-position:var(--bg-position);position:relative;overflow:hidden}
+.bg-preview::after{content:'';position:absolute;inset:0;background:var(--bg);opacity:var(--bg-overlay);backdrop-filter:blur(var(--bg-blur))}
+.settings-note{font-size:11px;color:var(--muted2);padding-top:4px}
+.settings-note strong{color:var(--text);font-weight:600}
+.loading-modal{display:flex;flex-direction:column;gap:12px;padding:4px 0}
+.loading-spinner{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--accent);animation:spin .85s linear infinite}
+.loading-copy{font-size:12px;color:var(--muted);line-height:1.6}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div id="titlebar"><span>Lokal TTML Editor</span></div>
+<div id="theme-bg"></div>
+<div id="theme-overlay"></div>
+<div id="titlebar">
+  <div id="titlebar-drag"></div>
+  <div id="titlebar-center"><span>Lokal TTML Editor</span></div>
+  <div id="window-controls">
+    <button class="wc-btn" id="wc-min" aria-label="Minimize">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h8"/></svg>
+    </button>
+    <button class="wc-btn" id="wc-max" aria-label="Maximize">
+      <svg id="wc-max-icon" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="7" height="7"/></svg>
+    </button>
+    <button class="wc-btn close" id="wc-close" aria-label="Close">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l6 6M9 3L3 9"/></svg>
+    </button>
+  </div>
+</div>
 <div id="app">
   <div id="toolbar">
     <button class="tb-btn" onclick="openAudio()">
@@ -249,6 +308,7 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
         <canvas id="waveform-canvas"></canvas>
         <div id="playhead" style="left:0"></div>
         <div id="waveform-time-overlay">0:00.000</div>
+        <div id="waveform-zoom-overlay">100%</div>
       </div>
       <div id="word-editor">
         <div id="empty-state">
@@ -285,7 +345,9 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
           <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
         </button>
         <div id="prog-track" onmousedown="progressSeek(event)">
+          <canvas id="prog-waveform"></canvas>
           <div id="prog-fill"></div>
+          <div id="prog-playhead" style="left:0"></div>
         </div>
         <span id="tp-time">0:00</span>
         <input id="vol-slider" type="range" min="0" max="1" step="0.01" value="0.8" oninput="audio.volume=this.value">
@@ -310,6 +372,11 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 </div>
 
 <audio id="audio-el" style="display:none"></audio>
+<div id="error-log">
+  <h4>Runtime Error</h4>
+  <pre id="error-log-text"></pre>
+  <button class="mbtn" id="error-log-close" type="button">Dismiss</button>
+</div>
 
 <script>
 const audio = document.getElementById('audio-el')
@@ -318,8 +385,24 @@ let selectedLineId = null
 let selectedWord = null
 let audioDuration = 0
 let audioFileName = ''
+let currentAudioPath = ''
+let currentAudioMetadata = null
 let previewMode = 'karaoke'
 let filterText = ''
+let waveformPeaks = null
+let waveformZoom = 1
+let waveformCenter = 0
+let isWindowMaximized = false
+const waveformMinWindow = 0.06
+let waveformDecodeToken = 0
+let waveformSupport = { native: null }
+let loadingModalToken = 0
+const NATIVE_WAVEFORM_POINTS = 50000
+const BROWSER_WAVEFORM_POINTS = 18000
+let previewAnimationFrame = 0
+let autosaveTimer = 0
+let restoringSession = false
+const SESSION_STORAGE_KEY = 'ttml-editor-session'
 
 function genId() { return 'l' + Math.random().toString(36).slice(2, 9) }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
@@ -342,19 +425,470 @@ function splitWords(text) {
   return text.match(/\S+/g) || []
 }
 
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function getWordsForSelection(selection) {
+  if (!selection) return null
+  const line = lines.find(l => l.id === selection.lineId)
+  if (!line) return null
+  const words = selection.type === 'bg' ? line.bgWords : selection.type === 'duo' ? line.duoWords : line.words
+  return { line, words }
+}
+
+function syncLineTimingFromWords(line, type) {
+  if (!line || type !== 'main') return
+  const ts = line.words.map(x => x.time).filter(x => x != null)
+  const es = line.words.map(x => x.end).filter(x => x != null)
+  if (ts.length) line.time = Math.min(...ts)
+  if (es.length) line.end = Math.max(...es)
+}
+
+function extractTrackGuess(name) {
+  const cleaned = String(name || '')
+    .replace(/\.[^.]+$/, '')
+    .replace(/\[[^\]]*]/g, ' ')
+    .replace(/\([^)]*(official|audio|video|lyrics|visualizer|mv)[^)]*\)/ig, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const patterns = [' - ', ' – ', ' — ', ' by ']
+  for (const sep of patterns) {
+    const idx = cleaned.indexOf(sep)
+    if (idx > 0 && idx < cleaned.length - sep.length) {
+      const left = cleaned.slice(0, idx).trim()
+      const right = cleaned.slice(idx + sep.length).trim()
+      if (left && right) {
+        if (sep === ' by ') return { title: left, artist: right }
+        return { artist: left, title: right }
+      }
+    }
+  }
+  return { title: cleaned, artist: '' }
+}
+
+async function loadAudioMetadata(fp) {
+  currentAudioMetadata = null
+  try {
+    const metadata = await window.api.getAudioMetadata?.(fp)
+    if (metadata && (metadata.title || metadata.artist || metadata.album)) {
+      currentAudioMetadata = metadata
+    }
+  } catch {}
+}
+
+async function loadAudioFromPath(fp, opts = {}) {
+  if (!fp) return
+  await ensureWaveformSupport()
+  const showLoader = opts.showLoader !== false
+  const loadingToken = showLoader ? showLoadingModal('Loading Audio', 'Preparing playback and building the waveform...') : 0
+  currentAudioPath = fp
+  loadAudioMetadata(fp).catch(() => {})
+  audioFileName = opts.audioFileName || fp.split(/[\\/]/).pop()
+  document.getElementById('track-name').textContent = audioFileName
+  document.getElementById('track-name').style.color = 'var(--text)'
+  waveformPeaks = null
+  waveformDecodeToken++
+  audio.src = pathToFileUrl(fp)
+  audio.load()
+  waveformZoom = Number.isFinite(opts.waveformZoom) ? opts.waveformZoom : 1
+  waveformCenter = Number.isFinite(opts.waveformCenter) ? opts.waveformCenter : 0
+  audio.onloadedmetadata = () => {
+    audioDuration = audio.duration
+    if (!Number.isFinite(opts.waveformCenter)) waveformCenter = audio.duration / 2
+    const resumeTime = clamp(Number(opts.currentTime) || 0, 0, audio.duration || 0)
+    audio.currentTime = resumeTime
+    drawWaveform()
+    updatePlayheads()
+  }
+  document.getElementById('sb-file').textContent = audioFileName
+  setTimeout(async () => {
+    try {
+      await loadWaveformPeaks(fp)
+    } catch (err) {
+      showRuntimeError(`Waveform setup failed: ${err?.message || err}`)
+    } finally {
+      if (showLoader) hideLoadingModal(loadingToken)
+    }
+  }, 0)
+}
+
+async function restoreSession() {
+  restoringSession = true
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY)
+    if (!raw) return
+    const session = JSON.parse(raw)
+    lines = Array.isArray(session.lines) ? session.lines : []
+    selectedLineId = session.selectedLineId || null
+    selectedWord = session.selectedWord || null
+    audioFileName = session.audioFileName || ''
+    currentAudioPath = session.currentAudioPath || ''
+    currentAudioMetadata = session.currentAudioMetadata || null
+    previewMode = session.previewMode || 'karaoke'
+    filterText = session.filterText || ''
+    waveformZoom = Number.isFinite(session.waveformZoom) ? session.waveformZoom : 1
+    waveformCenter = Number.isFinite(session.waveformCenter) ? session.waveformCenter : 0
+    if (currentAudioPath) {
+      await loadAudioFromPath(currentAudioPath, {
+        showLoader: false,
+        audioFileName,
+        currentTime: session.audioCurrentTime,
+        waveformZoom,
+        waveformCenter,
+      })
+    }
+  } catch {}
+  finally {
+    restoringSession = false
+  }
+}
+
+function ensurePreviewTicker() {
+  if (previewAnimationFrame) return
+  const tick = () => {
+    previewAnimationFrame = 0
+    if (!audio.paused && !audio.ended) {
+      updatePreviewLive(audio.currentTime || 0)
+      maybeKeepPlayheadVisible()
+      updatePlayheads()
+      previewAnimationFrame = requestAnimationFrame(tick)
+    }
+  }
+  previewAnimationFrame = requestAnimationFrame(tick)
+}
+
+function stopPreviewTicker() {
+  if (!previewAnimationFrame) return
+  cancelAnimationFrame(previewAnimationFrame)
+  previewAnimationFrame = 0
+}
+
+function getSessionSnapshot() {
+  return {
+    version: 1,
+    savedAt: Date.now(),
+    lines,
+    selectedLineId,
+    selectedWord,
+    audioFileName,
+    currentAudioPath,
+    currentAudioMetadata,
+    audioCurrentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
+    audioDuration,
+    waveformZoom,
+    waveformCenter,
+    previewMode,
+    filterText,
+  }
+}
+
+function saveSessionNow() {
+  if (restoringSession) return
+  try {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(getSessionSnapshot()))
+  } catch {}
+}
+
+function scheduleSessionSave() {
+  if (restoringSession) return
+  clearTimeout(autosaveTimer)
+  autosaveTimer = setTimeout(saveSessionNow, 250)
+}
+
+function showRuntimeError(message) {
+  const box = document.getElementById('error-log')
+  const text = document.getElementById('error-log-text')
+  if (!box || !text) return
+  text.textContent = `${text.textContent ? text.textContent + '\n\n' : ''}${String(message || 'Unknown error')}`
+  box.classList.add('visible')
+}
+
+function setWindowMaximizedState(maximized) {
+  isWindowMaximized = !!maximized
+  const icon = document.getElementById('wc-max-icon')
+  if (!icon) return
+  icon.innerHTML = maximized
+    ? '<path d="M3.5 2.5h5v5h-5z"/><path d="M2.5 4.5v4h4"/>'
+    : '<rect x="2.5" y="2.5" width="7" height="7"/>'
+}
+
+function updateWindowControls() {
+  window.api.isWindowMaximized?.().then(setWindowMaximizedState).catch(() => {})
+}
+
+function pathToFileUrl(fp) {
+  const normalized = String(fp || '').replace(/\\/g, '/')
+  const withSlash = normalized.startsWith('/') ? normalized : `/${normalized}`
+  return encodeURI(`file://${withSlash}`)
+}
+
+function normalizeWaveformBuckets(peaks) {
+  return Array.isArray(peaks) ? peaks.map(bucket => {
+    if (bucket && typeof bucket === 'object') {
+      return {
+        min: clamp(Number(bucket.min) || 0, -1, 1),
+        max: clamp(Number(bucket.max) || 0, -1, 1),
+        rms: clamp(Number(bucket.rms) || 0, 0, 1),
+      }
+    }
+    const peak = clamp(Number(bucket) || 0, 0, 1)
+    return { min: -peak, max: peak, rms: peak }
+  }) : []
+}
+
+function getWaveformEngine() {
+  return settings.waveformEngine || 'auto'
+}
+
+async function ensureWaveformSupport() {
+  if (typeof waveformSupport.native === 'boolean') return waveformSupport
+  try {
+    waveformSupport.native = !!(await window.api.hasNativeWaveformDecoder?.())
+  } catch {
+    waveformSupport.native = false
+  }
+  return waveformSupport
+}
+
+function getEffectiveWaveformEngine() {
+  const preferred = getWaveformEngine()
+  if (preferred === 'native') return waveformSupport.native ? 'native' : 'browser'
+  if (preferred === 'browser') return 'browser'
+  return waveformSupport.native ? 'native' : 'browser'
+}
+
+async function loadWaveformPeaksNative(fp) {
+  const result = await window.api.getWaveformPeaks(fp, NATIVE_WAVEFORM_POINTS)
+  return normalizeWaveformBuckets(result?.peaks)
+}
+
+async function loadWaveformPeaksBrowser(fp) {
+  const response = await fetch(pathToFileUrl(fp))
+  if (!response.ok) throw new Error(`Failed to read audio file (${response.status})`)
+  const arrayBuffer = await response.arrayBuffer()
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext
+  if (!AudioContextCtor) throw new Error('Web Audio API is unavailable')
+  const ctx = new AudioContextCtor()
+  try {
+    const decoded = await ctx.decodeAudioData(arrayBuffer.slice(0))
+    const channelCount = Math.min(2, decoded.numberOfChannels || 1)
+    const channels = Array.from({ length: channelCount }, (_, i) => decoded.getChannelData(i))
+    const totalSamples = decoded.length || channels[0]?.length || 0
+    if (!totalSamples) return []
+    const points = BROWSER_WAVEFORM_POINTS
+    const bucketSize = Math.max(1, Math.floor(totalSamples / points))
+    const peaks = []
+    for (let start = 0; start < totalSamples; start += bucketSize) {
+      const end = Math.min(totalSamples, start + bucketSize)
+      let min = 1
+      let max = -1
+      let sumSquares = 0
+      for (let i = start; i < end; i++) {
+        let value = 0
+        for (let c = 0; c < channels.length; c++) value += channels[c][i] || 0
+        value /= Math.max(1, channels.length)
+        if (value < min) min = value
+        if (value > max) max = value
+        sumSquares += value * value
+      }
+      const count = Math.max(1, end - start)
+      peaks.push({
+        min: clamp(min, -1, 1),
+        max: clamp(max, -1, 1),
+        rms: clamp(Math.sqrt(sumSquares / count), 0.001, 1),
+      })
+    }
+    return peaks
+  } finally {
+    try { await ctx.close() } catch {}
+  }
+}
+
+function showLoadingModal(title, message) {
+  loadingModalToken += 1
+  const token = loadingModalToken
+  showModal(title, `
+    <div class="loading-modal">
+      <div class="loading-spinner"></div>
+      <div class="loading-copy">${esc(message)}</div>
+    </div>
+  `, [], { locked: true })
+  return token
+}
+
+function hideLoadingModal(token) {
+  if (token !== loadingModalToken) return
+  forceCloseModal()
+}
+
+async function loadWaveformPeaks(fp) {
+  const token = ++waveformDecodeToken
+  try {
+    await ensureWaveformSupport()
+    if (token !== waveformDecodeToken) return
+    const effectiveEngine = getEffectiveWaveformEngine()
+    const peaks = effectiveEngine === 'native'
+      ? await loadWaveformPeaksNative(fp)
+      : await loadWaveformPeaksBrowser(fp)
+    if (token !== waveformDecodeToken) return
+    waveformPeaks = peaks
+    drawWaveform()
+  } catch (err) {
+    if (token !== waveformDecodeToken) return
+    if (getWaveformEngine() === 'native') {
+      showRuntimeError(`Waveform generation failed: ${err?.message || err}`)
+      return
+    }
+    try {
+      const fallbackPeaks = await loadWaveformPeaksBrowser(fp)
+      if (token !== waveformDecodeToken) return
+      waveformPeaks = fallbackPeaks
+      drawWaveform()
+    } catch (fallbackErr) {
+      showRuntimeError(`Waveform generation failed: ${fallbackErr?.message || fallbackErr}`)
+    }
+  }
+}
+
+function getWaveformViewFor(center, zoom) {
+  if (!audioDuration) return { start: 0, end: 0, duration: 0 }
+  const visible = clamp(audioDuration / zoom, waveformMinWindow, audioDuration)
+  const clampedCenter = clamp(center, visible / 2, Math.max(visible / 2, audioDuration - visible / 2))
+  const start = clamp(clampedCenter - visible / 2, 0, Math.max(0, audioDuration - visible))
+  return { start, end: start + visible, duration: visible }
+}
+
+function getCurrentWaveformCenter() {
+  return Number.isFinite(waveformCenter) ? waveformCenter : (audio.currentTime || 0)
+}
+
+function zoomWaveformAtTime(anchorTime, anchorRatio, factor) {
+  const nextZoom = clamp(waveformZoom * factor, 1, Math.max(1, audioDuration / waveformMinWindow))
+  const nextVisible = clamp(audioDuration / nextZoom, waveformMinWindow, audioDuration)
+  const boundedRatio = clamp(anchorRatio, 0, 1)
+  waveformZoom = nextZoom
+  waveformCenter = clamp(
+    anchorTime - (boundedRatio * nextVisible) + (nextVisible / 2),
+    nextVisible / 2,
+    Math.max(nextVisible / 2, audioDuration - nextVisible / 2)
+  )
+  drawWaveform()
+}
+
+function getVisibleDuration() {
+  if (!audioDuration) return 0
+  return clamp(audioDuration / waveformZoom, waveformMinWindow, audioDuration)
+}
+
+function getWaveformView() {
+  return getWaveformViewFor(getCurrentWaveformCenter(), waveformZoom)
+}
+
+function timeToWaveX(time, width, view = getWaveformView()) {
+  if (!view.duration) return 0
+  return ((time - view.start) / view.duration) * width
+}
+
+function waveXToTime(x, width, view = getWaveformView()) {
+  if (!view.duration || !width) return 0
+  return clamp(view.start + (x / width) * view.duration, 0, audioDuration)
+}
+
+function updateWaveformZoomLabel() {
+  const el = document.getElementById('waveform-zoom-overlay')
+  if (el) el.textContent = `${Math.round(waveformZoom * 100)}%`
+}
+
+function drawWaveformBars(ctx, width, height, opts = {}) {
+  const view = opts.view || getWaveformView()
+  const { start, end, duration } = view
+  ctx.clearRect(0, 0, width, height)
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#111'
+  ctx.fillRect(0, 0, width, height)
+  if (!audioDuration || !duration) return
+
+  const mid = height / 2
+  const baseColor = getComputedStyle(document.documentElement).getPropertyValue('--muted2').trim() || '#555'
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#e8ff57'
+  const accentDim = getComputedStyle(document.documentElement).getPropertyValue('--accent-dim').trim() || 'rgba(200,255,87,0.12)'
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#222'
+
+  if (waveformPeaks && waveformPeaks.length) {
+    const totalPeaks = waveformPeaks.length
+    const startIndex = Math.max(0, Math.floor((start / audioDuration) * totalPeaks))
+    const endIndex = Math.min(totalPeaks, Math.ceil((end / audioDuration) * totalPeaks))
+    ctx.fillStyle = baseColor
+    for (let x = 0; x < width; x++) {
+      const pixelStart = startIndex + ((x / Math.max(1, width)) * (endIndex - startIndex))
+      const pixelEnd = startIndex + (((x + 1) / Math.max(1, width)) * (endIndex - startIndex))
+      const sliceStart = Math.max(startIndex, Math.floor(pixelStart))
+      if (sliceStart >= endIndex) break
+      const sliceEnd = Math.max(sliceStart + 1, Math.min(endIndex, Math.ceil(pixelEnd)))
+      let min = 1
+      let max = -1
+      let rms = 0
+      for (let i = sliceStart; i < sliceEnd; i++) {
+        const bucket = waveformPeaks[i] || { min: 0, max: 0, rms: 0 }
+        if (bucket.min < min) min = bucket.min
+        if (bucket.max > max) max = bucket.max
+        if (bucket.rms > rms) rms = bucket.rms
+      }
+      const top = Math.max(0, Math.min(height, mid - max * (height * 0.46)))
+      const bottom = Math.max(top + 1, Math.min(height, mid - min * (height * 0.46)))
+      ctx.globalAlpha = 0.35 + (rms * 0.65)
+      ctx.fillRect(x, top, 1, Math.max(1, bottom - top))
+    }
+    ctx.globalAlpha = 1
+  }
+
+  ctx.strokeStyle = border
+  ctx.lineWidth = 1
+  const tickStep = duration <= 1 ? 0.05 : duration <= 4 ? 0.1 : duration <= 12 ? 0.25 : duration <= 40 ? 0.5 : duration <= 120 ? 1 : 2
+  const firstTick = Math.ceil(start / tickStep) * tickStep
+  for (let sec = firstTick; sec <= end; sec += tickStep) {
+    const x = timeToWaveX(sec, width, view)
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, height)
+    ctx.stroke()
+  }
+
+  for (const line of lines) {
+    if (line.time == null || line.time > end || effectiveEnd(line) < start) continue
+    const x1 = clamp(timeToWaveX(line.time, width, view), 0, width)
+    const x2 = clamp(timeToWaveX(line.end ?? line.time, width, view), 0, width)
+    ctx.fillStyle = accentDim
+    ctx.fillRect(x1, 0, Math.max(2, x2 - x1), height)
+    ctx.fillStyle = accent
+    ctx.fillRect(x1, 0, 2, height)
+  }
+}
+
+function updatePlayheads() {
+  if (!audioDuration) return
+  const main = document.getElementById('waveform-canvas')
+  const prog = document.getElementById('prog-track')
+  const mainX = clamp(timeToWaveX(audio.currentTime, main.offsetWidth || 1), 0, main.offsetWidth || 1)
+  document.getElementById('playhead').style.left = `${mainX}px`
+  document.getElementById('prog-playhead').style.left = `${clamp((audio.currentTime / audioDuration) * (prog.clientWidth || 1), 0, prog.clientWidth || 1)}px`
+}
+
+function maybeKeepPlayheadVisible() {
+  const view = getWaveformView()
+  if (!view.duration || waveformZoom <= 1) return
+  const margin = view.duration * 0.15
+  if (audio.currentTime < view.start + margin || audio.currentTime > view.end - margin) {
+    waveformCenter = audio.currentTime
+    drawWaveform()
+  }
+}
+
 async function openAudio() {
   const fp = await window.api.openAudio()
   if (!fp) return
-  audioFileName = fp.split(/[\\/]/).pop()
-  document.getElementById('track-name').textContent = audioFileName
-  document.getElementById('track-name').style.color = 'var(--text)'
-  const b64 = await window.api.readBinary(fp)
-  const ext = fp.split('.').pop().toLowerCase()
-  const mimes = {mp3:'audio/mpeg',flac:'audio/flac',m4a:'audio/mp4',ogg:'audio/ogg',wav:'audio/wav',aac:'audio/aac',opus:'audio/ogg'}
-  audio.src = `data:${mimes[ext]||'audio/*'};base64,${b64}`
-  audio.load()
-  audio.onloadedmetadata = () => { audioDuration = audio.duration; drawWaveform() }
-  document.getElementById('sb-file').textContent = audioFileName
+  await loadAudioFromPath(fp, { showLoader: true })
+  scheduleSessionSave()
 }
 
 function togglePlay() {
@@ -368,28 +902,35 @@ function setPlayIcon(paused) {
     : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
 }
 audio.addEventListener('ended', () => setPlayIcon(true))
+audio.addEventListener('play', ensurePreviewTicker)
+audio.addEventListener('pause', stopPreviewTicker)
+audio.addEventListener('ended', stopPreviewTicker)
 audio.addEventListener('timeupdate', () => {
   const t = audio.currentTime
   document.getElementById('track-time').textContent = fmtMs(t)
   document.getElementById('waveform-time-overlay').textContent = fmtMs(t)
   document.getElementById('tp-time').textContent = fmtSec(t)
   document.getElementById('prog-fill').style.width = (audioDuration ? t/audioDuration*100 : 0) + '%'
-  if (audioDuration) {
-    document.getElementById('playhead').style.left = (t/audioDuration * document.getElementById('waveform-canvas').offsetWidth) + 'px'
-  }
   updateEditorActiveWords(t)
   updatePreviewLive(t)
+  maybeKeepPlayheadVisible()
+  updatePlayheads()
 })
 
 function progressSeek(e) {
   if (!audioDuration) return
   const r = document.getElementById('prog-track').getBoundingClientRect()
   audio.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * audioDuration
+  updatePlayheads()
+  if (waveformZoom > 1) maybeKeepPlayheadVisible()
 }
 function waveformSeek(e) {
   if (!audioDuration) return
   const r = document.getElementById('waveform-canvas').getBoundingClientRect()
-  audio.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * audioDuration
+  const view = getWaveformView()
+  audio.currentTime = waveXToTime(clamp(e.clientX-r.left, 0, r.width), r.width, view)
+  updatePlayheads()
+  if (waveformZoom > 1) drawWaveform()
 }
 function waveformDrag(e) { if (e.buttons===1) waveformSeek(e) }
 
@@ -398,20 +939,42 @@ function drawWaveform() {
   const W = c.offsetWidth, H = c.offsetHeight
   c.width = W; c.height = H
   const ctx = c.getContext('2d')
-  ctx.fillStyle = '#111'; ctx.fillRect(0,0,W,H)
+  drawWaveformBars(ctx, W, H, { view: getWaveformView() })
+  const mini = document.getElementById('prog-waveform')
+  const miniW = mini.offsetWidth, miniH = mini.offsetHeight
+  mini.width = miniW; mini.height = miniH
+  drawWaveformBars(mini.getContext('2d'), miniW, miniH, { view: { start: 0, end: audioDuration, duration: audioDuration } })
+  updatePlayheads()
+  updateWaveformZoomLabel()
+}
+
+function handleWaveformWheel(e) {
   if (!audioDuration) return
-  ctx.strokeStyle = '#1e1e1e'; ctx.lineWidth = 1
-  for (let s = 0; s <= audioDuration; s += Math.max(1,Math.floor(audioDuration/20))) {
-    const x = s/audioDuration*W
-    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke()
+  const rect = document.getElementById('waveform-canvas').getBoundingClientRect()
+  const x = clamp(e.clientX - rect.left, 0, rect.width)
+  if (e.ctrlKey) {
+    e.preventDefault()
+    const currentView = getWaveformView()
+    const anchorTime = clamp(currentView.start + ((rect.width ? x / rect.width : 0.5) * currentView.duration), 0, audioDuration)
+    const factor = e.deltaY < 0 ? 1.18 : 1 / 1.18
+    zoomWaveformAtTime(anchorTime, rect.width ? x / rect.width : 0.5, factor)
+    return
   }
-  for (const line of lines) {
-    if (line.time == null) continue
-    const x1 = line.time/audioDuration*W
-    const x2 = line.end ? line.end/audioDuration*W : x1+3
-    ctx.fillStyle = 'rgba(200,255,87,0.07)'; ctx.fillRect(x1,0,Math.max(2,x2-x1),H)
-    ctx.fillStyle = 'rgba(200,255,87,0.55)'; ctx.fillRect(x1,0,2,H)
+  if (waveformZoom > 1) {
+    e.preventDefault()
+    const view = getWaveformView()
+    waveformCenter = clamp(waveformCenter + Math.sign(e.deltaY) * view.duration * 0.08, view.duration / 2, Math.max(view.duration / 2, audioDuration - view.duration / 2))
+    drawWaveform()
   }
+}
+
+function handleProgressWheel(e) {
+  if (!audioDuration || !e.ctrlKey) return
+  const rect = document.getElementById('prog-track').getBoundingClientRect()
+  const x = clamp(e.clientX - rect.left, 0, rect.width)
+  const anchorTime = clamp((rect.width ? x / rect.width : 0.5) * audioDuration, 0, audioDuration)
+  e.preventDefault()
+  zoomWaveformAtTime(anchorTime, 0.5, e.deltaY < 0 ? 1.18 : 1 / 1.18)
 }
 
 function parseLRC(lrc) {
@@ -533,10 +1096,14 @@ async function openLyricsFile() {
 }
 
 async function showLRCLIBModal() {
-  const title = audioFileName.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ')
+  const guess = extractTrackGuess(audioFileName)
+  const preferred = {
+    title: currentAudioMetadata?.title || guess.title,
+    artist: currentAudioMetadata?.artist || guess.artist,
+  }
   showModal('Search LRCLIB', `
-    <div class="mf"><label>Track Title</label><input class="mi" id="lr-title" value="${esc(title)}" placeholder="Song title"></div>
-    <div class="mf"><label>Artist</label><input class="mi" id="lr-artist" placeholder="Artist name"></div>
+    <div class="mf"><label>Track Title</label><input class="mi" id="lr-title" value="${esc(preferred.title)}" placeholder="Song title"></div>
+    <div class="mf"><label>Artist</label><input class="mi" id="lr-artist" value="${esc(preferred.artist)}" placeholder="Artist name"></div>
     <div id="lrclib-spinner" style="display:none;text-align:center;padding:16px;color:var(--muted);font-size:12px">Searching…</div>
     <div id="lrclib-results"></div>
   `, [
@@ -579,6 +1146,7 @@ async function searchLRCLIB() {
           words:splitWords(l.trim()).map(w=>({word:w,time:null,end:null})),
           bgWords:[],bgText:null,duoWords:[],duoText:null
         }))
+        scheduleSessionSave()
         closeModal(); renderAll(); drawWaveform()
       })
       container.appendChild(el)
@@ -590,6 +1158,7 @@ async function searchLRCLIB() {
 }
 
 function renderAll() {
+  scheduleSessionSave()
   renderLines(); renderEditorFull(); renderPreview(audio.currentTime||0); updateStatus()
 }
 
@@ -612,6 +1181,8 @@ function renderLines() {
       document.getElementById('timing-end').value = ''
       renderLines()
       renderEditorFull()
+      updatePreviewLive(audio.currentTime||0)
+      scheduleSessionSave()
     })
     list.appendChild(el)
   }
@@ -736,6 +1307,7 @@ function selectWord(lineId, idx, type) {
   document.querySelectorAll('.word-chip.selected').forEach(c => c.classList.remove('selected'))
   const container = document.getElementById(`wc-${lineId}-${type}`)
   if (container) container.children[idx]?.classList.add('selected')
+  scheduleSessionSave()
 }
 
 function updateEditorActiveWords(t) {
@@ -762,18 +1334,13 @@ function updateEditorActiveWords(t) {
 
 function updateWordTime(field, val) {
   if (!selectedWord) return
-  const line = lines.find(l=>l.id===selectedWord.lineId)
-  if (!line) return
-  const words = selectedWord.type==='bg'?line.bgWords:selectedWord.type==='duo'?line.duoWords:line.words
+  const target = getWordsForSelection(selectedWord)
+  if (!target) return
+  const { line, words } = target
   const t = parseFloat(val)
   if (!isNaN(t)) {
     words[selectedWord.idx][field] = t
-    if (selectedWord.type==='main') {
-      const ts = line.words.map(x=>x.time).filter(x=>x!=null)
-      const es = line.words.map(x=>x.end).filter(x=>x!=null)
-      if (ts.length) line.time = Math.min(...ts)
-      if (es.length) line.end = Math.max(...es)
-    }
+    syncLineTimingFromWords(line, selectedWord.type)
     renderLines(); updateStatus(); drawWaveform()
     const container = document.getElementById(`wc-${selectedWord.lineId}-${selectedWord.type}`)
     const chip = container?.children[selectedWord.idx]
@@ -784,6 +1351,7 @@ function updateWordTime(field, val) {
       if (spans[2]) spans[2].textContent = w.end!=null?w.end.toFixed(2):'??'
       chip.classList.toggle('no-time', w.time==null)
     }
+    scheduleSessionSave()
   }
 }
 
@@ -796,14 +1364,32 @@ function setStartNow() {
 function setEndNow() {
   if (!selectedWord) return
   const t = audio.currentTime
+  const target = getWordsForSelection(selectedWord)
+  if (!target) return
+  const { line, words } = target
   document.getElementById('timing-end').value = t.toFixed(3)
   updateWordTime('end', t)
+  const nextIdx = selectedWord.idx + 1
+  if (nextIdx < words.length) {
+    words[nextIdx].time = t
+    syncLineTimingFromWords(line, selectedWord.type)
+    renderLines()
+    renderEditorFull()
+    updateStatus()
+    drawWaveform()
+    selectWord(selectedWord.lineId, nextIdx, selectedWord.type)
+  }
 }
 function updateLineField(field, val) {
   const line = lines.find(l=>l.id===selectedLineId)
   if (!line) return
   const t = parseFloat(val)
-  if (!isNaN(t)) { line[field==='time'?'time':'end']=t; renderLines(); drawWaveform() }
+  if (!isNaN(t)) {
+    line[field==='time'?'time':'end']=t
+    renderLines()
+    drawWaveform()
+    scheduleSessionSave()
+  }
 }
 function setLineFieldNow(field) {
   const line = lines.find(l=>l.id===selectedLineId)
@@ -812,11 +1398,13 @@ function setLineFieldNow(field) {
   const el = document.getElementById(field==='time'?'ls-input':'le-input')
   if (el) el.value = line[field].toFixed(3)
   renderLines(); drawWaveform()
+  scheduleSessionSave()
 }
 function deleteLine(id) {
   lines = lines.filter(l=>l.id!==id)
   if (selectedLineId===id) { selectedLineId=null; selectedWord=null }
   renderAll(); drawWaveform()
+  scheduleSessionSave()
 }
 
 function addVocalLayer(lineId, type) {
@@ -888,6 +1476,34 @@ function setMode(mode) {
   renderPreview(audio.currentTime||0)
 }
 
+function getWordProgress(word, t) {
+  if (!word || word.time == null) return 0
+  const start = word.time
+  const end = word.end != null && word.end > start ? word.end : start + 0.12
+  const raw = clamp((t - start) / (end - start), 0, 1)
+  return 1 - Math.pow(1 - raw, 0.72)
+}
+
+function buildSyncWord(word, className, index, t) {
+  const wrapper = document.createElement('span')
+  wrapper.className = className
+  wrapper.dataset.wi = index
+  const chars = Array.from(word.word || '')
+  const progress = getWordProgress(word, t)
+  const litCount = progress * chars.length
+  chars.forEach((ch, charIndex) => {
+    const char = document.createElement('span')
+    char.className = 'pc'
+    const fill = clamp(litCount - charIndex, 0, 1)
+    if (fill > 0) char.classList.add('lit')
+    char.style.opacity = fill > 0 ? String(0.42 + fill * 0.58) : ''
+    char.textContent = ch
+    wrapper.appendChild(char)
+  })
+  if (progress >= 0.999) wrapper.classList.add('lit')
+  return wrapper
+}
+
 function renderPreview(t) {
   const container = document.getElementById('lyrics-preview')
   container.innerHTML = ''
@@ -902,12 +1518,8 @@ function renderPreview(t) {
     mainDiv.className = 'pline-text'
     if (previewMode==='karaoke') {
       line.words.forEach((w,i) => {
-        const sp = document.createElement('span')
-        const lit = w.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
-        sp.className = 'pw' + (lit?' lit':'')
-        sp.dataset.wi = i
-        sp.textContent = (i>0?' ':'')+w.word
-        mainDiv.appendChild(sp)
+        if (i > 0) mainDiv.appendChild(document.createTextNode(' '))
+        mainDiv.appendChild(buildSyncWord(w, 'pw', i, t))
       })
     } else {
       mainDiv.textContent = line.text
@@ -918,12 +1530,8 @@ function renderPreview(t) {
       const bgDiv = document.createElement('div')
       bgDiv.className = 'pline-bg'
       line.bgWords.forEach((w,i) => {
-        const sp = document.createElement('span')
-        const lit = w.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
-        sp.className = 'pbw' + (lit?' lit':'')
-        sp.dataset.wi = i
-        sp.textContent = (i>0?' ':'')+w.word
-        bgDiv.appendChild(sp)
+        if (i > 0) bgDiv.appendChild(document.createTextNode(' '))
+        bgDiv.appendChild(buildSyncWord(w, 'pbw', i, t))
       })
       div.appendChild(bgDiv)
     } else if (line.bgText) {
@@ -937,12 +1545,8 @@ function renderPreview(t) {
       const duoDiv = document.createElement('div')
       duoDiv.className = 'pline-duo'
       line.duoWords.forEach((w,i) => {
-        const sp = document.createElement('span')
-        const lit = w.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
-        sp.className = 'pdw' + (lit?' lit':'')
-        sp.dataset.wi = i
-        sp.textContent = (i>0?' ':'')+w.word
-        duoDiv.appendChild(sp)
+        if (i > 0) duoDiv.appendChild(document.createTextNode(' '))
+        duoDiv.appendChild(buildSyncWord(w, 'pdw', i, t))
       })
       div.appendChild(duoDiv)
     } else if (line.duoText) {
@@ -968,27 +1572,45 @@ function updatePreviewLive(t) {
     const newClass = `pline ${past&&settings.dimPast?'past':cur?'current':'future'}`
     if (el.className !== newClass) el.className = newClass
 
-    if (cur && previewMode==='karaoke') {
-      if (settings.wordGlowStyle !== 'none') {
-        el.querySelectorAll('.pw').forEach((sp,wi) => {
-          const w = line.words[wi]
-          const lit = w?.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
-          sp.classList.toggle('lit', lit)
+    if (previewMode === 'karaoke') {
+      el.querySelectorAll('.pw').forEach((sp,wi) => {
+        const w = line.words[wi]
+        const progress = settings.wordGlowStyle === 'none' ? 0 : getWordProgress(w, t)
+        const chars = sp.querySelectorAll('.pc')
+        const litCount = progress * chars.length
+        chars.forEach((char, charIndex) => {
+          const fill = clamp(litCount - charIndex, 0, 1)
+          char.classList.toggle('lit', fill > 0)
+          char.style.opacity = fill > 0 ? String(0.42 + fill * 0.58) : ''
         })
-      }
-      if (settings.wordGlowStyle === 'all' || settings.wordGlowStyle === 'both') {
-        el.querySelectorAll('.pbw').forEach((sp,wi) => {
-          const w = line.bgWords?.[wi]
-          const lit = w?.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
-          sp.classList.toggle('lit', lit)
+        sp.classList.toggle('lit', progress >= 0.999)
+      })
+      const allowAlt = settings.wordGlowStyle === 'all' || settings.wordGlowStyle === 'both'
+      el.querySelectorAll('.pbw').forEach((sp,wi) => {
+        const w = line.bgWords?.[wi]
+        const progress = allowAlt ? getWordProgress(w, t) : 0
+        const chars = sp.querySelectorAll('.pc')
+        const litCount = progress * chars.length
+        chars.forEach((char, charIndex) => {
+          const fill = clamp(litCount - charIndex, 0, 1)
+          char.classList.toggle('lit', fill > 0)
+          char.style.opacity = fill > 0 ? String(0.4 + fill * 0.6) : ''
         })
-        el.querySelectorAll('.pdw').forEach((sp,wi) => {
-          const w = line.duoWords?.[wi]
-          const lit = w?.time!=null && t>=w.time && (w.end==null||t<=w.end+0.05)
-          sp.classList.toggle('lit', lit)
+        sp.classList.toggle('lit', progress >= 0.999)
+      })
+      el.querySelectorAll('.pdw').forEach((sp,wi) => {
+        const w = line.duoWords?.[wi]
+        const progress = allowAlt ? getWordProgress(w, t) : 0
+        const chars = sp.querySelectorAll('.pc')
+        const litCount = progress * chars.length
+        chars.forEach((char, charIndex) => {
+          const fill = clamp(litCount - charIndex, 0, 1)
+          char.classList.toggle('lit', fill > 0)
+          char.style.opacity = fill > 0 ? String(0.4 + fill * 0.6) : ''
         })
-      }
-      if (settings.scrollPreview) el.scrollIntoView({behavior:'smooth',block:'center'})
+        sp.classList.toggle('lit', progress >= 0.999)
+      })
+      if (cur && settings.scrollPreview) el.scrollIntoView({behavior:'smooth',block:'center'})
     }
   })
 }
@@ -999,12 +1621,133 @@ let settings = {
   previewFontSize: 17,
   dimPast: true,
   showTimecodes: true,
+  waveformEngine: 'auto',
+  theme: 'dark',
+  themeOverrides: {},
+  showAdvancedTheme: false,
+}
+
+const THEMES = {
+  dark: { name: 'Dark', vars: { '--bg':'#0a0a0a','--surface':'#111111','--surface2':'#181818','--surface3':'#202020','--border':'#2a2a2a','--border2':'#333333','--text':'#e8e8e8','--muted':'#888888','--muted2':'#555555','--accent':'#e8ff57','--red':'#ff5757','--blue':'#57b8ff','--purple':'#7c6aff','--orange':'#ff9f43','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  light: { name: 'Light', vars: { '--bg':'#f5f5f5','--surface':'#ffffff','--surface2':'#fafafa','--surface3':'#f0f0f0','--border':'#e0e0e0','--border2':'#cccccc','--text':'#1a1a1a','--muted':'#666666','--muted2':'#999999','--accent':'#7c6aff','--red':'#e53935','--blue':'#57b8ff','--purple':'#5e35b1','--orange':'#fb8c00','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  midnight: { name: 'Midnight', vars: { '--bg':'#0d1117','--surface':'#161b22','--surface2':'#21262d','--surface3':'#30363d','--border':'#30363d','--border2':'#484f58','--text':'#c9d1d9','--muted':'#8b949e','--muted2':'#6e7681','--accent':'#58a6ff','--red':'#f85149','--blue':'#58a6ff','--purple':'#a371f7','--orange':'#d29922','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  warm: { name: 'Warm', vars: { '--bg':'#1a1410','--surface':'#251c18','--surface2':'#302520','--surface3':'#3d2e28','--border':'#4a3830','--border2':'#5c4640','--text':'#f0e6dc','--muted':'#a89585','--muted2':'#7d6b60','--accent':'#ff9f43','--red':'#e74c3c','--blue':'#57b8ff','--purple':'#9b59b6','--orange':'#e67e22','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  oled: { name: 'OLED', vars: { '--bg':'#000000','--surface':'#0a0a0a','--surface2':'#121212','--surface3':'#1a1a1a','--border':'#222222','--border2':'#2a2a2a','--text':'#ffffff','--muted':'#888888','--muted2':'#555555','--accent':'#e8ff57','--red':'#ff5757','--blue':'#57b8ff','--purple':'#7c6aff','--orange':'#ff9f43','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  ocean: { name: 'Ocean', vars: { '--bg':'#0a1929','--surface':'#0f2744','--surface2':'#14395e','--surface3':'#1a4678','--border':'#1e4d6b','--border2':'#2a5f7f','--text':'#e0f0ff','--muted':'#7aa3c4','--muted2':'#5a7d9e','--accent':'#57b8ff','--red':'#ff5757','--blue':'#57b8ff','--purple':'#7c6aff','--orange':'#ff9f43','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  forest: { name: 'Forest', vars: { '--bg':'#0a1a0a','--surface':'#0f260f','--surface2':'#143214','--surface3':'#1a3d1a','--border':'#1f451f','--border2':'#2a552a','--text':'#e0ffe0','--muted':'#7ac47a','--muted2':'#5a9a5a','--accent':'#57ffd4','--red':'#ff5757','--blue':'#57b8ff','--purple':'#7c6aff','--orange':'#ff9f43','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  cyberpunk: { name: 'Cyberpunk', vars: { '--bg':'#0f0f1a','--surface':'#161625','--surface2':'#1c1c30','--surface3':'#252540','--border':'#2d2d4a','--border2':'#3a3a5e','--text':'#00ffcc','--muted':'#7a7ab0','--muted2':'#4e4e7a','--accent':'#ff00ff','--red':'#ff3e3e','--blue':'#57b8ff','--purple':'#9d4edd','--orange':'#ff9100','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  rosegold: { name: 'Rose Gold', vars: { '--bg':'#1a1718','--surface':'#241e20','--surface2':'#2d2528','--surface3':'#382e32','--border':'#45383c','--border2':'#54454a','--text':'#f5edee','--muted':'#a69296','--muted2':'#7a686c','--accent':'#ffb7c5','--red':'#ff6b6b','--blue':'#57b8ff','--purple':'#d4a5ff','--orange':'#ffb38a','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } },
+  deepContrast: { name: 'Deep Contrast', vars: { '--bg':'#000000','--surface':'#050505','--surface2':'#0a0a0a','--surface3':'#121212','--border':'#404040','--border2':'#666666','--text':'#ffffff','--muted':'#999999','--muted2':'#777777','--accent':'#ffffff','--red':'#ff0000','--blue':'#57b8ff','--purple':'#bf94ff','--orange':'#ffab40','--text-scale':'1','--bg-image':'none','--bg-overlay':'0','--bg-blur':'0px','--bg-size':'cover','--bg-position':'center' } }
+}
+
+const ACCENT_COLORS = [
+  { name:'Theme Default', value:'' },
+  { name:'Lime', value:'#c8ff57' },
+  { name:'Purple', value:'#7c6aff' },
+  { name:'Pink', value:'#ff57c8' },
+  { name:'Orange', value:'#ff9f43' },
+  { name:'Blue', value:'#57b8ff' },
+  { name:'Red', value:'#ff5757' },
+  { name:'Teal', value:'#57ffd4' },
+  { name:'White', value:'#ffffff' },
+  { name:'Yellow', value:'#ffec57' },
+  { name:'Cyan', value:'#57ffec' },
+  { name:'Magenta', value:'#ff57ec' },
+  { name:'Gray', value:'#888888' },
+]
+
+const ADVANCED_THEME_KEYS = ['--bg','--surface','--surface2','--surface3','--border','--border2','--text','--muted','--muted2','--accent','--red','--blue','--purple','--orange']
+
+function isHexColor(v) {
+  return typeof v === 'string' && /^#([0-9a-f]{6})$/i.test(v.trim())
+}
+
+function hexToRgba(hex, alpha) {
+  const value = hex.replace('#', '')
+  const r = parseInt(value.slice(0, 2), 16)
+  const g = parseInt(value.slice(2, 4), 16)
+  const b = parseInt(value.slice(4, 6), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function withAlphaIfHex(value, alpha) {
+  return isHexColor(value) ? hexToRgba(value, alpha) : value
+}
+
+function getThemeBaseVars() {
+  return { ...(THEMES[settings.theme] || THEMES.dark).vars }
+}
+
+function getThemeVars() {
+  return { ...getThemeBaseVars(), ...(settings.themeOverrides || {}) }
+}
+
+function applyDerivedThemeVars(vars) {
+  const hasBgImage = vars['--bg-image'] && vars['--bg-image'] !== 'none'
+  if (isHexColor(vars['--accent'])) {
+    vars['--accent-dim'] = hexToRgba(vars['--accent'], 0.12)
+    vars['--accent-dim2'] = hexToRgba(vars['--accent'], 0.06)
+    vars['--accent-20'] = hexToRgba(vars['--accent'], 0.2)
+    vars['--accent-25'] = hexToRgba(vars['--accent'], 0.25)
+    vars['--accent-30'] = hexToRgba(vars['--accent'], 0.3)
+    vars['--accent-40'] = hexToRgba(vars['--accent'], 0.4)
+    vars['--accent-50'] = hexToRgba(vars['--accent'], 0.5)
+    vars['--accent-70'] = hexToRgba(vars['--accent'], 0.7)
+  }
+  if (isHexColor(vars['--red'])) vars['--red-dim'] = hexToRgba(vars['--red'], 0.12)
+  if (isHexColor(vars['--blue'])) vars['--blue-dim'] = hexToRgba(vars['--blue'], 0.12)
+  if (isHexColor(vars['--purple'])) vars['--purple-dim'] = hexToRgba(vars['--purple'], 0.12)
+  if (isHexColor(vars['--orange'])) vars['--orange-dim'] = hexToRgba(vars['--orange'], 0.12)
+  if (hasBgImage) {
+    vars['--bg'] = withAlphaIfHex(vars['--bg'], 0.72)
+    vars['--surface'] = withAlphaIfHex(vars['--surface'], 0.74)
+    vars['--surface2'] = withAlphaIfHex(vars['--surface2'], 0.78)
+    vars['--surface3'] = withAlphaIfHex(vars['--surface3'], 0.84)
+    vars['--border'] = withAlphaIfHex(vars['--border'], 0.7)
+    vars['--border2'] = withAlphaIfHex(vars['--border2'], 0.8)
+  }
+  return vars
+}
+
+function collectThemeOverridesFromModal() {
+  const nextOverrides = {}
+  const accent = document.getElementById('s-accent')?.value
+  if (accent) nextOverrides['--accent'] = accent
+  const textScale = document.getElementById('s-textscale')?.value
+  if (textScale) nextOverrides['--text-scale'] = textScale
+  const bgImageValue = document.getElementById('s-bg-image')?.value || ''
+  nextOverrides['--bg-image'] = bgImageValue ? `url('${bgImageValue}')` : 'none'
+  nextOverrides['--bg-overlay'] = document.getElementById('s-bg-overlay')?.value || '0'
+  nextOverrides['--bg-blur'] = (document.getElementById('s-bg-blur')?.value || '0') + 'px'
+  nextOverrides['--bg-size'] = document.getElementById('s-bg-size')?.value || 'cover'
+  nextOverrides['--bg-position'] = document.getElementById('s-bg-position')?.value || 'center'
+  document.querySelectorAll('[data-theme-key]').forEach(input => {
+    const key = input.getAttribute('data-theme-key')
+    const value = input.value.trim()
+    if (value) nextOverrides[key] = value
+  })
+  return nextOverrides
+}
+
+function previewThemeFromModal() {
+  settings.theme = document.getElementById('s-theme')?.value || settings.theme
+  settings.themeOverrides = collectThemeOverridesFromModal()
+  applySettings()
+  renderPreview(audio.currentTime||0)
 }
 
 function loadSettings() {
   try {
     const s = localStorage.getItem('ttml-editor-settings')
-    if (s) settings = { ...settings, ...JSON.parse(s) }
+    if (s) {
+      const parsed = JSON.parse(s)
+      settings = {
+        ...settings,
+        ...parsed,
+        themeOverrides: { ...(parsed.themeOverrides || {}) }
+      }
+      if (parsed.textScale && !settings.themeOverrides['--text-scale']) settings.themeOverrides['--text-scale'] = String(parsed.textScale)
+    }
   } catch {}
 }
 
@@ -1013,11 +1756,21 @@ function saveSettings() {
 }
 
 function applySettings() {
+  const root = document.documentElement
+  const vars = applyDerivedThemeVars(getThemeVars())
+  for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v)
   document.querySelectorAll('.pline-text').forEach(el => el.style.fontSize = settings.previewFontSize + 'px')
+  drawWaveform()
 }
 
-function showSettings() {
-  showModal('Settings (Beta)', `
+async function showSettings() {
+  await ensureWaveformSupport()
+  const themeVars = getThemeVars()
+  const selectedAccent = ACCENT_COLORS.find(c => c.value && c.value.toLowerCase() === String(themeVars['--accent'] || '').toLowerCase())?.value || ''
+  const bgImageMatch = String(themeVars['--bg-image'] || '').match(/^url\(['"]?(.+?)['"]?\)$/)
+  const bgImage = bgImageMatch ? bgImageMatch[1] : ''
+  const nativeAvailable = waveformSupport.native === true
+  showModal('Settings', `
     <div class="settings-section">
       <h4>Preview</h4>
       <div class="settings-row">
@@ -1055,21 +1808,187 @@ function showSettings() {
         <div><div>Show timecodes on chips</div><div class="desc">Show start/end times below each word</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-timecodes" ${settings.showTimecodes?'checked':''}><div class="toggle-track"></div></label>
       </div>
+      <div class="settings-row">
+        <div><div>Waveform backend</div><div class="desc">Choose how the waveform gets generated</div></div>
+        <select class="settings-select" id="s-waveform-engine">
+          <option value="auto" ${getWaveformEngine()==='auto'?'selected':''}>Auto</option>
+          <option value="native" ${getWaveformEngine()==='native'?'selected':''}>Native</option>
+          <option value="browser" ${getWaveformEngine()==='browser'?'selected':''}>Browser</option>
+        </select>
+      </div>
+      <div class="settings-note"><strong>${nativeAvailable ? 'Native decoder found.' : 'Native decoder not found.'}</strong> Auto prefers the main-process decoder when it is available and falls back to browser decoding otherwise.</div>
     </div>
-    <div style="font-size:11px;color:var(--muted2);padding-top:4px">Settings are saved locally in your browser.</div>
+    <div class="settings-section">
+      <h4>Theme</h4>
+      <div class="mf">
+        <label>Preset</label>
+        <div class="settings-grid">
+          ${Object.entries(THEMES).map(([key, theme]) => `
+            <button type="button" class="theme-option ${settings.theme===key?'active':''}" data-theme-option="${key}">
+              <div class="theme-option-name">${theme.name}</div>
+              <div class="theme-swatches">
+                <span style="background:${theme.vars['--bg']}"></span>
+                <span style="background:${theme.vars['--surface2']}"></span>
+                <span style="background:${theme.vars['--accent']}"></span>
+                <span style="background:${theme.vars['--text']}"></span>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+        <input type="hidden" id="s-theme" value="${settings.theme}">
+      </div>
+      <div class="settings-row">
+        <div><div>Accent color</div><div class="desc">Pick a highlight color for buttons, focus states, and playback accents</div></div>
+        <select class="settings-select" id="s-accent">
+          ${ACCENT_COLORS.map(color => `<option value="${color.value}" ${selectedAccent===color.value?'selected':''}>${color.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mf">
+        <label>Text Scale</label>
+        <input class="settings-range" id="s-textscale" type="range" min="0.7" max="1.5" step="0.05" value="${themeVars['--text-scale'] || '1'}">
+        <div class="desc" id="s-textscale-label">${Math.round(parseFloat(themeVars['--text-scale'] || '1') * 100)}%</div>
+      </div>
+      <div class="settings-row">
+        <div><div>Custom background</div><div class="desc">Apply an image across the whole editor</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="mbtn" type="button" id="s-bg-upload">Upload</button>
+          <button class="mbtn" type="button" id="s-bg-clear" ${bgImage?'':'disabled'}>Clear</button>
+        </div>
+      </div>
+      <input type="file" id="s-bg-file" accept="image/*" class="settings-hidden">
+      <input type="hidden" id="s-bg-image" value="${esc(bgImage)}">
+      <div class="bg-preview" id="s-bg-preview" style="${bgImage?`background-image:url('${esc(bgImage)}')`:'background-image:none'}"></div>
+      <div class="settings-split" style="margin-top:10px">
+        <div class="mf">
+          <label>Overlay</label>
+          <input class="settings-range" id="s-bg-overlay" type="range" min="0" max="1" step="0.05" value="${themeVars['--bg-overlay'] || '0'}">
+        </div>
+        <div class="mf">
+          <label>Blur</label>
+          <input class="settings-range" id="s-bg-blur" type="range" min="0" max="24" step="1" value="${parseInt(themeVars['--bg-blur'] || '0', 10) || 0}">
+        </div>
+      </div>
+      <div class="settings-split">
+        <div class="mf">
+          <label>Fit</label>
+          <select class="settings-select" id="s-bg-size">
+            <option value="cover" ${(themeVars['--bg-size']||'cover')==='cover'?'selected':''}>Cover</option>
+            <option value="contain" ${(themeVars['--bg-size']||'cover')==='contain'?'selected':''}>Contain</option>
+            <option value="auto" ${(themeVars['--bg-size']||'cover')==='auto'?'selected':''}>Auto</option>
+          </select>
+        </div>
+        <div class="mf">
+          <label>Position</label>
+          <select class="settings-select" id="s-bg-position">
+            <option value="center" ${(themeVars['--bg-position']||'center')==='center'?'selected':''}>Center</option>
+            <option value="top" ${(themeVars['--bg-position']||'center')==='top'?'selected':''}>Top</option>
+            <option value="bottom" ${(themeVars['--bg-position']||'center')==='bottom'?'selected':''}>Bottom</option>
+            <option value="left" ${(themeVars['--bg-position']||'center')==='left'?'selected':''}>Left</option>
+            <option value="right" ${(themeVars['--bg-position']||'center')==='right'?'selected':''}>Right</option>
+          </select>
+        </div>
+      </div>
+      <div class="mf">
+        <button class="mbtn" type="button" id="s-advanced-toggle">${settings.showAdvancedTheme ? 'Hide' : 'Show'} Advanced Overrides</button>
+      </div>
+      <div id="s-advanced-wrap" class="${settings.showAdvancedTheme ? '' : 'settings-hidden'}">
+        ${ADVANCED_THEME_KEYS.map(key => `
+          <div class="settings-row">
+            <div><div class="settings-code">${key}</div><div class="desc">Base theme variable override</div></div>
+            <input class="mi settings-code" data-theme-key="${key}" value="${esc(settings.themeOverrides[key] ?? '')}" placeholder="${esc((THEMES[settings.theme] || THEMES.dark).vars[key] || '')}">
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="settings-note">Theme settings are saved locally in your browser.</div>
   `, [
-    { label: 'Close', fn: () => {
+    { label: 'Reset Theme', fn: () => {
+      settings.theme = 'dark'
+      settings.themeOverrides = {}
+      settings.showAdvancedTheme = false
+      saveSettings()
+      applySettings()
+      closeModal()
+      renderPreview(audio.currentTime||0)
+    }},
+    { label: 'Save', primary:true, fn: () => {
+      const prevWaveformEngine = settings.waveformEngine
       settings.previewFontSize = parseInt(document.getElementById('s-fontsize').value)
       settings.scrollPreview = document.getElementById('s-scroll').checked
       settings.dimPast = document.getElementById('s-dim').checked
       settings.wordGlowStyle = document.getElementById('s-glow').value
       settings.showTimecodes = document.getElementById('s-timecodes').checked
+      settings.waveformEngine = document.getElementById('s-waveform-engine').value || 'auto'
+      settings.theme = document.getElementById('s-theme').value || 'dark'
+      settings.showAdvancedTheme = !document.getElementById('s-advanced-wrap').classList.contains('settings-hidden')
+      settings.themeOverrides = collectThemeOverridesFromModal()
       saveSettings()
       applySettings()
       closeModal()
       renderPreview(audio.currentTime||0)
+      if (currentAudioPath && prevWaveformEngine !== settings.waveformEngine) {
+        const loadingToken = showLoadingModal('Refreshing Waveform', 'Rebuilding the waveform with the selected backend...')
+        loadWaveformPeaks(currentAudioPath)
+          .catch(err => showRuntimeError(`Waveform refresh failed: ${err?.message || err}`))
+          .finally(() => hideLoadingModal(loadingToken))
+      }
     }}
   ])
+  const themeInput = document.getElementById('s-theme')
+  document.querySelectorAll('[data-theme-option]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      themeInput.value = btn.getAttribute('data-theme-option')
+      document.querySelectorAll('[data-theme-option]').forEach(el => el.classList.toggle('active', el === btn))
+      previewThemeFromModal()
+    })
+  })
+  const scaleInput = document.getElementById('s-textscale')
+  scaleInput.addEventListener('input', () => {
+    document.getElementById('s-textscale-label').textContent = Math.round(parseFloat(scaleInput.value) * 100) + '%'
+    previewThemeFromModal()
+  })
+  const bgFile = document.getElementById('s-bg-file')
+  const bgInput = document.getElementById('s-bg-image')
+  const bgPreview = document.getElementById('s-bg-preview')
+  const bgClear = document.getElementById('s-bg-clear')
+  document.getElementById('s-bg-upload').addEventListener('click', () => bgFile.click())
+  bgFile.addEventListener('change', () => {
+    const file = bgFile.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      bgInput.value = typeof reader.result === 'string' ? reader.result : ''
+      bgPreview.style.backgroundImage = bgInput.value ? `url('${bgInput.value}')` : 'none'
+      bgClear.disabled = !bgInput.value
+      previewThemeFromModal()
+    }
+    reader.readAsDataURL(file)
+  })
+  bgClear.addEventListener('click', () => {
+    bgInput.value = ''
+    bgPreview.style.backgroundImage = 'none'
+    bgClear.disabled = true
+    bgFile.value = ''
+    previewThemeFromModal()
+  })
+  const syncBgPreview = () => {
+    bgPreview.style.backgroundSize = document.getElementById('s-bg-size').value
+    bgPreview.style.backgroundPosition = document.getElementById('s-bg-position').value
+    previewThemeFromModal()
+  }
+  document.getElementById('s-bg-size').addEventListener('change', syncBgPreview)
+  document.getElementById('s-bg-position').addEventListener('change', syncBgPreview)
+  document.getElementById('s-accent').addEventListener('change', previewThemeFromModal)
+  document.getElementById('s-bg-overlay').addEventListener('input', previewThemeFromModal)
+  document.getElementById('s-bg-blur').addEventListener('input', previewThemeFromModal)
+  document.querySelectorAll('[data-theme-key]').forEach(input => {
+    input.addEventListener('input', previewThemeFromModal)
+  })
+  const advancedWrap = document.getElementById('s-advanced-wrap')
+  document.getElementById('s-advanced-toggle').addEventListener('click', () => {
+    advancedWrap.classList.toggle('settings-hidden')
+    document.getElementById('s-advanced-toggle').textContent = advancedWrap.classList.contains('settings-hidden') ? 'Show Advanced Overrides' : 'Hide Advanced Overrides'
+  })
 }
 
 function exportTTML() {
@@ -1115,7 +2034,7 @@ function sortLines() {
   lines.sort((a,b)=>(a.time??Infinity)-(b.time??Infinity))
   renderAll()
 }
-function filterLines(val) { filterText=val; renderLines() }
+function filterLines(val) { filterText=val; renderLines(); scheduleSessionSave() }
 function updateStatus() {
   document.getElementById('sb-lines').textContent = lines.length
   let timed=0, missing=0
@@ -1125,11 +2044,13 @@ function updateStatus() {
 }
 
 function showModal(title, bodyHtml, buttons) {
+  const opts = arguments[3] || {}
+  document.getElementById('modal').dataset.locked = opts.locked ? 'true' : 'false'
   document.getElementById('modal-title').textContent = title
   document.getElementById('modal-body').innerHTML = bodyHtml
   const acts = document.getElementById('modal-actions')
   acts.innerHTML = ''
-  for (const b of buttons) {
+  for (const b of (buttons || [])) {
     const btn = document.createElement('button')
     btn.className = 'mbtn'+(b.primary?' primary':'')
     btn.textContent = b.label
@@ -1138,9 +2059,53 @@ function showModal(title, bodyHtml, buttons) {
   }
   document.getElementById('modal-overlay').classList.remove('hidden')
 }
-function closeModal() { document.getElementById('modal-overlay').classList.add('hidden') }
+function closeModal() {
+  const modal = document.getElementById('modal')
+  if (modal.dataset.locked === 'true') return
+  modal.dataset.locked = 'false'
+  document.getElementById('modal-overlay').classList.add('hidden')
+}
+function forceCloseModal() {
+  const modal = document.getElementById('modal')
+  modal.dataset.locked = 'false'
+  document.getElementById('modal-overlay').classList.add('hidden')
+}
 document.getElementById('modal-overlay').addEventListener('mousedown', e => {
   if (e.target===document.getElementById('modal-overlay')) closeModal()
+})
+
+document.getElementById('wc-min').addEventListener('click', () => window.api.minimizeWindow?.())
+document.getElementById('wc-max').addEventListener('click', async () => {
+  try {
+    const maximized = await window.api.toggleMaximizeWindow?.()
+    setWindowMaximizedState(maximized)
+  } catch {}
+})
+document.getElementById('wc-close').addEventListener('click', () => window.api.closeWindow?.())
+window.api.onWindowMaximized?.(setWindowMaximizedState)
+updateWindowControls()
+document.getElementById('error-log-close').addEventListener('click', () => {
+  document.getElementById('error-log').classList.remove('visible')
+  document.getElementById('error-log-text').textContent = ''
+})
+
+document.getElementById('waveform-area').addEventListener('wheel', handleWaveformWheel, { passive: false })
+document.getElementById('prog-track').addEventListener('wheel', handleProgressWheel, { passive: false })
+window.addEventListener('resize', () => drawWaveform())
+window.addEventListener('beforeunload', saveSessionNow)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) saveSessionNow()
+})
+window.addEventListener('error', (event) => {
+  showRuntimeError(`${event.message || 'Unhandled error'}${event.filename ? `\n${event.filename}:${event.lineno || 0}:${event.colno || 0}` : ''}`)
+})
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason
+  showRuntimeError(`Unhandled rejection: ${reason?.stack || reason?.message || reason}`)
+})
+audio.addEventListener('error', () => {
+  const mediaError = audio.error
+  showRuntimeError(`Audio element error${mediaError ? ` (code ${mediaError.code})` : ''}`)
 })
 
 document.addEventListener('keydown', e => {
@@ -1162,5 +2127,10 @@ document.addEventListener('keydown', e => {
 })
 
 loadSettings()
-renderAll()
+applySettings()
+restoreSession().finally(() => {
+  renderAll()
+  drawWaveform()
+  if (selectedWord) selectWord(selectedWord.lineId, selectedWord.idx, selectedWord.type)
+})
 </script>
