@@ -11,7 +11,7 @@ A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating 
 
 - Pulls lyrics automatically from **LRCLIB.net** by title + artist
 - Import existing `.lrc`, `.ttml`, or `.txt` files
-- Edit word-by-word timing by ear — press S to set a word's start, E to set its end
+- Edit word-by-word timing by ear: press S to set a word's start, E to set its end
 - Supports **background vocals** (`x-bg`) and **duo / harmony** lines (`x-alt`) per line
 - Live karaoke preview that lights up words as they pass
 - Exports valid TTML that Lokal and other compatible players can read
