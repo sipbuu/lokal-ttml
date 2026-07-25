@@ -1964,7 +1964,7 @@ function editWordsText(lineId, type) {
   if (!line) return
   const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
   const current = joinWordsForEditing(words)
-  showModal('Edit Words', `<div class="mf"><label>Words with timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea><div class="desc" style="margin-top:6px">Tip: use "\\" to split a word into connected sections with independent timing, e.g. "bed\\room". Existing splits show up here as "\\" too, and you can remove one to merge that split back together.</div></div>`, [
+   showModal('Edit Words', `<div class="mf"><label>Words with timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea><div class="desc" style="margin-top:6px">Tip: use "\\" to split a word into connected sections with independent timing, e.g. "bed\\room". Existing splits show up here as "\\" too, and you can remove one to merge that split back together.</div></div>`, [
     {label:'Cancel',fn:closeModal},
     {label:'Update',primary:true,fn:()=>{
       const raw = document.getElementById('ew-text').value
@@ -2200,12 +2200,12 @@ let settings = {
   previewFontSize: 17,
   dimPast: true,
   showTimecodes: true,
-  colorWordMarkers: false,
+  colorWordMarkers: true,
   preserveTimingOnWordSplit: true,
-  autoScrollWaveform: true,
+  autoScrollWaveform: false,
   syncMatchingLinePacing: false,
   spicyLyricsPrep: true,
-  autoCorrectWordTimings: false,
+  autoCorrectWordTimings: true,
   waveformEngine: 'auto',
   theme: 'dark',
   themeOverrides: {},
@@ -2747,7 +2747,7 @@ function lrcLineText(line) {
 
 function exportLRC() {
   const timed = lines.filter(l => l.time != null).sort((a,b) => a.time - b.time)
-  if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
+   if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
   let out = ''
   for (const line of timed) out += `[${fmtLRCTime(line.time)}]${lrcLineText(line)}\n`
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.lrc'
