@@ -3,7 +3,7 @@
 ![icon](https://i.imgur.com/3Id3RPj.png)
 ![kuro!!!](https://i.imgur.com/3LoTeml.png)
 
-A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating and editing TTML lyric files with word-level timing. Made to make files compatible with Lokal Music's synced lyrics system, and any other software that supports TTML.
+A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating and editing TTML lyric files with word-level timing. Made to make files compatible with Lokal Music's synced lyrics system, and any program that supports TTML. (like Spicy Lyrics)
 
 ---
 
@@ -11,8 +11,8 @@ A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating 
 
 - Pulls lyrics automatically from **LRCLIB.net** by title + artist
 - Import existing `.lrc`, `.ttml`, or `.txt` files
-- Edit word-by-word timing by ear: press S to set a word's start, E to set its end
-- Supports **background vocals** (`x-bg`) and **duo / harmony** lines (`x-alt`) per line
+- Edit word-by-word timing by ear: press S to set a word's start, E to set its end, with estimated timing happening after each change.
+- Supports **background vocals** (`x-bg`) and **duo / harmony** lines per line
 - Live karaoke preview that lights up words as they pass
 - Exports valid TTML that Lokal and other compatible players can read
 
@@ -78,12 +78,14 @@ Both `x-bg` and `x-alt` are parsed correctly by Lokal.
 
 ## Tips
 
+- Look into settings to tune the settings to your needs, especially if you're using this tool for Spicy Lyrics, or any other "community-upload" TTML service.
 - If LRCLIB returns synced lyrics, word timings are pre-estimated from line timings, you'll want to likely fine-tune them
 - If it returns plain lyrics, all words start with no timing, work through each line with the S/E keys
 - The waveform bar at the top shows green markers for each line's start position so it's easier to track
 - Double-clicking a word chip in the editor jumps the audio to that word's start so you can re-sync it
 - The status bar at the bottom shows how many words are still missing timing
-
+- Each word chip in a line section is highlighted for ease of use.
+- Estimation will attempt to match the song to the line length, and will work around your words to improve syncing.
 ---
 
 ## Importing into Lokal
