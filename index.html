@@ -156,6 +156,38 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .pline-bg .pbw{opacity:.6}
 .pline-duo .pdw{opacity:.6}
 
+#lyrics-preview.apple-mode{gap:20px;padding:24px 20px}
+.am-line{padding:4px 2px;border-radius:6px;transition:opacity .4s ease,filter .4s ease}
+.am-line.preview-seekable{cursor:pointer}
+.am-line.preview-seekable:hover{background:var(--accent-dim2)}
+.am-line.preview-hover{background:var(--accent-dim);outline:1px solid var(--accent-25)}
+.am-line.past{opacity:.22;filter:blur(1.4px)}
+.am-line.current{opacity:1;filter:blur(0)}
+.am-line.future{opacity:.4;filter:blur(.5px)}
+.am-row{display:flex;align-items:baseline;justify-content:space-between;gap:18px;transform-origin:left center;transition:transform .48s cubic-bezier(0.175,0.885,0.32,1.275)}
+.am-line.current .am-row{transform:scale(1.045)}
+.am-main{font-size:22px;font-weight:800;line-height:1.35;color:var(--text);letter-spacing:-.01em;flex:1}
+.am-duo{font-size:16px;font-weight:700;line-height:1.35;color:var(--orange);text-align:right;opacity:.85;flex-shrink:0;max-width:45%}
+.am-bg{font-size:13px;font-weight:600;color:var(--purple);opacity:.65;margin-top:4px}
+.am-bg::before{content:'('}
+.am-bg::after{content:')'}
+.am-word{display:inline-block}
+.am-char{display:inline-block;color:var(--muted);opacity:calc(0.3 + var(--fill,0) * 0.7);transition:opacity .1s linear,color .12s linear,transform .18s cubic-bezier(0.34,1.56,0.64,1)}
+.am-char.lit{color:inherit}
+.am-word.singing{animation:am-word-pulse 1s ease-in-out infinite}
+.am-word.am-wave .am-char.active{transform:translateY(calc(var(--fill,0) * -4px)) scale(calc(1 + var(--fill,0) * 0.12));color:var(--accent);text-shadow:0 0 10px var(--accent-40)}
+.am-word.am-fill .am-char.active{color:var(--accent)}
+.am-duo .am-word.singing{animation:am-word-pulse-duo 1s ease-in-out infinite}
+.am-duo .am-char.lit{color:var(--orange)}
+.am-bgword .am-char.lit{color:var(--purple)}
+@keyframes am-word-pulse{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 16px var(--accent-40)}}
+@keyframes am-word-pulse-duo{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 14px rgba(255,170,87,.5)}}
+.am-dots{display:flex;gap:6px;padding:6px 4px;opacity:.3;transition:opacity .3s}
+.am-dots.active{opacity:1}
+.am-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);transition:background .2s,transform .2s}
+.am-dot.lit{background:var(--accent);animation:am-dot-bounce .5s ease}
+@keyframes am-dot-bounce{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+
 #transport{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
 #play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 #play-btn:hover{background:var(--accent);filter:brightness(1.08);transform:scale(1.05)}
@@ -353,6 +385,8 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
         <div style="display:flex;gap:4px">
           <button class="mode-btn active" id="mode-kara" onclick="setMode('karaoke')">Karaoke</button>
           <button class="mode-btn" id="mode-plain" onclick="setMode('plain')">Plain</button>
+          <div class="tb-sep"></div>
+          <button class="mode-btn" id="mode-apple" onclick="togglePreviewStyle()" title="Apple Music-style animated preview">Preview Style</button>
         </div>
       </div>
       <div id="preview-body">
@@ -1991,7 +2025,7 @@ function editWordsText(lineId, type) {
   if (!line) return
   const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
   const current = joinWordsForEditing(words)
-   showModal('Edit Words', `<div class="mf"><label>Words with timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea><div class="desc" style="margin-top:6px">Tip: use "\\" to split a word into connected sections with independent timing, e.g. "bed\\room". Existing splits show up here as "\\" too, and you can remove one to merge that split back together.</div></div>`, [
+  showModal('Edit Words', `<div class="mf"><label>Words with timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea><div class="desc" style="margin-top:6px">Tip: use "\\" to split a word into connected sections with independent timing, e.g. "bed\\room". Existing splits show up here as "\\" too, and you can remove one to merge that split back together.</div></div>`, [
     {label:'Cancel',fn:closeModal},
     {label:'Update',primary:true,fn:()=>{
       const raw = document.getElementById('ew-text').value
@@ -2102,7 +2136,7 @@ function buildSyncWord(word, className, index, t, type = 'main') {
   return wrapper
 }
 
-function renderPreview(t) {
+function renderPreviewLightweight(t) {
   const container = document.getElementById('lyrics-preview')
   container.innerHTML = ''
   for (const line of lines) {
@@ -2166,7 +2200,7 @@ function renderPreview(t) {
   }
 }
 
-function updatePreviewLive(t) {
+function updatePreviewLiveLightweight(t) {
   const plines = document.querySelectorAll('.pline')
   plines.forEach((el, i) => {
     if (i>=lines.length) return
@@ -2221,6 +2255,176 @@ function updatePreviewLive(t) {
   })
 }
 
+function renderPreview(t) {
+  if (settings.previewStyle === 'apple') renderPreviewApple(t)
+  else renderPreviewLightweight(t)
+}
+
+function updatePreviewLive(t) {
+  if (settings.previewStyle === 'apple') updatePreviewLiveApple(t)
+  else updatePreviewLiveLightweight(t)
+}
+
+const HELD_WORD_THRESHOLD = 0.55
+const PAUSE_DOTS_THRESHOLD = 3
+
+function measureCharFractions(wrapper) {
+  const chars = wrapper.querySelectorAll('.am-char')
+  const widths = Array.from(chars).map(c => c.offsetWidth || 1)
+  const total = widths.reduce((a,b)=>a+b,0) || 1
+  let cum = 0
+  wrapper._charFractions = widths.map(w => {
+    const start = cum / total
+    cum += w
+    return { start, end: cum / total }
+  })
+}
+
+function applyWordFill(wrapper, t) {
+  const word = wrapper._wordData
+  const progress = getWordProgress(word, t)
+  const chars = wrapper.querySelectorAll('.am-char')
+  const fractions = wrapper._charFractions
+  chars.forEach((char, ci) => {
+    const frac = fractions?.[ci] || { start: ci/chars.length, end: (ci+1)/chars.length }
+    const span = Math.max(0.0001, frac.end - frac.start)
+    const fill = clamp((progress - frac.start) / span, 0, 1)
+    char.style.setProperty('--fill', fill.toFixed(3))
+    char.classList.toggle('lit', fill > 0.001)
+    char.classList.toggle('active', fill > 0.02 && fill < 0.98)
+  })
+  wrapper.classList.toggle('singing', progress > 0 && progress < 1)
+  wrapper.classList.toggle('lit', progress >= 0.999)
+}
+
+function buildAppleWord(word, className, index, type) {
+  const wrapper = document.createElement('span')
+  wrapper.className = className
+  wrapper.dataset.wi = index
+  applyWordColor(wrapper, index, type)
+  const dur = word?.time!=null && word?.end!=null ? word.end - word.time : 0
+  const held = dur >= HELD_WORD_THRESHOLD
+  wrapper.classList.add(held ? 'am-wave' : 'am-fill')
+  wrapper._wordData = word
+  Array.from(word?.word || '').forEach(ch => {
+    const char = document.createElement('span')
+    char.className = 'am-char'
+    char.style.setProperty('--fill', '0')
+    char.textContent = ch
+    wrapper.appendChild(char)
+  })
+  return wrapper
+}
+
+function appendAppleWords(container, words, className, type) {
+  words.forEach((w,i) => {
+    if (i > 0 && !w.tight) container.appendChild(document.createTextNode(' '))
+    container.appendChild(buildAppleWord(w, className, i, type))
+  })
+}
+
+function renderPreviewApple(t) {
+  const container = document.getElementById('lyrics-preview')
+  container.classList.add('apple-mode')
+  container.innerHTML = ''
+  const timedLines = lines.filter(l => l.time != null)
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li]
+    const effEnd = effectiveEnd(line)
+    const past = effEnd > 0 && t > effEnd
+    const cur = line.time!=null && t>=line.time && !past
+    const div = document.createElement('div')
+    div.className = `am-line preview-seekable ${past?'past':cur?'current':'future'}`
+    div.dataset.lineId = line.id
+    div.addEventListener('mouseenter', () => div.classList.add('preview-hover'))
+    div.addEventListener('mouseleave', () => div.classList.remove('preview-hover'))
+    div.addEventListener('click', () => { selectLine(line.id); seekToLine(line, false) })
+
+    const row = document.createElement('div')
+    row.className = 'am-row'
+    const mainDiv = document.createElement('div')
+    mainDiv.className = 'am-main'
+    appendAppleWords(mainDiv, line.words, 'am-word', 'main')
+    row.appendChild(mainDiv)
+
+    if (line.duoWords?.length) {
+      const duoDiv = document.createElement('div')
+      duoDiv.className = 'am-duo'
+      appendAppleWords(duoDiv, line.duoWords, 'am-word', 'duo')
+      row.appendChild(duoDiv)
+    } else if (line.duoText) {
+      const duoDiv = document.createElement('div')
+      duoDiv.className = 'am-duo'
+      duoDiv.textContent = line.duoText
+      row.appendChild(duoDiv)
+    }
+    div.appendChild(row)
+
+    if (line.bgWords?.length) {
+      const bgDiv = document.createElement('div')
+      bgDiv.className = 'am-bg'
+      appendAppleWords(bgDiv, line.bgWords, 'am-word am-bgword', 'bg')
+      div.appendChild(bgDiv)
+    } else if (line.bgText) {
+      const bgDiv = document.createElement('div')
+      bgDiv.className = 'am-bg'
+      bgDiv.textContent = line.bgText
+      div.appendChild(bgDiv)
+    }
+
+    container.appendChild(div)
+    // measure real rendered character widths now that the words are laid out in the live DOM,
+    // then do an immediate fill pass so the first paint already reflects proportional timing
+    div.querySelectorAll('.am-word').forEach(w => { measureCharFractions(w); applyWordFill(w, t) })
+    if (cur && settings.scrollPreview) setTimeout(()=>div.scrollIntoView({behavior:'smooth',block:'center'}),0)
+
+    const nextTimed = timedLines.find(l => l.time > (line.time ?? -Infinity))
+    if (nextTimed && line.time != null) {
+      const gapStart = effEnd
+      const gapEnd = nextTimed.time
+      if (gapEnd - gapStart >= PAUSE_DOTS_THRESHOLD) {
+        const dots = document.createElement('div')
+        dots.className = 'am-dots'
+        dots.dataset.start = gapStart
+        dots.dataset.end = gapEnd
+        for (let d = 0; d < 3; d++) {
+          const dot = document.createElement('span')
+          dot.className = 'am-dot'
+          dots.appendChild(dot)
+        }
+        container.appendChild(dots)
+      }
+    }
+  }
+}
+
+function updatePreviewLiveApple(t) {
+  document.querySelectorAll('.am-line').forEach((el, i) => {
+    if (i>=lines.length) return
+    const line = lines[i]
+    const effEnd = effectiveEnd(line)
+    const past = effEnd > 0 && t > effEnd
+    const cur = line.time!=null && t>=line.time && !past
+    const hover = el.classList.contains('preview-hover')
+    const newClass = `am-line preview-seekable ${hover?'preview-hover ':''}${past&&settings.dimPast?'past':cur?'current':'future'}`
+    if (el.className !== newClass) el.className = newClass
+
+    el.querySelectorAll('.am-word').forEach(w => applyWordFill(w, t))
+
+    if (cur && settings.scrollPreview) el.scrollIntoView({behavior:'smooth',block:'center'})
+  })
+
+  document.querySelectorAll('.am-dots').forEach(el => {
+    const start = parseFloat(el.dataset.start), end = parseFloat(el.dataset.end)
+    const active = t >= start && t <= end
+    el.classList.toggle('active', active)
+    const progress = clamp((t - start) / Math.max(0.01, end - start), 0, 1)
+    el.querySelectorAll('.am-dot').forEach((dot, i) => {
+      dot.classList.toggle('lit', active && progress >= (i+1)/3 - 0.02)
+    })
+  })
+}
+
 let settings = {
   scrollPreview: true,
   wordGlowStyle: 'both',
@@ -2228,6 +2432,7 @@ let settings = {
   dimPast: true,
   showTimecodes: true,
   colorWordMarkers: true,
+  previewStyle: 'lightweight',
   preserveTimingOnWordSplit: true,
   autoScrollWaveform: false,
   syncMatchingLinePacing: false,
@@ -2372,7 +2577,22 @@ function applySettings() {
   const vars = applyDerivedThemeVars(getThemeVars())
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v)
   document.querySelectorAll('.pline-text').forEach(el => el.style.fontSize = settings.previewFontSize + 'px')
+  syncPreviewStyleButton()
   drawWaveform()
+}
+
+function syncPreviewStyleButton() {
+  const btn = document.getElementById('mode-apple')
+  if (btn) btn.className = 'mode-btn' + (settings.previewStyle==='apple' ? ' active' : '')
+  const container = document.getElementById('lyrics-preview')
+  if (container) container.classList.toggle('apple-mode', settings.previewStyle==='apple')
+}
+
+function togglePreviewStyle() {
+  settings.previewStyle = settings.previewStyle === 'apple' ? 'lightweight' : 'apple'
+  saveSettings()
+  syncPreviewStyleButton()
+  renderPreview(audio.currentTime||0)
 }
 
 async function showSettings() {
@@ -2417,7 +2637,14 @@ async function showSettings() {
     <div class="settings-section">
       <h4>Editor</h4>
       <div class="settings-row">
-        <div><div>Auto-scroll waveform during playback</div><div class="desc">Recenter the waveform view on the playhead when it nears the edge while playing. Turn off to stay put where you're editing, you can still click the progress bar to jump the view manually</div></div>
+        <div><div>Live preview style</div><div class="desc">Lightweight is fast and simple. Preview-style adds animated word pulses, letter-by-letter waves for held words, right-aligned duo vocals, and pause dots, closer to how it'll look in a real lyrics app.</div></div>
+        <select id="s-preview-style" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px">
+          <option value="lightweight" ${settings.previewStyle!=='apple'?'selected':''}>Lightweight</option>
+          <option value="apple" ${settings.previewStyle==='apple'?'selected':''}>Preview-style</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div><div>Auto-scroll waveform during playback</div><div class="desc">Recenter the waveform view on the playhead when it nears the edge while playing. Turn off to stay put where you're editing — you can still click the progress bar to jump the view manually</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-autoscroll-waveform" ${settings.autoScrollWaveform!==false?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
@@ -2425,7 +2652,7 @@ async function showSettings() {
         <label class="settings-toggle"><input type="checkbox" id="s-preserve-split-timing" ${settings.preserveTimingOnWordSplit!==false?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
-        <div><div>Sync pacing across matching lines</div><div class="desc">If a line's words/bg/duo exactly match another line (e.g. a repeated chorus), retiming one propagates the same relative word pacing to the others, only when word counts match, and each line keeps its own start/end</div></div>
+        <div><div>Sync pacing across matching lines</div><div class="desc">If a line's words/bg/duo exactly match another line (e.g. a repeated chorus), retiming one propagates the same relative word pacing to the others — only when word counts match, and each line keeps its own start/end</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-sync-matching-lines" ${settings.syncMatchingLinePacing?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
@@ -2556,6 +2783,7 @@ async function showSettings() {
       settings.wordGlowStyle = document.getElementById('s-glow').value
       settings.showTimecodes = document.getElementById('s-timecodes').checked
       settings.colorWordMarkers = document.getElementById('s-color-words').checked
+      settings.previewStyle = document.getElementById('s-preview-style').value
       settings.preserveTimingOnWordSplit = document.getElementById('s-preserve-split-timing').checked
       settings.autoScrollWaveform = document.getElementById('s-autoscroll-waveform').checked
       settings.syncMatchingLinePacing = document.getElementById('s-sync-matching-lines').checked
@@ -2774,7 +3002,7 @@ function lrcLineText(line) {
 
 function exportLRC() {
   const timed = lines.filter(l => l.time != null).sort((a,b) => a.time - b.time)
-   if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
+  if (!timed.length) { showRuntimeError('No timed lines to export — add line timing first.'); return }
   let out = ''
   for (const line of timed) out += `[${fmtLRCTime(line.time)}]${lrcLineText(line)}\n`
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.lrc'
@@ -2786,7 +3014,6 @@ function exportLRC() {
     showModal('Saved!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(fileName)}</strong><div class="es-path">${esc(dir)}</div><div class="es-note">Plain line-synced LRC, ready to submit to LRCLIB alongside your word-synced TTML.</div></div>`, [{label:'Close',fn:closeModal}])
   })
 }
-
 
 function sortLines() {
   lines.sort((a,b)=>(a.time??Infinity)-(b.time??Infinity))
