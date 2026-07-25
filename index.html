@@ -1500,13 +1500,13 @@ function parseTTML(xml) {
       const tightNext = prevEnd!=null && !/\s/.test(gapBetween) && !prevHadTrailingSpace
       const hasTrailingSpace = raw.endsWith(' ')
       if (!hasTrailingSpace && trimmed.indexOf(' ') === -1) {
-        words.push({word:trimmed, time:st, end:en, tight:tightNext})
+        words.push({word:trimmed, time:st, end:en, tight:tightNext, timingEdited:true})
       } else {
         const pieces = splitWords(trimmed)
-        if (pieces.length === 1) { words.push({word:pieces[0],time:st,end:en,tight:tightNext}) }
+        if (pieces.length === 1) { words.push({word:pieces[0],time:st,end:en,tight:tightNext,timingEdited:true}) }
         else {
           const dur = Math.max(0.001,(en?en-st:pieces.length*0.3))
-          pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length),tight:pi===0?tightNext:false}))
+          pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length),tight:pi===0?tightNext:false,timingEdited:true}))
         }
       }
       prevHadTrailingSpace = hasTrailingSpace
