@@ -1,4 +1,3 @@
-* Compatible with Spicy Lyrics (i've used it myself)
 # ![Local TTML Editor](https://i.imgur.com/NzDrtAq.png)
 
 ![icon](https://i.imgur.com/3Id3RPj.png)
@@ -6,6 +5,7 @@
 
 A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating and editing TTML lyric files with word-level timing. Made to make files compatible with Lokal Music's synced lyrics system, and any program that supports TTML. (like Spicy Lyrics)
 
+(Compatible with Spicy Lyrics, I've used it myself.)
 ---
 
 ## What it does
