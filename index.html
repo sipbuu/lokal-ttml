@@ -3002,7 +3002,7 @@ function lrcLineText(line) {
 
 function exportLRC() {
   const timed = lines.filter(l => l.time != null).sort((a,b) => a.time - b.time)
-  if (!timed.length) { showRuntimeError('No timed lines to export — add line timing first.'); return }
+  if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
   let out = ''
   for (const line of timed) out += `[${fmtLRCTime(line.time)}]${lrcLineText(line)}\n`
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.lrc'
