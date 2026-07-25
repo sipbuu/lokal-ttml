@@ -2644,7 +2644,7 @@ async function showSettings() {
         </select>
       </div>
       <div class="settings-row">
-        <div><div>Auto-scroll waveform during playback</div><div class="desc">Recenter the waveform view on the playhead when it nears the edge while playing. Turn off to stay put where you're editing — you can still click the progress bar to jump the view manually</div></div>
+        <div><div>Auto-scroll waveform during playback</div><div class="desc">Recenter the waveform view on the playhead when it nears the edge while playing. Turn off to stay put where you're editing, but you can still click the progress bar to jump the view manually</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-autoscroll-waveform" ${settings.autoScrollWaveform!==false?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
@@ -2652,7 +2652,7 @@ async function showSettings() {
         <label class="settings-toggle"><input type="checkbox" id="s-preserve-split-timing" ${settings.preserveTimingOnWordSplit!==false?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
-        <div><div>Sync pacing across matching lines</div><div class="desc">If a line's words/bg/duo exactly match another line (e.g. a repeated chorus), retiming one propagates the same relative word pacing to the others — only when word counts match, and each line keeps its own start/end</div></div>
+        <div><div>Sync pacing across matching lines</div><div class="desc">If a line's words/bg/duo exactly match another line (e.g. a repeated chorus), retiming one propagates the same relative word pacing to the others, only when word counts match, and each line keeps its own start/end</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-sync-matching-lines" ${settings.syncMatchingLinePacing?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
