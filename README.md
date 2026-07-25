@@ -11,7 +11,7 @@ A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating 
 
 - Pulls lyrics automatically from **LRCLIB.net** by title + artist
 - Import existing `.lrc`, `.ttml`, or `.txt` files
-- Edit word-by-word timing by ear — press S to set a word's start, E to set its end
+- Edit word-by-word timing by ear: press S to set a word's start, E to set its end
 - Supports **background vocals** (`x-bg`) and **duo / harmony** lines (`x-alt`) per line
 - Live karaoke preview that lights up words as they pass
 - Exports valid TTML that Lokal and other compatible players can read
@@ -36,11 +36,11 @@ npm run build
 
 ## How to Use
 
-1. **Open Audio** — load your audio file (mp3, flac, m4a, ogg, wav, aac, opus)
-2. **Get Lyrics** — click **Search LRCLIB** to pull synced or plain lyrics by title/artist, or **Import File** to load a local `.lrc` / `.ttml` / `.txt`
+1. **Open Audio** - load your audio file (mp3, flac, m4a, ogg, wav, aac, opus)
+2. **Get Lyrics** - click **Search LRCLIB** to pull synced or plain lyrics by title/artist, or **Import File** to load a local `.lrc` / `.ttml` / `.txt`
 3. **Select a line** from the left panel
 4. **Select a word** from the editor (the word chips)
-5. Play the audio, and when the word starts press `S` — when it ends press `E`
+5. Play the audio, and when the word starts press `S` - when it ends press `E`
 6. Use `Tab` / `Shift+Tab` to move between words without clicking
 7. Add **background vocals** or **duo/harmony** to any line using the buttons below the main word row
 8. **Export TTML** when done
