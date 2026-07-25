@@ -103,6 +103,16 @@ ipcMain.handle('dialog:saveTTML', async (_, content, suggestedName) => {
   return result.filePath
 })
 
+ipcMain.handle('dialog:saveLRC', async (_, content, suggestedName) => {
+  const result = await dialog.showSaveDialog(win, {
+    defaultPath: suggestedName || 'lyrics.lrc',
+    filters: [{ name: 'LRC', extensions: ['lrc'] }]
+  })
+  if (result.canceled) return null
+  fs.writeFileSync(result.filePath, content, 'utf8')
+  return result.filePath
+})
+
 ipcMain.handle('file:readBinary', async (_, fp) => {
   return fs.readFileSync(fp).toString('base64')
 })

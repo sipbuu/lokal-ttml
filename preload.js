@@ -3,6 +3,7 @@ contextBridge.exposeInMainWorld('api', {
   openAudio: () => ipcRenderer.invoke('dialog:openAudio'),
   openLyrics: () => ipcRenderer.invoke('dialog:openLyrics'),
   saveTTML: (content, name) => ipcRenderer.invoke('dialog:saveTTML', content, name),
+  saveLRC: (content, name) => ipcRenderer.invoke('dialog:saveLRC', content, name),
   readBinary: (fp) => ipcRenderer.invoke('file:readBinary', fp),
   getAudioMetadata: (fp) => ipcRenderer.invoke('audio:getMetadata', fp),
   getWaveformPeaks: (fp, points) => ipcRenderer.invoke('waveform:getPeaks', fp, points),

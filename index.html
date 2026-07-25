@@ -96,11 +96,17 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .sm-btn.danger:hover{color:var(--red);border-color:var(--red);background:var(--red-dim)}
 
 .words-container{display:flex;flex-wrap:wrap;gap:5px;padding:10px}
+.word-gap{display:flex;align-items:center;justify-content:center;width:13px;align-self:stretch;cursor:pointer;color:var(--muted2);font-size:13px;user-select:none;border-radius:4px;transition:background .1s,color .1s}
+.word-gap:hover{background:var(--surface3);color:var(--text)}
+.word-gap.tight{color:var(--orange)}
 
 .word-chip{display:flex;flex-direction:column;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;min-width:36px}
 .word-chip:hover{border-color:var(--border2);background:var(--surface3)}
 .word-chip.selected{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 1px var(--accent)}
 .word-chip.active-now{border-color:var(--accent-70);background:var(--accent-dim);box-shadow:0 0 6px var(--accent-20)}
+.word-chip.word-colored{border-color:color-mix(in srgb,var(--word-color),transparent 58%);box-shadow:inset 3px 0 0 color-mix(in srgb,var(--word-color),transparent 10%)}
+.word-chip.word-colored:hover{background:color-mix(in srgb,var(--word-color),var(--surface2) 88%)}
+.word-chip.word-colored.active-now{background:color-mix(in srgb,var(--word-color),var(--surface2) 78%);border-color:color-mix(in srgb,var(--word-color),transparent 25%);box-shadow:inset 3px 0 0 var(--word-color),0 0 8px color-mix(in srgb,var(--word-color),transparent 70%)}
 .word-chip.bg-chip{border-color:rgba(192,87,255,.2)}
 .word-chip.bg-chip.active-now{border-color:rgba(192,87,255,.7);background:rgba(192,87,255,.15);box-shadow:0 0 6px rgba(192,87,255,.2)}
 .word-chip.duo-chip{border-color:rgba(255,170,87,.2)}
@@ -129,6 +135,9 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #preview-body{flex:1;overflow:hidden;position:relative;background:var(--bg)}
 #lyrics-preview{position:absolute;inset:0;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth}
 .pline{padding:6px 4px;border-radius:5px;transition:opacity .25s}
+.pline.preview-seekable{cursor:pointer}
+.pline.preview-seekable:hover{background:var(--accent-dim2)}
+.pline.preview-hover{background:var(--accent-dim);outline:1px solid var(--accent-25)}
 .pline.past{opacity:.2}
 .pline.current{opacity:1}
 .pline.future{opacity:.35}
@@ -280,9 +289,17 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
     <div id="track-info">
       <span id="track-name">No audio loaded</span>
       <span id="track-time">0:00.000</span>
+      <button class="tb-btn" onclick="showMetadataModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Edit Metadata
+      </button>
       <button class="tb-btn accent" onclick="exportTTML()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export TTML
+      </button>
+      <button class="tb-btn" onclick="exportLRC()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export LRC
       </button>
       <button class="tb-btn" onclick="showSettings()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -320,9 +337,9 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
         <span id="tw-label">No word selected</span>
         <div class="tb-sep"></div>
         <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Start</label>
-        <input id="timing-start" type="text" placeholder="0.000" oninput="updateWordTime('time',this.value)">
+        <input id="timing-start" type="text" placeholder="0.000" onchange="updateWordTime('time',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
         <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">End</label>
-        <input id="timing-end" type="text" placeholder="0.000" oninput="updateWordTime('end',this.value)">
+        <input id="timing-end" type="text" placeholder="0.000" onchange="updateWordTime('end',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
         <button id="set-start-btn" onclick="setStartNow()">Set Start <kbd>S</kbd></button>
         <button id="set-end-btn" onclick="setEndNow()">Set End <kbd>E</kbd></button>
         <span style="font-size:10px;color:var(--muted2);margin-left:auto"><kbd>Tab</kbd> next · <kbd>Shift+Tab</kbd> prev</span>
@@ -385,6 +402,7 @@ let selectedLineId = null
 let selectedWord = null
 let audioDuration = 0
 let audioFileName = ''
+let songMeta = { musicName: '', album: '', artists: [], songwriters: [] }
 let currentAudioPath = ''
 let currentAudioMetadata = null
 let previewMode = 'karaoke'
@@ -403,9 +421,23 @@ let previewAnimationFrame = 0
 let autosaveTimer = 0
 let restoringSession = false
 const SESSION_STORAGE_KEY = 'ttml-editor-session'
+let undoHistory = []
+let undoRestoring = false
+const MAX_UNDO_HISTORY = 80
 
 function genId() { return 'l' + Math.random().toString(36).slice(2, 9) }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function escAttr(s) { return esc(s).replace(/"/g,'&quot;') }
+function decodeXmlEntities(s) {
+  return String(s||'')
+    .replace(/&apos;/g,"'")
+    .replace(/&quot;/g,'"')
+    .replace(/&lt;/g,'<')
+    .replace(/&gt;/g,'>')
+    .replace(/&#(\d+);/g,(m,d)=>String.fromCharCode(+d))
+    .replace(/&#x([0-9a-fA-F]+);/g,(m,d)=>String.fromCharCode(parseInt(d,16)))
+    .replace(/&amp;/g,'&')
+}
 function fmtMs(t) {
   if (t == null) return '--:--.---'
   const m = Math.floor(t/60), s = Math.floor(t%60).toString().padStart(2,'0')
@@ -423,6 +455,99 @@ function fmtTTML(t) {
 function splitWords(text) {
   if (!text) return []
   return text.match(/\S+/g) || []
+}
+
+function spicySplitToken(token) {
+  if (!/[-\u2013\u2014]/.test(token)) return [token]
+  const parts = token.split(/([-\u2013\u2014])/)
+  const out = []
+  let cur = ''
+  for (const p of parts) {
+    cur += p
+    if (p === '-' || p === '\u2013' || p === '\u2014') { out.push(cur); cur = '' }
+  }
+  if (cur) out.push(cur)
+  return out.filter(Boolean)
+}
+
+function spicyPrepWords(text) {
+  const raw = text.match(/\S+/g) || []
+  const out = []
+  raw.forEach(tok => {
+    spicySplitToken(tok).forEach((t, pi) => out.push({ word: t, tight: pi > 0 }))
+  })
+  return out
+}
+
+function expandBackslashSplits(tokens) {
+  const out = []
+  tokens.forEach(t => {
+    if (!t.word.includes('\\')) { out.push(t); return }
+    const parts = t.word.split('\\').filter(Boolean)
+    if (!parts.length) return
+    parts.forEach((p, pi) => out.push({ ...t, word: p, tight: pi === 0 ? t.tight : true }))
+  })
+  return out
+}
+
+function autoFillWordTimings(line, words, force = false) {
+  if ((!force && !settings.autoCorrectWordTimings) || !Array.isArray(words) || !words.length) return
+  let i = 0
+  while (i < words.length) {
+    if (words[i].time != null) { i++; continue }
+    let j = i
+    while (j < words.length && words[j].time == null) j++
+    const prevEnd = i > 0 ? getWordEnd(words[i - 1]) : line?.time
+    const nextStart = j < words.length ? getWordStart(words[j]) : line?.end
+    if (force) {
+      const editable = []
+      for (let k = i; k <= j - 1; k++) if (!isTimingAnchor(words[k])) editable.push(k)
+      if (editable.length && prevEnd != null && nextStart != null && nextStart > prevEnd) {
+        const step = (nextStart - prevEnd) / editable.length
+        editable.forEach((wordIdx, pos) => {
+          words[wordIdx].time = prevEnd + (step * pos)
+          words[wordIdx].end = pos === editable.length - 1 ? nextStart : prevEnd + (step * (pos + 1))
+        })
+      }
+    } else {
+      distributeUnlockedWords(words, i, j - 1, prevEnd, nextStart)
+    }
+    i = j
+  }
+}
+
+function manualAutoFillWords(lineId, type) {
+  const line = lines.find(l => l.id === lineId)
+  if (!line) return
+  const words = type === 'bg' ? line.bgWords : type === 'duo' ? line.duoWords : line.words
+  if (!words?.length) return
+  pushHistory('autofill timings')
+  autoFillWordTimings(line, words, true)
+  renderEditorFull(); renderPreview(audio.currentTime||0); scheduleSessionSave()
+}
+
+function mergeStandalonePunctuation(words) {
+  const out = []
+  for (const w of words) {
+    if (out.length && /^[,.!?;:]+$/.test(w.word)) {
+      const prev = out[out.length-1]
+      prev.word += w.word
+      if (w.end != null) prev.end = w.end
+    } else {
+      out.push({ ...w })
+    }
+  }
+  return out
+}
+
+function extractParenBgText(text) {
+  const bgParts = []
+  const main = text.replace(/\(([^)]*)\)/g, (m, inner) => {
+    const t = inner.trim()
+    if (t) bgParts.push(t)
+    return ' '
+  }).replace(/\s+/g, ' ').trim()
+  return { main, bg: bgParts.join(' ').trim() }
 }
 
 function clamp(n, min, max) {
@@ -443,6 +568,198 @@ function syncLineTimingFromWords(line, type) {
   const es = line.words.map(x => x.end).filter(x => x != null)
   if (ts.length) line.time = Math.min(...ts)
   if (es.length) line.end = Math.max(...es)
+}
+
+function markWordTimingEdited(word) {
+  if (word) word.timingEdited = true
+}
+
+function isTimingAnchor(word) {
+  return !!word?.timingEdited
+}
+
+function lineSignature(line) {
+  if (!line) return ''
+  return `${line.text||''}\u0001${line.bgText||''}\u0001${line.duoText||''}`
+}
+
+function propagatePacing(sourceWords, targetWords) {
+  if (!sourceWords?.length || !targetWords?.length) return false
+  if (sourceWords.length !== targetWords.length) return false
+  const srcStart = sourceWords[0].time, srcEnd = sourceWords[sourceWords.length-1].end
+  const tgtStart = targetWords[0].time, tgtEnd = targetWords[targetWords.length-1].end
+  if (srcStart==null || srcEnd==null || tgtStart==null || tgtEnd==null) return false
+  const srcDur = srcEnd - srcStart, tgtDur = tgtEnd - tgtStart
+  if (srcDur <= 0 || tgtDur <= 0) return false
+  let changed = false
+  for (let i = 0; i < sourceWords.length; i++) {
+    if (sourceWords[i].time == null || sourceWords[i].end == null) continue
+    const fracStart = (sourceWords[i].time - srcStart) / srcDur
+    const fracEnd = (sourceWords[i].end - srcStart) / srcDur
+    const newTime = tgtStart + fracStart * tgtDur
+    const newEnd = tgtStart + fracEnd * tgtDur
+    if (targetWords[i].time !== newTime || targetWords[i].end !== newEnd) changed = true
+    targetWords[i].time = newTime
+    targetWords[i].end = newEnd
+  }
+  return changed
+}
+
+function propagatePacingToMatches(sourceLineId) {
+  if (!settings.syncMatchingLinePacing) return false
+  const source = lines.find(l => l.id === sourceLineId)
+  if (!source) return false
+  const sig = lineSignature(source)
+  if (!sig || sig === '\u0001\u0001') return false
+  let changed = false
+  for (const target of lines) {
+    if (target.id === sourceLineId) continue
+    if (lineSignature(target) !== sig) continue
+    if (propagatePacing(source.words, target.words)) changed = true
+    if (source.bgWords?.length && propagatePacing(source.bgWords, target.bgWords)) changed = true
+    if (source.duoWords?.length && propagatePacing(source.duoWords, target.duoWords)) changed = true
+  }
+  return changed
+}
+
+function getWordStart(word) {
+  return word?.time != null ? word.time : null
+}
+
+function getWordEnd(word) {
+  return word?.end != null ? word.end : getWordStart(word)
+}
+
+function getWordColor(index, type = 'main') {
+  const offsets = { main: 0, bg: 38, duo: 74 }
+  const hue = (index * 41 + (offsets[type] || 0)) % 360
+  return `hsl(${hue} 84% 64%)`
+}
+
+function applyWordColor(el, index, type) {
+  if (!settings.colorWordMarkers || !el) return
+  el.classList.add('word-colored')
+  el.style.setProperty('--word-color', getWordColor(index, type))
+}
+
+function drawSelectedWordMarkers(ctx, width, height, view) {
+  if (!settings.colorWordMarkers || !selectedLineId || !view?.duration) return
+  const line = lines.find(l => l.id === selectedLineId)
+  if (!line) return
+  const activeType = (selectedWord && selectedWord.lineId === selectedLineId) ? selectedWord.type : 'main'
+  const words = activeType === 'bg' ? line.bgWords : activeType === 'duo' ? line.duoWords : line.words
+  if (!words?.length) return
+  ctx.save()
+  words.forEach((word, index) => {
+    if (word.time == null) return
+    const start = word.time
+    const end = word.end != null && word.end > start ? word.end : start + 0.08
+    if (end < view.start || start > view.end) return
+    const x1 = clamp(timeToWaveX(start, width, view), 0, width)
+    const x2 = clamp(timeToWaveX(end, width, view), 0, width)
+    const w = Math.max(2, x2 - x1)
+    ctx.fillStyle = getWordColor(index, activeType)
+    ctx.globalAlpha = 0.16
+    ctx.fillRect(x1, 0, w, height)
+    ctx.globalAlpha = 0.72
+    ctx.fillRect(x1, 0, 2, height)
+  })
+  ctx.restore()
+}
+
+function seekToLine(line, play = true) {
+  if (!line || line.time == null) return
+  audio.currentTime = clamp(line.time, 0, audioDuration || line.time)
+  waveformCenter = audio.currentTime
+  updatePlayheads()
+  if (waveformZoom > 1) drawWaveform()
+  if (play) {
+    audio.play()
+    setPlayIcon(false)
+  }
+}
+
+function selectLine(lineId) {
+  const line = lines.find(l => l.id === lineId)
+  if (!line) return
+  selectedLineId = line.id
+  selectedWord = null
+  document.getElementById('tw-label').textContent = 'No word selected'
+  document.getElementById('tw-label').style.color = 'var(--muted)'
+  document.getElementById('timing-start').value = ''
+  document.getElementById('timing-end').value = ''
+  renderLines()
+  renderEditorFull()
+  updatePreviewLive(audio.currentTime||0)
+  scheduleSessionSave()
+}
+
+function distributeUnlockedWords(words, startIdx, endIdx, startTime, endTime) {
+  if (!settings.autoCorrectWordTimings) return
+  if (!Array.isArray(words) || startIdx > endIdx) return
+  if (startTime == null || endTime == null || endTime <= startTime) return
+  const editable = []
+  for (let i = startIdx; i <= endIdx; i++) {
+    if (!isTimingAnchor(words[i])) editable.push(i)
+  }
+  if (!editable.length) return
+  const step = (endTime - startTime) / editable.length
+  editable.forEach((wordIdx, pos) => {
+    words[wordIdx].time = startTime + (step * pos)
+    words[wordIdx].end = pos === editable.length - 1 ? endTime : startTime + (step * (pos + 1))
+  })
+}
+
+function autoCorrectAfterWordEdit(line, words, idx, field) {
+  if (!settings.autoCorrectWordTimings || !line || !Array.isArray(words)) return
+  const word = words[idx]
+  if (!word) return
+  const lineEnd = line.end != null ? line.end : getWordEnd(words[words.length - 1])
+  const lineStart = line.time != null ? line.time : getWordStart(words[0])
+
+  if (field === 'time' && idx > 0) {
+    const prevAnchorIdx = (() => {
+      for (let i = idx - 1; i >= 0; i--) if (isTimingAnchor(words[i])) return i
+      return -1
+    })()
+    const startTime = prevAnchorIdx >= 0 ? getWordEnd(words[prevAnchorIdx]) : lineStart
+    distributeUnlockedWords(words, prevAnchorIdx + 1, idx - 1, startTime, word.time)
+  }
+
+  const startTime = field === 'end' ? word.end : getWordEnd(word)
+  if (startTime == null) return
+  let nextAnchorIdx = -1
+  for (let i = idx + 1; i < words.length; i++) {
+    if (isTimingAnchor(words[i]) && getWordStart(words[i]) != null) {
+      nextAnchorIdx = i
+      break
+    }
+  }
+  const endTime = nextAnchorIdx >= 0 ? getWordStart(words[nextAnchorIdx]) : lineEnd
+  distributeUnlockedWords(words, idx + 1, nextAnchorIdx >= 0 ? nextAnchorIdx - 1 : words.length - 1, startTime, endTime)
+}
+
+function autoCorrectLineWords(line, changedField) {
+  if (!settings.autoCorrectWordTimings || !line?.words?.length) return
+  const words = line.words
+  const lineStart = line.time
+  const lineEnd = line.end
+  if (changedField === 'time' && lineStart != null) {
+    const firstAnchor = words.findIndex(w => isTimingAnchor(w) && getWordStart(w) != null)
+    const endTime = firstAnchor >= 0 ? getWordStart(words[firstAnchor]) : lineEnd
+    distributeUnlockedWords(words, 0, firstAnchor >= 0 ? firstAnchor - 1 : words.length - 1, lineStart, endTime)
+  }
+  if (changedField === 'end' && lineEnd != null) {
+    let lastAnchor = -1
+    for (let i = words.length - 1; i >= 0; i--) {
+      if (isTimingAnchor(words[i]) && getWordEnd(words[i]) != null) {
+        lastAnchor = i
+        break
+      }
+    }
+    const startTime = lastAnchor >= 0 ? getWordEnd(words[lastAnchor]) : lineStart
+    distributeUnlockedWords(words, lastAnchor + 1, words.length - 1, startTime, lineEnd)
+  }
 }
 
 function extractTrackGuess(name) {
@@ -523,6 +840,7 @@ async function restoreSession() {
     selectedLineId = session.selectedLineId || null
     selectedWord = session.selectedWord || null
     audioFileName = session.audioFileName || ''
+    songMeta = session.songMeta || { musicName: '', album: '', artists: [], songwriters: [] }
     currentAudioPath = session.currentAudioPath || ''
     currentAudioMetadata = session.currentAudioMetadata || null
     previewMode = session.previewMode || 'karaoke'
@@ -572,6 +890,7 @@ function getSessionSnapshot() {
     selectedLineId,
     selectedWord,
     audioFileName,
+    songMeta,
     currentAudioPath,
     currentAudioMetadata,
     audioCurrentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
@@ -591,9 +910,54 @@ function saveSessionNow() {
 }
 
 function scheduleSessionSave() {
-  if (restoringSession) return
+  if (restoringSession || undoRestoring) return
   clearTimeout(autosaveTimer)
   autosaveTimer = setTimeout(saveSessionNow, 250)
+}
+
+function cloneEditorState() {
+  return JSON.parse(JSON.stringify({
+    lines,
+    selectedLineId,
+    selectedWord,
+    audioCurrentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
+    waveformZoom,
+    waveformCenter,
+    previewMode,
+    filterText,
+  }))
+}
+
+function pushHistory(label = 'edit') {
+  if (restoringSession || undoRestoring) return
+  undoHistory.push({ label, savedAt: Date.now(), state: cloneEditorState() })
+  if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift()
+}
+
+function restoreEditorState(state) {
+  if (!state) return
+  undoRestoring = true
+  lines = Array.isArray(state.lines) ? state.lines : []
+  selectedLineId = state.selectedLineId || null
+  selectedWord = state.selectedWord || null
+  previewMode = state.previewMode || 'karaoke'
+  filterText = state.filterText || ''
+  waveformZoom = Number.isFinite(state.waveformZoom) ? state.waveformZoom : waveformZoom
+  waveformCenter = Number.isFinite(state.waveformCenter) ? state.waveformCenter : waveformCenter
+  if (Number.isFinite(state.audioCurrentTime) && audioDuration) {
+    audio.currentTime = clamp(state.audioCurrentTime, 0, audioDuration)
+  }
+  renderAll()
+  drawWaveform()
+  if (selectedWord) selectWord(selectedWord.lineId, selectedWord.idx, selectedWord.type)
+  undoRestoring = false
+  saveSessionNow()
+}
+
+function undoLastEdit() {
+  const entry = undoHistory.pop()
+  if (!entry) return
+  restoreEditorState(entry.state)
 }
 
 function showRuntimeError(message) {
@@ -863,6 +1227,7 @@ function drawWaveformBars(ctx, width, height, opts = {}) {
     ctx.fillStyle = accent
     ctx.fillRect(x1, 0, 2, height)
   }
+  drawSelectedWordMarkers(ctx, width, height, view)
 }
 
 function updatePlayheads() {
@@ -874,7 +1239,8 @@ function updatePlayheads() {
   document.getElementById('prog-playhead').style.left = `${clamp((audio.currentTime / audioDuration) * (prog.clientWidth || 1), 0, prog.clientWidth || 1)}px`
 }
 
-function maybeKeepPlayheadVisible() {
+function maybeKeepPlayheadVisible(force) {
+  if (!force && settings.autoScrollWaveform === false) return
   const view = getWaveformView()
   if (!view.duration || waveformZoom <= 1) return
   const margin = view.duration * 0.15
@@ -922,7 +1288,7 @@ function progressSeek(e) {
   const r = document.getElementById('prog-track').getBoundingClientRect()
   audio.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * audioDuration
   updatePlayheads()
-  if (waveformZoom > 1) maybeKeepPlayheadVisible()
+  if (waveformZoom > 1) maybeKeepPlayheadVisible(true)
 }
 function waveformSeek(e) {
   if (!audioDuration) return
@@ -977,6 +1343,20 @@ function handleProgressWheel(e) {
   zoomWaveformAtTime(anchorTime, 0.5, e.deltaY < 0 ? 1.18 : 1 / 1.18)
 }
 
+function buildSpicyLineParts(text) {
+  const spicy = !!settings.spicyLyricsPrep
+  let lineText = text
+  let bgText = null
+  if (spicy) {
+    const extracted = extractParenBgText(lineText)
+    lineText = extracted.main
+    bgText = extracted.bg || null
+  }
+  const rawW = mergeStandalonePunctuation(spicy ? spicyPrepWords(lineText) : splitWords(lineText).map(w => ({ word: w, tight: false })))
+  const bgRaw = bgText ? mergeStandalonePunctuation(spicy ? spicyPrepWords(bgText) : splitWords(bgText).map(w => ({ word: w, tight: false }))) : []
+  return { lineText, bgText, rawW, bgRaw }
+}
+
 function parseLRC(lrc) {
   if (!lrc) return []
   const base = lrc.split('\n').map(raw => {
@@ -988,16 +1368,62 @@ function parseLRC(lrc) {
     const nextTime = arr[i+1]?.time
     const end = nextTime || line.time+3
     const dur = Math.max(0.01, end-line.time)
-    const rawW = splitWords(line.text)
-    const words = rawW.map((w,wi) => ({
-      word:w, time:line.time+(wi*dur/rawW.length), end:line.time+((wi+1)*dur/rawW.length)
+    const { lineText, bgText, rawW, bgRaw } = buildSpicyLineParts(line.text)
+    const words = rawW.map((rw,wi) => ({
+      word:rw.word, tight:!!rw.tight, time:line.time+(wi*dur/rawW.length), end:line.time+((wi+1)*dur/rawW.length)
     }))
-    return { id:genId(), time:line.time, end, text:line.text, words, bgWords:[], bgText:null, duoWords:[], duoText:null }
+    const bgWords = bgRaw.map((rw,wi) => ({
+      word:rw.word, tight:!!rw.tight, time:line.time+(wi*dur/bgRaw.length), end:line.time+((wi+1)*dur/bgRaw.length)
+    }))
+    return { id:genId(), time:line.time, end, text:lineText, words, bgWords, bgText, duoWords:[], duoText:null }
   })
+}
+
+function buildLineFromPlainText(text) {
+  const { lineText, bgText, rawW, bgRaw } = buildSpicyLineParts(text)
+  return {
+    id:genId(), time:null, end:null, text:lineText,
+    words:rawW.map(rw => ({ word:rw.word, tight:!!rw.tight, time:null, end:null })),
+    bgWords:bgRaw.map(rw => ({ word:rw.word, tight:!!rw.tight, time:null, end:null })),
+    bgText, duoWords:[], duoText:null
+  }
+}
+
+function joinWordsText(words) {
+  let s = ''
+  words.forEach((w,i) => { s += (i>0 && !w.tight ? ' ' : '') + w.word })
+  return s
+}
+
+function joinWordsForEditing(words) {
+  let s = ''
+  words.forEach((w,i) => { s += (i>0 ? (w.tight ? '\\' : ' ') : '') + w.word })
+  return s
+}
+
+function parseSongMetaFromTTML(xml) {
+  const meta = { musicName: '', album: '', artists: [], songwriters: [] }
+  const metaBlockMatch = xml.match(/<metadata[\s\S]*?<\/metadata>/i)
+  const metaBlock = metaBlockMatch ? metaBlockMatch[0] : ''
+  const titleMatch = metaBlock.match(/<ttm:title>([\s\S]*?)<\/ttm:title>/i)
+  if (titleMatch) meta.musicName = decodeXmlEntities(titleMatch[1]).trim()
+  const metaTagRe = /<amll:meta\b[^>]*\bkey="([^"]+)"[^>]*\bvalue="([^"]*)"[^>]*\/?>/ig
+  let mm
+  while ((mm = metaTagRe.exec(metaBlock)) !== null) {
+    const key = mm[1], val = decodeXmlEntities(mm[2]).trim()
+    if (key === 'musicName') meta.musicName = val
+    else if (key === 'album') meta.album = val
+    else if (key === 'artists') meta.artists.push(val)
+  }
+  const swRe = /<songwriter>([\s\S]*?)<\/songwriter>/ig
+  let sm
+  while ((sm = swRe.exec(metaBlock)) !== null) meta.songwriters.push(decodeXmlEntities(sm[1]).trim())
+  return meta
 }
 
 function parseTTML(xml) {
   if (!xml) return []
+  songMeta = parseSongMetaFromTTML(xml)
   const out = []
   const norm = xml.replace(/\r/g,'').replace(/\n+/g,' ')
   function pt(t) {
@@ -1036,45 +1462,64 @@ function parseTTML(xml) {
   function parseTimedWords(inner) {
     const words = []
     const wr = /<span\b[^>]*\bbegin="([^"]+)"(?:[^>]*\bend="([^"]+)")?[^>]*>([\s\S]*?)<\/span>/ig
+    let prevEnd = null
+    let prevHadTrailingSpace = false
     for (const wm of inner.matchAll(wr)) {
-      const raw = (wm[3]||'').replace(/<[^>]+>/g,'')
+      const raw = decodeXmlEntities((wm[3]||'').replace(/<[^>]+>/g,''))
       const trimmed = raw.replace(/^\s+|\s+$/g,'')
       if (!trimmed) continue
       const st = pt(wm[1]), en = wm[2]?pt(wm[2]):null
+      const gapBetween = prevEnd!=null ? inner.slice(prevEnd, wm.index) : ' '
+      const tightNext = prevEnd!=null && !/\s/.test(gapBetween) && !prevHadTrailingSpace
       const hasTrailingSpace = raw.endsWith(' ')
       if (!hasTrailingSpace && trimmed.indexOf(' ') === -1) {
-        words.push({word:trimmed, time:st, end:en})
+        words.push({word:trimmed, time:st, end:en, tight:tightNext})
       } else {
         const pieces = splitWords(trimmed)
-        if (pieces.length === 1) { words.push({word:pieces[0],time:st,end:en}) }
+        if (pieces.length === 1) { words.push({word:pieces[0],time:st,end:en,tight:tightNext}) }
         else {
           const dur = Math.max(0.001,(en?en-st:pieces.length*0.3))
-          pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length)}))
+          pieces.forEach((p,pi) => words.push({word:p,time:st+pi*(dur/pieces.length),end:st+(pi+1)*(dur/pieces.length),tight:pi===0?tightNext:false}))
         }
       }
+      prevHadTrailingSpace = hasTrailingSpace
+      prevEnd = wm.index + wm[0].length
     }
     return words
   }
   const pReg = /<p\b[^>]*\bbegin="([^"]+)"(?:[^>]*\bend="([^"]+)")?[^>]*>([\s\S]*?)<\/p>/ig
   for (const pm of norm.matchAll(pReg)) {
     const ls = pt(pm[1]), le = pm[2]?pt(pm[2]):null
+    const openTag = pm[0].slice(0, pm[0].indexOf('>')+1)
+    const agentMatch = openTag.match(/\bttm:agent\s*=\s*"([^"]+)"/)
+    const isSecondaryAgent = !!agentMatch && agentMatch[1] !== 'v1'
     let inner = (pm[3]||'').trim()
     const bgMatches = extractRole(inner, 'x-bg')
     const duoMatches = extractRole(inner, 'x-alt')
     let bgWords = [], bgText = '', duoWords = [], duoText = ''
-    for (const bm of bgMatches) { const w = parseTimedWords(bm.inner); bgWords.push(...w); bgText += (bgText?' ':'')+w.map(x=>x.word).join(' ') }
-    for (const dm of duoMatches) { const w = parseTimedWords(dm.inner); duoWords.push(...w); duoText += (duoText?' ':'')+w.map(x=>x.word).join(' ') }
+    for (const bm of bgMatches) { const w = mergeStandalonePunctuation(parseTimedWords(bm.inner)); bgWords.push(...w); bgText += (bgText?' ':'')+joinWordsText(w) }
+    for (const dm of duoMatches) { const w = mergeStandalonePunctuation(parseTimedWords(dm.inner)); duoWords.push(...w); duoText += (duoText?' ':'')+joinWordsText(w) }
     for (const bm of [...bgMatches,...duoMatches]) inner = inner.split(bm.full).join(' ')
     const mw = parseTimedWords(inner)
     for (let i = 0; i < mw.length; i++) { if (mw[i].end==null) mw[i].end = mw[i+1]?.time||(le||(mw[i].time+0.5)) }
     for (let i = 0; i < bgWords.length; i++) { if (bgWords[i].end==null) bgWords[i].end = bgWords[i+1]?.time||(le||(bgWords[i].time+0.5)) }
     for (let i = 0; i < duoWords.length; i++) { if (duoWords[i].end==null) duoWords[i].end = duoWords[i+1]?.time||(le||(duoWords[i].time+0.5)) }
-    const text = mw.map(w=>w.word).join(' ')
-    if (mw.length||bgText||duoText) {
+    const mwMerged = mergeStandalonePunctuation(mw)
+    const bgWordsMerged = mergeStandalonePunctuation(bgWords)
+    let duoWordsMerged = mergeStandalonePunctuation(duoWords)
+    let mainWords = mwMerged
+    let text = joinWordsText(mwMerged)
+    if (isSecondaryAgent && mwMerged.length) {
+      duoWordsMerged = duoWordsMerged.concat(mwMerged)
+      duoText = duoText ? duoText+' '+text : text
+      mainWords = []
+      text = ''
+    }
+    if (mainWords.length||bgText||duoText) {
       out.push({
         id:genId(), time:ls, end:le, text,
-        words:mw, bgWords, bgText:bgText||null,
-        duoWords, duoText:duoText||null
+        words:mainWords, bgWords:bgWordsMerged, bgText:bgText||null,
+        duoWords:duoWordsMerged, duoText:duoText||null
       })
     }
   }
@@ -1087,11 +1532,7 @@ async function openLyricsFile() {
   const { content, ext } = result
   if (ext==='lrc') lines = parseLRC(content)
   else if (ext==='ttml'||ext==='xml') lines = parseTTML(content)
-  else lines = content.split('\n').filter(l=>l.trim()).map(l=>({
-    id:genId(),time:null,end:null,text:l.trim(),
-    words:splitWords(l.trim()).map(w=>({word:w,time:null,end:null})),
-    bgWords:[],bgText:null,duoWords:[],duoText:null
-  }))
+  else lines = content.split('\n').filter(l=>l.trim()).map(l=>buildLineFromPlainText(l.trim()))
   renderAll(); drawWaveform()
 }
 
@@ -1141,11 +1582,7 @@ async function searchLRCLIB() {
       el.innerHTML = `<div class="rt">${esc(r.trackName)}</div><div class="ra">${esc(r.artistName)}${r.albumName?' · '+esc(r.albumName):''}</div><div class="rb">${r.syncedLyrics?'<span class="lrclib-tag tag-synced">Synced</span>':'<span class="lrclib-tag tag-plain">Plain</span>'}${dur?`<span class="lrclib-tag tag-dur">${dur}</span>`:''}</div>`
       el.addEventListener('click', () => {
         if (r.syncedLyrics) lines = parseLRC(r.syncedLyrics)
-        else if (r.plainLyrics) lines = r.plainLyrics.split('\n').filter(l=>l.trim()).map(l=>({
-          id:genId(),time:null,end:null,text:l.trim(),
-          words:splitWords(l.trim()).map(w=>({word:w,time:null,end:null})),
-          bgWords:[],bgText:null,duoWords:[],duoText:null
-        }))
+        else if (r.plainLyrics) lines = r.plainLyrics.split('\n').filter(l=>l.trim()).map(l=>buildLineFromPlainText(l.trim()))
         scheduleSessionSave()
         closeModal(); renderAll(); drawWaveform()
       })
@@ -1172,17 +1609,10 @@ function renderLines() {
     el.dataset.id = line.id
     const untimed = line.words.filter(w=>w.time==null).length
     el.innerHTML = `<div class="line-time">${fmtMs(line.time)}</div><div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div><div class="line-badges"><span class="badge badge-main">${line.words.length}w</span>${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}</div>`
-    el.addEventListener('click', () => {
-      selectedLineId = line.id
-      selectedWord = null
-      document.getElementById('tw-label').textContent = 'No word selected'
-      document.getElementById('tw-label').style.color = 'var(--muted)'
-      document.getElementById('timing-start').value = ''
-      document.getElementById('timing-end').value = ''
-      renderLines()
-      renderEditorFull()
-      updatePreviewLive(audio.currentTime||0)
-      scheduleSessionSave()
+    el.addEventListener('click', () => selectLine(line.id))
+    el.addEventListener('dblclick', () => {
+      selectLine(line.id)
+      seekToLine(line, true)
     })
     list.appendChild(el)
   }
@@ -1214,7 +1644,7 @@ function renderEditorFull() {
 
   const timingRow = document.createElement('div')
   timingRow.className = 'line-timing-row'
-  timingRow.innerHTML = `<label>Line Start</label><input class="timing-sm" id="ls-input" value="${line.time!=null?line.time.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('time',this.value)"><label>End</label><input class="timing-sm" id="le-input" value="${line.end!=null?line.end.toFixed(3):''}" placeholder="0.000" oninput="updateLineField('end',this.value)"><button class="sm-btn" onclick="setLineFieldNow('time')">↙ Now</button><button class="sm-btn" onclick="setLineFieldNow('end')">↗ Now</button><button class="sm-btn danger" style="margin-left:auto" onclick="deleteLine('${line.id}')">Delete</button>`
+  timingRow.innerHTML = `<label>Line Start</label><input class="timing-sm" id="ls-input" value="${line.time!=null?line.time.toFixed(3):''}" placeholder="0.000" onchange="updateLineField('time',this.value)" onkeydown="if(event.key==='Enter')this.blur()"><label>End</label><input class="timing-sm" id="le-input" value="${line.end!=null?line.end.toFixed(3):''}" placeholder="0.000" onchange="updateLineField('end',this.value)" onkeydown="if(event.key==='Enter')this.blur()"><button class="sm-btn" onclick="setLineFieldNow('time')">↙ Now</button><button class="sm-btn" onclick="setLineFieldNow('end')">↗ Now</button><button class="sm-btn danger" style="margin-left:auto" onclick="deleteLine('${line.id}')">Delete</button>`
   editor.appendChild(timingRow)
 
   editor.appendChild(buildWordRow(line.words, 'Main Vocals', '', line.id, 'main'))
@@ -1242,6 +1672,46 @@ function renderEditorFull() {
   if (addRow.children.length) editor.appendChild(addRow)
 }
 
+function getRoleData(line, type) {
+  if (type==='bg') return { words: line.bgWords||[], text: line.bgText||null }
+  if (type==='duo') return { words: line.duoWords||[], text: line.duoText||null }
+  return { words: line.words||[], text: line.text||'' }
+}
+function setRoleData(line, type, data) {
+  if (type==='bg') { line.bgWords = data.words; line.bgText = data.text }
+  else if (type==='duo') { line.duoWords = data.words; line.duoText = data.text }
+  else { line.words = data.words; line.text = data.text||'' }
+}
+function switchVocalRole(lineId, fromType, toType) {
+  const line = lines.find(l=>l.id===lineId)
+  if (!line || fromType===toType) return
+  pushHistory('switch vocal role')
+  const a = getRoleData(line, fromType)
+  const b = getRoleData(line, toType)
+  setRoleData(line, toType, a)
+  setRoleData(line, fromType, b)
+  selectedWord = null
+  renderLines(); renderEditorFull(); renderPreview(audio.currentTime||0); drawWaveform()
+  scheduleSessionSave()
+  closeModal()
+}
+function promptSwitchVocalRole(lineId, fromType) {
+  const labels = { main:'Main Vocals', bg:'Background Vocals', duo:'Duo / Harmony' }
+  const others = ['main','bg','duo'].filter(t=>t!==fromType)
+  const line = lines.find(l=>l.id===lineId)
+  const rows = others.map(t=>{
+    const data = getRoleData(line, t)
+    const occupied = data.words?.length
+    return `<button class="mbtn" data-switch-to="${t}" style="width:100%;text-align:left;margin-bottom:6px">${labels[t]}${occupied?' <span style="color:var(--muted2);font-weight:400">(swaps with existing words + timing)</span>':' <span style="color:var(--muted2);font-weight:400">(empty)</span>'}</button>`
+  }).join('')
+  showModal(`Move "${labels[fromType]}" to…`, `<div class="mf"><p style="color:var(--muted);margin:0 0 10px">This moves the words and timing into the other slot. If it already has content, they'll swap places instead of overwriting.</p>${rows}</div>`, [
+    {label:'Cancel', fn:closeModal}
+  ])
+  document.querySelectorAll('#modal-body [data-switch-to]').forEach(btn => {
+    btn.addEventListener('click', () => switchVocalRole(lineId, fromType, btn.dataset.switchTo))
+  })
+}
+
 function buildWordRow(words, label, labelClass, lineId, type) {
   const row = document.createElement('div')
   row.className = 'word-row'
@@ -1255,6 +1725,18 @@ function buildWordRow(words, label, labelClass, lineId, type) {
   editBtn.textContent = 'Edit Text'
   editBtn.addEventListener('click', () => editWordsText(lineId, type))
   actions.appendChild(editBtn)
+  const fillBtn = document.createElement('button')
+  fillBtn.className = 'sm-btn'
+  fillBtn.title = 'Fill in missing word timings by interpolating between known timings'
+  fillBtn.textContent = 'Autofill Timings'
+  fillBtn.addEventListener('click', () => manualAutoFillWords(lineId, type))
+  actions.appendChild(fillBtn)
+  const switchBtn = document.createElement('button')
+  switchBtn.className = 'sm-btn'
+  switchBtn.title = 'Move these words + timing to Main / Background / Duo'
+  switchBtn.textContent = '⇄ Switch'
+  switchBtn.addEventListener('click', () => promptSwitchVocalRole(lineId, type))
+  actions.appendChild(switchBtn)
   if (type !== 'main') {
     const rmBtn = document.createElement('button')
     rmBtn.className = 'sm-btn danger'
@@ -1269,10 +1751,19 @@ function buildWordRow(words, label, labelClass, lineId, type) {
   container.className = 'words-container'
   container.id = `wc-${lineId}-${type}`
   words.forEach((w, i) => {
+    if (i > 0) {
+      const gap = document.createElement('div')
+      gap.className = `word-gap ${w.tight?'tight':''}`
+      gap.title = w.tight ? 'No space before this word, click to add one' : 'Space before this word, click to join tight'
+      gap.textContent = w.tight ? '‿' : '·'
+      gap.addEventListener('click', (e) => { e.stopPropagation(); toggleWordGap(lineId, type, i) })
+      container.appendChild(gap)
+    }
     const chip = document.createElement('div')
     const isSel = selectedWord && selectedWord.lineId===lineId && selectedWord.idx===i && selectedWord.type===type
     const typeClass = type==='bg'?'bg-chip':type==='duo'?'duo-chip':''
     chip.className = `word-chip ${typeClass} ${isSel?'selected':''} ${w.time==null?'no-time':''}`
+    applyWordColor(chip, i, type)
     chip.dataset.idx = i
     const wtText = document.createElement('div')
     wtText.className = 'wt-text'
@@ -1307,6 +1798,7 @@ function selectWord(lineId, idx, type) {
   document.querySelectorAll('.word-chip.selected').forEach(c => c.classList.remove('selected'))
   const container = document.getElementById(`wc-${lineId}-${type}`)
   if (container) container.children[idx]?.classList.add('selected')
+  drawWaveform()
   scheduleSessionSave()
 }
 
@@ -1332,6 +1824,19 @@ function updateEditorActiveWords(t) {
   }
 }
 
+function toggleWordGap(lineId, type, idx) {
+  const line = lines.find(l=>l.id===lineId)
+  if (!line) return
+  const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
+  const w = words[idx]
+  if (!w) return
+  pushHistory('toggle word spacing')
+  w.tight = !w.tight
+  renderEditorFull()
+  renderPreview(audio.currentTime||0)
+  scheduleSessionSave()
+}
+
 function updateWordTime(field, val) {
   if (!selectedWord) return
   const target = getWordsForSelection(selectedWord)
@@ -1339,9 +1844,15 @@ function updateWordTime(field, val) {
   const { line, words } = target
   const t = parseFloat(val)
   if (!isNaN(t)) {
+    pushHistory('word timing')
+    const preservedLineEnd = line.end
     words[selectedWord.idx][field] = t
+    markWordTimingEdited(words[selectedWord.idx])
+    autoCorrectAfterWordEdit(line, words, selectedWord.idx, field)
     syncLineTimingFromWords(line, selectedWord.type)
-    renderLines(); updateStatus(); drawWaveform()
+    if (selectedWord.type === 'main' && preservedLineEnd != null) line.end = preservedLineEnd
+    propagatePacingToMatches(line.id)
+    renderLines(); renderEditorFull(); updateStatus(); drawWaveform()
     const container = document.getElementById(`wc-${selectedWord.lineId}-${selectedWord.type}`)
     const chip = container?.children[selectedWord.idx]
     if (chip) {
@@ -1367,12 +1878,17 @@ function setEndNow() {
   const target = getWordsForSelection(selectedWord)
   if (!target) return
   const { line, words } = target
+  const preservedLineEnd = line.end
   document.getElementById('timing-end').value = t.toFixed(3)
   updateWordTime('end', t)
   const nextIdx = selectedWord.idx + 1
   if (nextIdx < words.length) {
-    words[nextIdx].time = t
+    if (!settings.autoCorrectWordTimings || !isTimingAnchor(words[nextIdx])) {
+      words[nextIdx].time = t
+    }
     syncLineTimingFromWords(line, selectedWord.type)
+    if (selectedWord.type === 'main' && preservedLineEnd != null) line.end = preservedLineEnd
+    propagatePacingToMatches(line.id)
     renderLines()
     renderEditorFull()
     updateStatus()
@@ -1385,8 +1901,13 @@ function updateLineField(field, val) {
   if (!line) return
   const t = parseFloat(val)
   if (!isNaN(t)) {
-    line[field==='time'?'time':'end']=t
+    pushHistory('line timing')
+    const key = field==='time'?'time':'end'
+    line[key]=t
+    autoCorrectLineWords(line, key)
+    propagatePacingToMatches(line.id)
     renderLines()
+    renderEditorFull()
     drawWaveform()
     scheduleSessionSave()
   }
@@ -1394,13 +1915,17 @@ function updateLineField(field, val) {
 function setLineFieldNow(field) {
   const line = lines.find(l=>l.id===selectedLineId)
   if (!line) return
+  pushHistory('line timing')
   line[field] = audio.currentTime
+  autoCorrectLineWords(line, field)
+  propagatePacingToMatches(line.id)
   const el = document.getElementById(field==='time'?'ls-input':'le-input')
   if (el) el.value = line[field].toFixed(3)
-  renderLines(); drawWaveform()
+  renderLines(); renderEditorFull(); drawWaveform()
   scheduleSessionSave()
 }
 function deleteLine(id) {
+  pushHistory('delete line')
   lines = lines.filter(l=>l.id!==id)
   if (selectedLineId===id) { selectedLineId=null; selectedWord=null }
   renderAll(); drawWaveform()
@@ -1415,6 +1940,7 @@ function addVocalLayer(lineId, type) {
       const text = document.getElementById('vl-text').value.trim()
       if (!text) return
       const line = lines.find(l=>l.id===lineId)
+      pushHistory('add vocal layer')
       const words = splitWords(text).map(w=>({word:w,time:null,end:null}))
       if (type==='bg') { line.bgWords=words; line.bgText=text }
       else { line.duoWords=words; line.duoText=text }
@@ -1427,6 +1953,7 @@ function addVocalLayer(lineId, type) {
 function removeVocalLayer(lineId, type) {
   const line = lines.find(l=>l.id===lineId)
   if (!line) return
+  pushHistory('remove vocal layer')
   if (type==='bg') { line.bgWords=[]; line.bgText=null }
   else { line.duoWords=[]; line.duoText=null }
   renderEditorFull(); renderPreview(audio.currentTime||0)
@@ -1436,15 +1963,57 @@ function editWordsText(lineId, type) {
   const line = lines.find(l=>l.id===lineId)
   if (!line) return
   const words = type==='bg'?line.bgWords:type==='duo'?line.duoWords:line.words
-  const current = words.map(w=>w.word).join(' ')
-  showModal('Edit Words', `<div class="mf"><label>Words — timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea></div>`, [
+  const current = joinWordsForEditing(words)
+  showModal('Edit Words', `<div class="mf"><label>Words with timings kept by position</label><textarea class="mi mta" id="ew-text">${esc(current)}</textarea><div class="desc" style="margin-top:6px">Tip: use "\\" to split a word into connected sections with independent timing, e.g. "bed\\room". Existing splits show up here as "\\" too, and you can remove one to merge that split back together.</div></div>`, [
     {label:'Cancel',fn:closeModal},
     {label:'Update',primary:true,fn:()=>{
-      const newWords = splitWords(document.getElementById('ew-text').value)
-      const updated = newWords.map((w,i)=>({word:w,time:words[i]?.time??null,end:words[i]?.end??null}))
-      if (type==='bg') { line.bgWords=updated; line.bgText=updated.length?updated.map(w=>w.word).join(' '):null }
-      else if (type==='duo') { line.duoWords=updated; line.duoText=updated.length?updated.map(w=>w.word).join(' '):null }
-      else { line.words=updated; line.text=updated.map(w=>w.word).join(' ') }
+      const raw = document.getElementById('ew-text').value
+      const rawWords = settings.spicyLyricsPrep ? spicyPrepWords(raw) : splitWords(raw).map(w=>({word:w,tight:false}))
+      let updatedRaw = []
+      let oldIdx = 0
+      rawWords.forEach(rw => {
+        const parts = rw.word.includes('\\') ? rw.word.split('\\').filter(Boolean) : [rw.word]
+        if (parts.length <= 1 || settings.preserveTimingOnWordSplit === false) {
+          const old = words[oldIdx]
+          if (parts.length <= 1) {
+            updatedRaw.push({ word:parts[0]||rw.word, tight:!!rw.tight, time:old?.time??null, end:old?.end??null, timingEdited:!!old?.timingEdited })
+          } else {
+            parts.forEach((p,pi) => updatedRaw.push({ word:p, tight:pi===0?!!rw.tight:true, time:old?.time??null, end:old?.end??null, timingEdited:!!old?.timingEdited }))
+          }
+          oldIdx += 1
+          return
+        }
+        let clusterLen = 1
+        while (oldIdx+clusterLen < words.length && words[oldIdx+clusterLen]?.tight) clusterLen++
+        if (clusterLen === parts.length) {
+          for (let k = 0; k < parts.length; k++) {
+            const old = words[oldIdx+k]
+            updatedRaw.push({ word:parts[k], tight:k===0?!!rw.tight:true, time:old?.time??null, end:old?.end??null, timingEdited:!!old?.timingEdited })
+          }
+        } else {
+          const spanStart = words[oldIdx], spanEndWord = words[oldIdx+clusterLen-1]
+          const oldTime = spanStart?.time ?? null, oldEnd = spanEndWord?.end ?? null
+          const totalLen = parts.reduce((s,p)=>s+p.length,0) || parts.length
+          let cursor = oldTime
+          parts.forEach((p,pi) => {
+            let pTime = null, pEnd = null
+            if (oldTime != null && oldEnd != null) {
+              const dur = oldEnd - oldTime
+              pTime = cursor
+              pEnd = pi === parts.length-1 ? oldEnd : cursor + dur * (p.length / totalLen)
+              cursor = pEnd
+            }
+            updatedRaw.push({ word:p, tight:pi===0?!!rw.tight:true, time:pTime, end:pEnd, timingEdited: pi===0?!!spanStart?.timingEdited:false })
+          })
+        }
+        oldIdx += clusterLen
+      })
+      const updated = mergeStandalonePunctuation(updatedRaw)
+      pushHistory('edit words')
+      autoFillWordTimings(line, updated)
+      if (type==='bg') { line.bgWords=updated; line.bgText=updated.length?joinWordsText(updated):null }
+      else if (type==='duo') { line.duoWords=updated; line.duoText=updated.length?joinWordsText(updated):null }
+      else { line.words=updated; line.text=joinWordsText(updated) }
       closeModal(); renderAll()
     }}
   ])
@@ -1462,6 +2031,7 @@ function addLineModal() {
       if (!text) return
       const useNow = document.getElementById('al-now').checked
       const time = useNow ? audio.currentTime : null
+      pushHistory('add line')
       lines.push({id:genId(),time,end:null,text,words:splitWords(text).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null})
       sortLines(); closeModal(); renderAll(); drawWaveform()
     }}
@@ -1484,10 +2054,11 @@ function getWordProgress(word, t) {
   return 1 - Math.pow(1 - raw, 0.72)
 }
 
-function buildSyncWord(word, className, index, t) {
+function buildSyncWord(word, className, index, t, type = 'main') {
   const wrapper = document.createElement('span')
   wrapper.className = className
   wrapper.dataset.wi = index
+  applyWordColor(wrapper, index, type)
   const chars = Array.from(word.word || '')
   const progress = getWordProgress(word, t)
   const litCount = progress * chars.length
@@ -1512,14 +2083,21 @@ function renderPreview(t) {
     const past = effEnd > 0 && t > effEnd
     const cur = line.time!=null && t>=line.time && !past
     const div = document.createElement('div')
-    div.className = `pline ${past?'past':cur?'current':'future'}`
+    div.className = `pline preview-seekable ${past?'past':cur?'current':'future'}`
+    div.dataset.lineId = line.id
+    div.addEventListener('mouseenter', () => div.classList.add('preview-hover'))
+    div.addEventListener('mouseleave', () => div.classList.remove('preview-hover'))
+    div.addEventListener('click', () => {
+      selectLine(line.id)
+      seekToLine(line, false)
+    })
 
     const mainDiv = document.createElement('div')
     mainDiv.className = 'pline-text'
     if (previewMode==='karaoke') {
       line.words.forEach((w,i) => {
-        if (i > 0) mainDiv.appendChild(document.createTextNode(' '))
-        mainDiv.appendChild(buildSyncWord(w, 'pw', i, t))
+        if (i > 0 && !w.tight) mainDiv.appendChild(document.createTextNode(' '))
+        mainDiv.appendChild(buildSyncWord(w, 'pw', i, t, 'main'))
       })
     } else {
       mainDiv.textContent = line.text
@@ -1530,8 +2108,8 @@ function renderPreview(t) {
       const bgDiv = document.createElement('div')
       bgDiv.className = 'pline-bg'
       line.bgWords.forEach((w,i) => {
-        if (i > 0) bgDiv.appendChild(document.createTextNode(' '))
-        bgDiv.appendChild(buildSyncWord(w, 'pbw', i, t))
+        if (i > 0 && !w.tight) bgDiv.appendChild(document.createTextNode(' '))
+        bgDiv.appendChild(buildSyncWord(w, 'pbw', i, t, 'bg'))
       })
       div.appendChild(bgDiv)
     } else if (line.bgText) {
@@ -1545,8 +2123,8 @@ function renderPreview(t) {
       const duoDiv = document.createElement('div')
       duoDiv.className = 'pline-duo'
       line.duoWords.forEach((w,i) => {
-        if (i > 0) duoDiv.appendChild(document.createTextNode(' '))
-        duoDiv.appendChild(buildSyncWord(w, 'pdw', i, t))
+        if (i > 0 && !w.tight) duoDiv.appendChild(document.createTextNode(' '))
+        duoDiv.appendChild(buildSyncWord(w, 'pdw', i, t, 'duo'))
       })
       div.appendChild(duoDiv)
     } else if (line.duoText) {
@@ -1569,7 +2147,8 @@ function updatePreviewLive(t) {
     const effEnd = effectiveEnd(line)
     const past = effEnd > 0 && t > effEnd
     const cur = line.time!=null && t>=line.time && (!past)
-    const newClass = `pline ${past&&settings.dimPast?'past':cur?'current':'future'}`
+    const hover = el.classList.contains('preview-hover')
+    const newClass = `pline preview-seekable ${hover?'preview-hover ':''}${past&&settings.dimPast?'past':cur?'current':'future'}`
     if (el.className !== newClass) el.className = newClass
 
     if (previewMode === 'karaoke') {
@@ -1621,6 +2200,12 @@ let settings = {
   previewFontSize: 17,
   dimPast: true,
   showTimecodes: true,
+  colorWordMarkers: false,
+  preserveTimingOnWordSplit: true,
+  autoScrollWaveform: true,
+  syncMatchingLinePacing: false,
+  spicyLyricsPrep: true,
+  autoCorrectWordTimings: false,
   waveformEngine: 'auto',
   theme: 'dark',
   themeOverrides: {},
@@ -1805,8 +2390,32 @@ async function showSettings() {
     <div class="settings-section">
       <h4>Editor</h4>
       <div class="settings-row">
+        <div><div>Auto-scroll waveform during playback</div><div class="desc">Recenter the waveform view on the playhead when it nears the edge while playing. Turn off to stay put where you're editing, you can still click the progress bar to jump the view manually</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-autoscroll-waveform" ${settings.autoScrollWaveform!==false?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Preserve timing when splitting a word</div><div class="desc">When you split a word (e.g. "some\times"), divide that word's own existing timing between the pieces instead of shifting every later word's timing down by one</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-preserve-split-timing" ${settings.preserveTimingOnWordSplit!==false?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Sync pacing across matching lines</div><div class="desc">If a line's words/bg/duo exactly match another line (e.g. a repeated chorus), retiming one propagates the same relative word pacing to the others, only when word counts match, and each line keeps its own start/end</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-sync-matching-lines" ${settings.syncMatchingLinePacing?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
         <div><div>Show timecodes on chips</div><div class="desc">Show start/end times below each word</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-timecodes" ${settings.showTimecodes?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Colored word markers</div><div class="desc">Tint word chips on the waveform with repeating timing colors</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-color-words" ${settings.colorWordMarkers?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Spicy Lyrics prep for LRCLIB search</div><div class="desc">Split hyphen/em-dash compounds into separate word chips (e.g. right-hand → right- hand) and pull (parenthesized) text into a background-vocal line</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-spicy-lyrics-prep" ${settings.spicyLyricsPrep?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Auto-adjust word timings</div><div class="desc">Resize unlocked words when line or anchor word timing changes</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-auto-correct-words" ${settings.autoCorrectWordTimings?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
         <div><div>Waveform backend</div><div class="desc">Choose how the waveform gets generated</div></div>
@@ -1909,6 +2518,7 @@ async function showSettings() {
       saveSettings()
       applySettings()
       closeModal()
+      renderEditorFull()
       renderPreview(audio.currentTime||0)
     }},
     { label: 'Save', primary:true, fn: () => {
@@ -1918,6 +2528,12 @@ async function showSettings() {
       settings.dimPast = document.getElementById('s-dim').checked
       settings.wordGlowStyle = document.getElementById('s-glow').value
       settings.showTimecodes = document.getElementById('s-timecodes').checked
+      settings.colorWordMarkers = document.getElementById('s-color-words').checked
+      settings.preserveTimingOnWordSplit = document.getElementById('s-preserve-split-timing').checked
+      settings.autoScrollWaveform = document.getElementById('s-autoscroll-waveform').checked
+      settings.syncMatchingLinePacing = document.getElementById('s-sync-matching-lines').checked
+      settings.spicyLyricsPrep = document.getElementById('s-spicy-lyrics-prep').checked
+      settings.autoCorrectWordTimings = document.getElementById('s-auto-correct-words').checked
       settings.waveformEngine = document.getElementById('s-waveform-engine').value || 'auto'
       settings.theme = document.getElementById('s-theme').value || 'dark'
       settings.showAdvancedTheme = !document.getElementById('s-advanced-wrap').classList.contains('settings-hidden')
@@ -1991,33 +2607,118 @@ async function showSettings() {
   })
 }
 
+function ttmlWordSpans(words) {
+  let out = ''
+  words.forEach((w, i) => {
+    if (i > 0 && !w.tight) out += ' '
+    out += `<span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)}</span>`
+  })
+  return out
+}
+
+function metaListRowsHtml(items, kind) {
+  return items.map((v,i) => `<div class="mf-row" style="display:flex;gap:6px;margin-bottom:6px">
+    <input class="mi meta-list-input" data-kind="${kind}" data-idx="${i}" value="${esc(v)}" style="flex:1">
+    <button type="button" class="sm-btn danger meta-remove-btn" data-kind="${kind}" data-idx="${i}">✕</button>
+  </div>`).join('') || `<div class="desc"> none added yet! </div>`
+}
+
+function showMetadataModal() {
+  const draft = {
+    musicName: songMeta.musicName || '',
+    album: songMeta.album || '',
+    artists: [...(songMeta.artists||[])],
+    songwriters: [...(songMeta.songwriters||[])],
+  }
+  const body = `
+    <div class="mf"><label>Song Name</label><input class="mi" id="meta-musicname" value="${esc(draft.musicName)}"></div>
+    <div class="mf"><label>Album</label><input class="mi" id="meta-album" value="${esc(draft.album)}"></div>
+    <div class="mf"><label>Artists</label><div id="meta-artists-list">${metaListRowsHtml(draft.artists,'artists')}</div><button type="button" class="sm-btn" id="meta-add-artist">+ Add Artist</button></div>
+    <div class="mf"><label>Songwriters</label><div class="desc" style="margin-bottom:6px">required by Spicy Lyrics to add each songwriter individually, using their real name</div><div id="meta-songwriters-list">${metaListRowsHtml(draft.songwriters,'songwriters')}</div><button type="button" class="sm-btn" id="meta-add-songwriter">+ Add Songwriter</button></div>
+  `
+  showModal('Edit Metadata', body, [
+    {label:'Cancel',fn:closeModal},
+    {label:'Save',primary:true,fn:()=>{
+      songMeta = {
+        musicName: document.getElementById('meta-musicname').value.trim(),
+        album: document.getElementById('meta-album').value.trim(),
+        artists: draft.artists.map(s=>s.trim()).filter(Boolean),
+        songwriters: draft.songwriters.map(s=>s.trim()).filter(Boolean),
+      }
+      closeModal(); scheduleSessionSave()
+    }}
+  ])
+  setTimeout(() => {
+    const rerenderList = (kind) => {
+      document.getElementById(`meta-${kind}-list`).innerHTML = metaListRowsHtml(draft[kind], kind)
+      wireList(kind)
+    }
+    const wireList = (kind) => {
+      document.querySelectorAll(`#meta-${kind}-list .meta-list-input`).forEach(inp => {
+        inp.addEventListener('input', () => { draft[kind][+inp.dataset.idx] = inp.value })
+      })
+      document.querySelectorAll(`#meta-${kind}-list .meta-remove-btn`).forEach(btn => {
+        btn.addEventListener('click', () => { draft[kind].splice(+btn.dataset.idx,1); rerenderList(kind) })
+      })
+    }
+    wireList('artists'); wireList('songwriters')
+    document.getElementById('meta-add-artist').addEventListener('click', () => { draft.artists.push(''); rerenderList('artists') })
+    document.getElementById('meta-add-songwriter').addEventListener('click', () => { draft.songwriters.push(''); rerenderList('songwriters') })
+  }, 50)
+}
+
 function exportTTML() {
   if (!lines.length) return
   const sorted = [...lines].sort((a,b)=>(a.time||0)-(b.time||0))
+  const hasDuet = sorted.some(l => l.duoWords?.length)
+  let metaXml = `<ttm:title>${esc(songMeta.musicName||audioFileName||'Unknown')}</ttm:title>`
+  if (hasDuet) metaXml += `<ttm:agent type="person" xml:id="v1"/><ttm:agent type="person" xml:id="v2"/>`
+  if (songMeta.musicName) metaXml += `<amll:meta key="musicName" value="${escAttr(songMeta.musicName)}"/>`
+  for (const a of (songMeta.artists||[])) metaXml += `<amll:meta key="artists" value="${escAttr(a)}"/>`
+  if (songMeta.album) metaXml += `<amll:meta key="album" value="${escAttr(songMeta.album)}"/>`
+  if (songMeta.songwriters?.length) {
+    metaXml += `<iTunesMetadata xmlns="http://music.apple.com/lyric-ttml-internal"><songwriters>`
+    for (const s of songMeta.songwriters) metaXml += `<songwriter>${esc(s)}</songwriter>`
+    metaXml += `</songwriters></iTunesMetadata>`
+  }
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <tt xml:lang="en" xmlns="http://www.w3.org/ns/ttml"
-    xmlns:ttm="http://www.w3.org/ns/ttml#metadata">
+    xmlns:ttm="http://www.w3.org/ns/ttml#metadata"
+    xmlns:itunes="http://music.apple.com/lyric-ttml-internal"
+    xmlns:amll="http://www.example.com/ns/amll">
   <head>
-    <metadata><ttm:title>${esc(audioFileName||'Unknown')}</ttm:title></metadata>
+    <metadata>${metaXml}</metadata>
     <styling><style xml:id="s1" tts:fontFamily="Arial" tts:fontSize="100%" tts:color="white" xmlns:tts="http://www.w3.org/ns/ttml#styling"/></styling>
     <layout><region xml:id="r1" tts:textAlign="center" tts:displayAlign="after" xmlns:tts="http://www.w3.org/ns/ttml#styling"/></layout>
   </head>
   <body>
     <div region="r1">\n`
   for (const line of sorted) {
-    xml += `      <p begin="${fmtTTML(line.time)}" end="${fmtTTML(line.end)}">\n`
-    for (const w of line.words) xml += `        <span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)} </span>\n`
+    const soloDuet = !line.words?.length && line.duoWords?.length
+    if (soloDuet) {
+      xml += `      <p begin="${fmtTTML(line.time)}" end="${fmtTTML(line.end)}" ttm:agent="v2">`
+      xml += ttmlWordSpans(line.duoWords)
+      if (line.bgWords?.length) {
+        xml += `<span ttm:role="x-bg" begin="${fmtTTML(line.bgWords[0].time)}" end="${fmtTTML(line.bgWords[line.bgWords.length-1].end)}">`
+        xml += ttmlWordSpans(line.bgWords)
+        xml += `</span>`
+      }
+      xml += `</p>\n`
+      continue
+    }
+    xml += `      <p begin="${fmtTTML(line.time)}" end="${fmtTTML(line.end)}"${hasDuet?' ttm:agent="v1"':''}>`
+    xml += ttmlWordSpans(line.words)
     if (line.bgWords?.length) {
-      xml += `        <span ttm:role="x-bg">\n`
-      for (const w of line.bgWords) xml += `          <span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)} </span>\n`
-      xml += `        </span>\n`
+      xml += `<span ttm:role="x-bg" begin="${fmtTTML(line.bgWords[0].time)}" end="${fmtTTML(line.bgWords[line.bgWords.length-1].end)}">`
+      xml += ttmlWordSpans(line.bgWords)
+      xml += `</span>`
     }
     if (line.duoWords?.length) {
-      xml += `        <span ttm:role="x-alt">\n`
-      for (const w of line.duoWords) xml += `          <span begin="${fmtTTML(w.time)}" end="${fmtTTML(w.end)}">${esc(w.word)} </span>\n`
-      xml += `        </span>\n`
+      xml += `<span ttm:role="x-alt" ttm:agent="v2" begin="${fmtTTML(line.duoWords[0].time)}" end="${fmtTTML(line.duoWords[line.duoWords.length-1].end)}">`
+      xml += ttmlWordSpans(line.duoWords)
+      xml += `</span>`
     }
-    xml += `      </p>\n`
+    xml += `</p>\n`
   }
   xml += `    </div>\n  </body>\n</tt>`
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.ttml'
@@ -2027,6 +2728,35 @@ function exportTTML() {
     const fileName = parts.pop()
     const dir = parts.join('/')
     showModal('Saved!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(fileName)}</strong><div class="es-path">${esc(dir)}</div><div class="es-note">Feel free to use this in Lokal by importing it from the lyrics view, or use it in any other program that supports TTML files. Thanks!</div></div>`, [{label:'Close',fn:closeModal}])
+  })
+}
+
+function fmtLRCTime(t) {
+  if (t == null) return '00:00.00'
+  const m = Math.floor(t / 60)
+  const s = t - m * 60
+  return `${String(m).padStart(2,'0')}:${s.toFixed(2).padStart(5,'0')}`
+}
+
+function lrcLineText(line) {
+  let t = line.text || ''
+  if (line.duoText) t += (t ? ' ' : '') + line.duoText
+  if (line.bgText) t += (t ? ' ' : '') + `(${line.bgText})`
+  return t.trim()
+}
+
+function exportLRC() {
+  const timed = lines.filter(l => l.time != null).sort((a,b) => a.time - b.time)
+  if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
+  let out = ''
+  for (const line of timed) out += `[${fmtLRCTime(line.time)}]${lrcLineText(line)}\n`
+  const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.lrc'
+  window.api.saveLRC(out, suggestedName).then(fp => {
+    if (!fp) return
+    const parts = fp.replace(/\\/g,'/').split('/')
+    const fileName = parts.pop()
+    const dir = parts.join('/')
+    showModal('Saved!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(fileName)}</strong><div class="es-path">${esc(dir)}</div><div class="es-note">Plain line-synced LRC, ready to submit to LRCLIB alongside your word-synced TTML.</div></div>`, [{label:'Close',fn:closeModal}])
   })
 }
 
@@ -2110,6 +2840,11 @@ audio.addEventListener('error', () => {
 
 document.addEventListener('keydown', e => {
   const tag = document.activeElement.tagName.toLowerCase()
+  if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.code==='KeyZ' && tag!=='input' && tag!=='textarea') {
+    e.preventDefault()
+    undoLastEdit()
+    return
+  }
   if (tag==='input'||tag==='textarea') return
   if (e.code==='Space') { e.preventDefault(); togglePlay() }
   if (e.code==='KeyS') { e.preventDefault(); setStartNow() }
