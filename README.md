@@ -1,3 +1,4 @@
+* Compatible with Spicy Lyrics (i've used it myself)
 # ![Local TTML Editor](https://i.imgur.com/NzDrtAq.png)
 
 ![icon](https://i.imgur.com/3Id3RPj.png)
