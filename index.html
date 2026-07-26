@@ -1245,7 +1245,7 @@ async function renderProjectsDropdown() {
         <button class="mbtn primary" id="pd-save-btn" style="flex:1">${currentProjectPath?'Save':'Save New'}</button>
         <button class="mbtn" id="pd-save-as-btn" style="flex:1">Save As…</button>
       </div>
-      <div class="pd-hint">${currentProjectPath?`Saving to <span class="settings-code">${esc(currentProjectPath.split(/[\\/]/).pop())}</span> — never touched by autosave.`:'Not linked to a saved file yet — Save will prompt where to put it.'}</div>
+      <div class="pd-hint">${currentProjectPath?`Saving to <span class="settings-code">${esc(currentProjectPath.split(/[\\/]/).pop())}</span> - never touched by autosave.`:'Not linked to a saved file yet - Save will prompt where to put it.'}</div>
     </div>
     <div class="pd-sep"></div>
     <div class="pd-section">
@@ -1343,7 +1343,7 @@ async function checkForCrashRecovery() {
     const best = candidates[0]
     showModal('Recover Unsaved Work?', `
       <div class="mf">
-        <p style="font-size:13px;line-height:1.6">Your last session didn't close properly, and nothing was restored automatically. We found <strong>${esc(best.name)}</strong>${best.isAutosave?' (autosave)':''} from ${esc(fmtProjTime(best.savedAt))} with ${best.lineCount||0} lines — want to load it back?</p>
+        <p style="font-size:13px;line-height:1.6">Your last session didn't close properly, and nothing was restored automatically. We found <strong>${esc(best.name)}</strong>${best.isAutosave?' (autosave)':''} from ${esc(fmtProjTime(best.savedAt))} with ${best.lineCount||0} lines - want to load it back?</p>
       </div>
     `, [
       {label:"Don't Recover", fn:closeModal},
@@ -1446,7 +1446,7 @@ async function checkForUpdates(manual) {
     if (compareVersions(latestTag, APP_VERSION) > 0) {
       showModal('Update Available', `
         <div class="mf">
-          <p style="font-size:13px;line-height:1.6">A new version is available: <strong>${esc(latestTag)}</strong> — you're on <strong>v${esc(APP_VERSION)}</strong>.</p>
+          <p style="font-size:13px;line-height:1.6">A new version is available: <strong>${esc(latestTag)}</strong> - you're on <strong>v${esc(APP_VERSION)}</strong>.</p>
           <div class="desc" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;background:var(--surface2);padding:10px;border-radius:6px">${esc((data.body||'').slice(0,700))}</div>
         </div>
       `, [
@@ -3275,7 +3275,7 @@ async function showSettings() {
     <div class="settings-section">
       <h4>Projects</h4>
       <div class="settings-row">
-        <div><div>Autosave interval</div><div class="desc">How long to wait between autosaves. Only writes a new timestamped file if something actually changed since the last one — never touches your manually saved project</div></div>
+        <div><div>Autosave interval</div><div class="desc">How long to wait between autosaves. Only writes a new timestamped file if something actually changed since the last one, so it never touches your manually saved project</div></div>
         <select class="settings-select" id="s-autosave-interval">
           ${[0,1,3,5,10,15,30].map(m => `<option value="${m}" ${settings.autosaveIntervalMinutes===m?'selected':''}>${m===0?'Off':`Every ${m} minute${m===1?'':'s'}`}</option>`).join('')}
         </select>
@@ -3537,10 +3537,10 @@ function validateExportIssues(sorted) {
     if (!words?.length) return
     const first = words[0], last = words[words.length - 1]
     if (first.time != null && line.time != null && first.time < line.time - EPS) {
-      issues.push(`${lineExportLabel(line)} — ${kind} vocals start before the line's own start time.`)
+      issues.push(`${lineExportLabel(line)} - ${kind} vocals start before the line's own start time.`)
     }
     if (last.end != null && line.end != null && last.end > line.end + EPS) {
-      issues.push(`${lineExportLabel(line)} — ${kind} vocals end after the line's own end time.`)
+      issues.push(`${lineExportLabel(line)} - ${kind} vocals end after the line's own end time.`)
     }
   }
   for (let i = 0; i < sorted.length; i++) {
