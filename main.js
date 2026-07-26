@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { spawn, spawnSync } = require('child_process')
@@ -6,6 +6,50 @@ const { spawn, spawnSync } = require('child_process')
 let win
 let nativeWaveformDecoderAvailable
 let audioMetadataProbeAvailable
+let allowClose = false
+
+const MAX_AUTOSAVES_PER_SONG = 20
+
+function getProjectsDir() {
+  const dir = path.join(app.getPath('documents'), 'Lokal TTML Editor', 'Projects')
+  fs.mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+function getAutosavesDir() {
+  const dir = path.join(getProjectsDir(), 'Autosaves')
+  fs.mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+function sanitizeFileBase(name) {
+  const safe = String(name || 'Untitled').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80)
+  return safe || 'Untitled'
+}
+
+function timestampSlug(date = new Date()) {
+  return date.toISOString().replace(/:/g, '-').replace(/\..+/, '')
+}
+
+function pruneOldAutosaves(base) {
+  const dir = getAutosavesDir()
+  let entries = []
+  try {
+    entries = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.autosave.ltproj') && f.startsWith(`${base} - `))
+  } catch {
+    return
+  }
+  if (entries.length <= MAX_AUTOSAVES_PER_SONG) return
+  const withStats = entries.map(f => {
+    const fp = path.join(dir, f)
+    let mtimeMs = 0
+    try { mtimeMs = fs.statSync(fp).mtimeMs } catch {}
+    return { fp, mtimeMs }
+  }).sort((a, b) => b.mtimeMs - a.mtimeMs)
+  withStats.slice(MAX_AUTOSAVES_PER_SONG).forEach(({ fp }) => {
+    try { fs.unlinkSync(fp) } catch {}
+  })
+}
 
 function hasNativeWaveformDecoder() {
   if (typeof nativeWaveformDecoderAvailable === 'boolean') return nativeWaveformDecoderAvailable
@@ -60,6 +104,11 @@ function createWindow() {
   win.webContents.on('unresponsive', () => {
     console.error('Renderer became unresponsive')
   })
+  win.on('close', (e) => {
+    if (allowClose) return
+    e.preventDefault()
+    win.webContents.send('app:confirm-close')
+  })
 }
 
 app.whenReady().then(createWindow)
@@ -113,8 +162,20 @@ ipcMain.handle('dialog:saveLRC', async (_, content, suggestedName) => {
   return result.filePath
 })
 
+ipcMain.handle('app:openExternal', async (_, url) => {
+  if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+    await shell.openExternal(url)
+    return true
+  }
+  return false
+})
+
 ipcMain.handle('file:readBinary', async (_, fp) => {
   return fs.readFileSync(fp).toString('base64')
+})
+
+ipcMain.handle('file:exists', async (_, fp) => {
+  try { return fs.existsSync(fp) } catch { return false }
 })
 
 ipcMain.handle('audio:getMetadata', async (_, fp) => {
@@ -233,6 +294,134 @@ ipcMain.handle('window:close', () => {
   if (win) win.close()
 })
 
+ipcMain.handle('window:confirmCloseResult', (_, shouldClose) => {
+  if (shouldClose && win) {
+    allowClose = true
+    win.close()
+  }
+})
+
 ipcMain.handle('window:isMaximized', () => {
   return win ? win.isMaximized() : false
+})
+
+ipcMain.handle('project:getDir', async () => getProjectsDir())
+
+ipcMain.handle('project:autosave', async (_, name, jsonContent) => {
+  const dir = getAutosavesDir()
+  const base = sanitizeFileBase(name)
+  const fp = path.join(dir, `${base} - ${timestampSlug()}.autosave.ltproj`)
+  fs.writeFileSync(fp, jsonContent, 'utf8')
+  pruneOldAutosaves(base)
+  return fp
+})
+
+ipcMain.handle('project:save', async (_, filePath, jsonContent) => {
+  fs.writeFileSync(filePath, jsonContent, 'utf8')
+  return filePath
+})
+
+ipcMain.handle('project:saveAs', async (_, jsonContent, suggestedName) => {
+  const dir = getProjectsDir()
+  const result = await dialog.showSaveDialog(win, {
+    defaultPath: path.join(dir, suggestedName || 'project.ltproj'),
+    filters: [{ name: 'Lokal TTML Project', extensions: ['ltproj'] }, { name: 'JSON', extensions: ['json'] }]
+  })
+  if (result.canceled) return null
+  fs.writeFileSync(result.filePath, jsonContent, 'utf8')
+  return result.filePath
+})
+
+ipcMain.handle('project:openDialog', async () => {
+  const dir = getProjectsDir()
+  const result = await dialog.showOpenDialog(win, {
+    defaultPath: dir,
+    filters: [{ name: 'Lokal TTML Project', extensions: ['ltproj', 'json'] }],
+    properties: ['openFile']
+  })
+  if (result.canceled) return null
+  const fp = result.filePaths[0]
+  return { path: fp, content: fs.readFileSync(fp, 'utf8') }
+})
+
+function readProjectFileMeta(fp) {
+  let stat
+  try { stat = fs.statSync(fp) } catch { return null }
+  let meta = { name: path.basename(fp).replace(/\.ltproj$/i, '') }
+  try {
+    const parsed = JSON.parse(fs.readFileSync(fp, 'utf8'))
+    meta = {
+      name: parsed.name || meta.name,
+      audioFileName: parsed.snapshot?.audioFileName || '',
+      lineCount: Array.isArray(parsed.snapshot?.lines) ? parsed.snapshot.lines.length : 0,
+      savedAt: parsed.savedAt || stat.mtimeMs,
+    }
+  } catch {}
+  return { path: fp, mtimeMs: stat.mtimeMs, ...meta }
+}
+
+ipcMain.handle('project:list', async () => {
+  const dir = getProjectsDir()
+  let entries = []
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true })
+      .filter(e => e.isFile() && e.name.toLowerCase().endsWith('.ltproj'))
+      .map(e => e.name)
+  } catch {
+    return []
+  }
+  return entries.map(f => readProjectFileMeta(path.join(dir, f))).filter(Boolean).sort((a, b) => b.mtimeMs - a.mtimeMs)
+})
+
+ipcMain.handle('project:listAutosaves', async () => {
+  const dir = getAutosavesDir()
+  let entries = []
+  try {
+    entries = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.autosave.ltproj'))
+  } catch {
+    return []
+  }
+  return entries.map(f => readProjectFileMeta(path.join(dir, f))).filter(Boolean).sort((a, b) => b.mtimeMs - a.mtimeMs)
+})
+
+ipcMain.handle('project:load', async (_, filePath) => {
+  return { path: filePath, content: fs.readFileSync(filePath, 'utf8') }
+})
+
+ipcMain.handle('project:delete', async (_, filePath) => {
+  try { fs.unlinkSync(filePath) } catch {}
+  return true
+})
+
+ipcMain.handle('project:deleteAutosavesForSong', async (_, name) => {
+  const dir = getAutosavesDir()
+  const base = sanitizeFileBase(name)
+  let entries = []
+  try {
+    entries = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.autosave.ltproj') && f.startsWith(`${base} - `))
+  } catch {
+    return 0
+  }
+  entries.forEach(f => {
+    try { fs.unlinkSync(path.join(dir, f)) } catch {}
+  })
+  return entries.length
+})
+
+ipcMain.handle('shell:showInFolder', async (_, filePath) => {
+  try {
+    shell.showItemInFolder(filePath)
+    return true
+  } catch {
+    return false
+  }
+})
+
+ipcMain.handle('shell:openProjectsFolder', async () => {
+  try {
+    await shell.openPath(getProjectsDir())
+    return true
+  } catch {
+    return false
+  }
 })

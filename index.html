@@ -39,6 +39,22 @@ body{position:relative}
 .tb-btn:hover{background:var(--surface3);border-color:var(--border2)}
 .tb-btn.accent{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
 .tb-btn.accent:hover{background:var(--accent-20)}
+.tb-btn.flash-saved{background:var(--accent-30)!important;transition:background .2s}
+#projects-dropdown-wrap{position:relative;display:flex}
+#recent-audio-wrap{position:relative;display:flex;gap:6px}
+#recent-audio-dropdown{position:absolute;top:calc(100% + 8px);left:0;width:280px;max-height:min(60vh,420px);overflow-y:auto;background:var(--surface);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--border2);border-radius:10px;box-shadow:0 16px 32px rgba(0,0,0,.55);padding:10px;z-index:50;display:none}
+#recent-audio-dropdown.open{display:block}
+#projects-btn{position:relative}
+#projects-dirty-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:1.5px solid var(--surface);opacity:0;transform:scale(.4);transition:opacity .2s,transform .2s;pointer-events:none}
+#projects-dirty-dot.visible{opacity:1;transform:scale(1)}
+#projects-dropdown{position:absolute;top:calc(100% + 8px);left:0;width:320px;max-height:min(70vh,560px);overflow-y:auto;background:var(--surface);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--border2);border-radius:10px;box-shadow:0 16px 32px rgba(0,0,0,.55);padding:14px;z-index:50;display:none}
+#projects-dropdown.open{display:block}
+.pd-section{margin-bottom:12px}
+.pd-section:last-child{margin-bottom:0}
+.pd-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500;display:block;margin-bottom:6px}
+.pd-sep{height:1px;background:var(--border);margin:12px 0}
+.pd-hint{font-size:10px;color:var(--muted2);margin-top:6px;line-height:1.4}
+.pd-empty{color:var(--muted);font-size:11px;text-align:center;padding:10px 4px}
 .tb-btn svg{width:14px;height:14px;flex-shrink:0}
 .tb-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
 kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px solid var(--border2);border-radius:3px;font-family:var(--mono);font-size:9px;color:var(--muted)}
@@ -58,6 +74,10 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .line-item.active{background:var(--accent-dim);border-color:var(--accent-25)}
 .line-item.playing{border-color:var(--accent-50)!important}
 .line-time{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:3px}
+.line-indicators{display:flex;gap:3px;align-items:center}
+.li-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.li-dot.li-bg{background:var(--purple);box-shadow:0 0 4px var(--purple-dim)}
+.li-dot.li-duo{background:var(--orange);box-shadow:0 0 4px var(--orange-dim)}
 .line-text-preview{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .line-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
 .badge{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:500}
@@ -128,8 +148,17 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 #set-end-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
 
 #preview-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--surface)}
-#preview-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-#preview-header h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+#preview-panel:fullscreen,#preview-panel.preview-fullscreen{width:100vw;height:100vh;border-left:none}
+#preview-panel:fullscreen #lyrics-preview,#preview-panel.preview-fullscreen #lyrics-preview{padding:40px 15vw}
+#preview-panel:fullscreen .am-main,#preview-panel.preview-fullscreen .am-main{font-size:38px}
+#preview-panel:fullscreen .am-duo,#preview-panel.preview-fullscreen .am-duo{font-size:26px}
+#preview-panel:fullscreen .am-bg,#preview-panel.preview-fullscreen .am-bg{font-size:20px}
+#preview-panel:fullscreen .pline-text,#preview-panel.preview-fullscreen .pline-text{font-size:30px}
+#fullscreen-btn.active{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
+#center-preview-btn.active{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
+#preview-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;row-gap:6px;justify-content:space-between}
+#preview-header h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;white-space:nowrap;flex-shrink:0;margin-right:8px}
+#preview-header-actions{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end;row-gap:6px}
 .mode-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--font)}
 .mode-btn.active{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
 #preview-body{flex:1;overflow:hidden;position:relative;background:var(--bg)}
@@ -182,11 +211,13 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .am-bgword .am-char.lit{color:var(--purple)}
 @keyframes am-word-pulse{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 16px var(--accent-40)}}
 @keyframes am-word-pulse-duo{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 14px rgba(255,170,87,.5)}}
-.am-dots{display:flex;gap:6px;padding:6px 4px;opacity:.3;transition:opacity .3s}
-.am-dots.active{opacity:1}
-.am-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);transition:background .2s,transform .2s}
-.am-dot.lit{background:var(--accent);animation:am-dot-bounce .5s ease}
-@keyframes am-dot-bounce{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+.am-dots{display:flex;align-items:center;justify-content:center;gap:7px;height:0;margin:0;opacity:0;overflow:hidden;transform:translateY(4px) scale(.75);transition:opacity .35s ease,transform .35s ease,height .35s ease,margin .35s ease;pointer-events:none}
+.am-dots.active{height:24px;margin:4px 0;opacity:1;transform:translateY(0) scale(1)}
+.am-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);opacity:.5}
+.am-dots.active .am-dot{background:var(--accent);opacity:.5;animation:am-dot-bounce 1.15s ease-in-out infinite}
+.am-dots.active .am-dot:nth-child(2){animation-delay:.15s}
+.am-dots.active .am-dot:nth-child(3){animation-delay:.3s}
+@keyframes am-dot-bounce{0%,60%,100%{transform:translateY(0) scale(1);opacity:.5}30%{transform:translateY(-6px) scale(1.25);opacity:1}}
 
 #transport{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
 #play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
@@ -298,10 +329,26 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 </div>
 <div id="app">
   <div id="toolbar">
-    <button class="tb-btn" onclick="openAudio()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-      Open Audio
-    </button>
+    <div id="projects-dropdown-wrap">
+      <button class="tb-btn accent" id="projects-btn" onclick="toggleProjectsDropdown()" title="Save/Load projects">
+        <span id="projects-dirty-dot" title="Unsaved changes"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Projects
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:1px"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="projects-dropdown"></div>
+    </div>
+    <div class="tb-sep"></div>
+    <div id="recent-audio-wrap">
+      <button class="tb-btn" onclick="openAudio()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Open Audio
+      </button>
+      <button class="tb-btn" id="recent-audio-btn" onclick="toggleRecentAudioDropdown()" title="Recently opened audio" style="padding:6px 7px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+      </button>
+      <div id="recent-audio-dropdown"></div>
+    </div>
     <button class="tb-btn" onclick="showLRCLIBModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Search LRCLIB
@@ -333,6 +380,9 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
       <button class="tb-btn" onclick="exportLRC()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export LRC
+      </button>
+      <button class="tb-btn" onclick="checkForUpdates(true)" title="Check for updates (currently v1.1.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21,3 21,9 15,9"/></svg>
       </button>
       <button class="tb-btn" onclick="showSettings()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -382,11 +432,19 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
     <div id="preview-panel">
       <div id="preview-header">
         <h2>Live Preview</h2>
-        <div style="display:flex;gap:4px">
+        <div id="preview-header-actions">
           <button class="mode-btn active" id="mode-kara" onclick="setMode('karaoke')">Karaoke</button>
           <button class="mode-btn" id="mode-plain" onclick="setMode('plain')">Plain</button>
           <div class="tb-sep"></div>
-          <button class="mode-btn" id="mode-apple" onclick="togglePreviewStyle()" title="Apple Music-style animated preview">Preview Style</button>
+          <button class="mode-btn" id="mode-apple" onclick="togglePreviewStyle()" title="Animated preview style with word pulses and letter waves">Preview Style</button>
+          <div class="tb-sep"></div>
+          <button class="mode-btn" id="center-preview-btn" onclick="toggleCenterPreview()" title="Auto-center the current line in the live preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:-2px"><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <div class="tb-sep"></div>
+          <button class="mode-btn" id="fullscreen-btn" onclick="togglePreviewFullscreen()" title="Fullscreen preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:-2px"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          </button>
         </div>
       </div>
       <div id="preview-body">
@@ -468,9 +526,22 @@ let previewAnimationFrame = 0
 let autosaveTimer = 0
 let restoringSession = false
 const SESSION_STORAGE_KEY = 'ttml-editor-session'
+const APP_VERSION = '1.1.1'
+const UPDATE_REPO = 'sipbuu/lokal-ttml'
+let currentProjectPath = null
+let projectDirty = false
+let lastAutosaveAt = 0
+let projectAutosaveTimer = null
+const SESSION_ACTIVE_KEY = 'ttml-editor-session-active'
 let undoHistory = []
+let redoHistory = []
 let undoRestoring = false
 const MAX_UNDO_HISTORY = 80
+const UNDO_STORAGE_KEY = 'ttml-editor-undo-history'
+const MAX_PERSISTED_UNDO = 15
+let undoPersistTimer = 0
+const RECENT_AUDIO_KEY = 'ttml-editor-recent-audio'
+const MAX_RECENT_AUDIO = 10
 
 function genId() { return 'l' + Math.random().toString(36).slice(2, 9) }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
@@ -950,17 +1021,449 @@ function getSessionSnapshot() {
   }
 }
 
+function setProjectDirty(v) {
+  projectDirty = v
+  const dot = document.getElementById('projects-dirty-dot')
+  if (dot) dot.classList.toggle('visible', v)
+}
+
 function saveSessionNow() {
   if (restoringSession) return
   try {
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(getSessionSnapshot()))
   } catch {}
+  setProjectDirty(true)
 }
 
 function scheduleSessionSave() {
   if (restoringSession || undoRestoring) return
   clearTimeout(autosaveTimer)
   autosaveTimer = setTimeout(saveSessionNow, 250)
+}
+
+function sanitizeFileBase(name) {
+  const safe = String(name || 'Untitled').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80)
+  return safe || 'Untitled'
+}
+
+function getCurrentSongName() {
+  return songMeta.musicName?.trim() || (audioFileName || '').replace(/\.[^.]+$/, '').trim() || 'Untitled'
+}
+
+function getProjectFileJSON(name) {
+  return JSON.stringify({
+    version: 1,
+    name: name || getCurrentSongName(),
+    savedAt: Date.now(),
+    snapshot: getSessionSnapshot(),
+  }, null, 2)
+}
+
+async function autosaveProjectTick() {
+  if (!window.api?.autosaveProject) return
+  if (!(settings.autosaveIntervalMinutes > 0)) return
+  if (!projectDirty) return
+  if (!lines.length && !audioFileName) return
+  try {
+    const json = getProjectFileJSON()
+    await window.api.autosaveProject(getCurrentSongName(), json)
+    setProjectDirty(false)
+    lastAutosaveAt = Date.now()
+    flashProjectsButton()
+    if (document.getElementById('projects-dropdown')?.classList.contains('open')) renderProjectsDropdown()
+  } catch (err) {
+    showRuntimeError(`Autosave failed: ${err?.message || err}`)
+  }
+}
+
+function startProjectAutosaveLoop() {
+  if (projectAutosaveTimer) clearInterval(projectAutosaveTimer)
+  const minutes = settings.autosaveIntervalMinutes > 0 ? settings.autosaveIntervalMinutes : 5
+  projectAutosaveTimer = setInterval(autosaveProjectTick, minutes * 60 * 1000)
+}
+
+function flashProjectsButton() {
+  const btn = document.getElementById('projects-btn')
+  if (!btn) return
+  btn.classList.add('flash-saved')
+  setTimeout(() => btn.classList.remove('flash-saved'), 900)
+}
+
+async function applyProjectSnapshot(s, filePath, isAutosave) {
+  restoringSession = true
+  clearUndoHistory()
+  try {
+    lines = Array.isArray(s.lines) ? s.lines : []
+    selectedLineId = s.selectedLineId || null
+    selectedWord = s.selectedWord || null
+    audioFileName = s.audioFileName || ''
+    songMeta = s.songMeta || { musicName: '', album: '', artists: [], songwriters: [] }
+    currentAudioPath = s.currentAudioPath || ''
+    currentAudioMetadata = s.currentAudioMetadata || null
+    previewMode = s.previewMode || 'karaoke'
+    filterText = s.filterText || ''
+    waveformZoom = Number.isFinite(s.waveformZoom) ? s.waveformZoom : 1
+    waveformCenter = Number.isFinite(s.waveformCenter) ? s.waveformCenter : 0
+    currentProjectPath = isAutosave ? null : (filePath || null)
+    if (currentAudioPath) {
+      await loadAudioFromPath(currentAudioPath, {
+        showLoader: true,
+        audioFileName,
+        currentTime: s.audioCurrentTime,
+        waveformZoom,
+        waveformCenter,
+      })
+    }
+  } finally {
+    restoringSession = false
+  }
+  renderAll()
+  drawWaveform()
+  if (selectedWord) selectWord(selectedWord.lineId, selectedWord.idx, selectedWord.type)
+  saveSessionNow()
+  setProjectDirty(false)
+}
+
+async function loadProjectFromPath(filePath, isAutosave) {
+  if (!window.api?.loadProjectFile) return
+  try {
+    const res = await window.api.loadProjectFile(filePath)
+    if (!res?.content) return
+    const parsed = JSON.parse(res.content)
+    await applyProjectSnapshot(parsed.snapshot || {}, filePath, isAutosave)
+  } catch (err) {
+    showRuntimeError(`Couldn't load project: ${err?.message || err}`)
+  }
+}
+
+async function saveCurrentProject(name) {
+  if (!currentProjectPath) return saveCurrentProjectAsFile(name)
+  if (!window.api?.saveProject) return
+  const json = getProjectFileJSON(name)
+  try {
+    await window.api.saveProject(currentProjectPath, json)
+    setProjectDirty(false)
+    flashProjectsButton()
+  } catch (err) {
+    showRuntimeError(`Couldn't save project: ${err?.message || err}`)
+  }
+}
+
+async function saveCurrentProjectAsFile(name) {
+  if (!window.api?.saveProjectAs) return null
+  const json = getProjectFileJSON(name)
+  const suggested = `${sanitizeFileBase(name)}.ltproj`
+  try {
+    const fp = await window.api.saveProjectAs(json, suggested)
+    if (!fp) return null
+    currentProjectPath = fp
+    setProjectDirty(false)
+    flashProjectsButton()
+    return fp
+  } catch (err) {
+    showRuntimeError(`Couldn't save project: ${err?.message || err}`)
+    return null
+  }
+}
+
+async function deleteProjectFile(filePath) {
+  if (!window.api?.deleteProjectFile) return
+  await window.api.deleteProjectFile(filePath)
+  if (currentProjectPath === filePath) currentProjectPath = null
+}
+
+function fmtProjTime(ts) {
+  try { return new Date(ts).toLocaleString() } catch { return '' }
+}
+
+function fmtRelTime(ms) {
+  if (!ms) return ''
+  const diff = Math.max(0, Date.now() - ms)
+  if (diff < 45000) return 'just now'
+  const mins = Math.round(diff / 60000)
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.round(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.round(hrs / 24)}d ago`
+}
+
+function toggleProjectsDropdown() {
+  const dd = document.getElementById('projects-dropdown')
+  if (!dd) return
+  if (dd.classList.contains('open')) closeProjectsDropdown()
+  else openProjectsDropdown()
+}
+
+function openProjectsDropdown() {
+  const dd = document.getElementById('projects-dropdown')
+  if (!dd) return
+  dd.classList.add('open')
+  renderProjectsDropdown()
+}
+
+function closeProjectsDropdown() {
+  document.getElementById('projects-dropdown')?.classList.remove('open')
+}
+
+document.addEventListener('mousedown', e => {
+  const wrap = document.getElementById('projects-dropdown-wrap')
+  if (wrap && !wrap.contains(e.target)) closeProjectsDropdown()
+})
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProjectsDropdown() })
+
+function projectRowHtml(p, isAutosave) {
+  const tag = isAutosave ? ' <span style="color:var(--muted2);font-weight:400">(autosave)</span>' : ''
+  const cur = !isAutosave && p.path === currentProjectPath ? ' <span style="color:var(--accent);font-weight:400">(current)</span>' : ''
+  return `
+    <div class="lrclib-result">
+      <div class="rt">${esc(p.name)}${tag}${cur}</div>
+      <div class="ra">${esc(p.audioFileName || 'No audio')} · ${esc(fmtProjTime(p.savedAt))} · ${p.lineCount||0} lines</div>
+      <div class="rb">
+        <button class="sm-btn pd-load-btn" data-path="${escAttr(p.path)}" data-autosave="${isAutosave?'1':'0'}">Load</button>
+        <button class="sm-btn pd-reveal-btn" data-path="${escAttr(p.path)}">Reveal</button>
+        <button class="sm-btn danger pd-delete-btn" data-path="${escAttr(p.path)}" data-autosave="${isAutosave?'1':'0'}">Delete</button>
+      </div>
+    </div>
+  `
+}
+
+async function renderProjectsDropdown() {
+  const dd = document.getElementById('projects-dropdown')
+  if (!dd || !dd.classList.contains('open')) return
+  let projects = [], autosaves = []
+  try { projects = (await window.api?.listProjects?.()) || [] } catch {}
+  try { autosaves = (await window.api?.listAutosaves?.()) || [] } catch {}
+  const projectRows = projects.map(p => projectRowHtml(p, false)).join('') || `<div class="pd-empty">No saved projects yet.</div>`
+  const autosaveRows = autosaves.slice(0, 10).map(p => projectRowHtml(p, true)).join('') || `<div class="pd-empty">No autosaves yet.</div>`
+  const intervalOptions = [0, 1, 3, 5, 10, 15, 30].map(m => `<option value="${m}" ${settings.autosaveIntervalMinutes===m?'selected':''}>${m===0?'Off':`Every ${m} minute${m===1?'':'s'}`}</option>`).join('')
+
+  dd.innerHTML = `
+    <div class="pd-section">
+      <label class="pd-label">Save Project</label>
+      <input class="mi" id="pd-name-input" placeholder="Project name…" value="${escAttr(getCurrentSongName())}">
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="mbtn primary" id="pd-save-btn" style="flex:1">${currentProjectPath?'Save':'Save New'}</button>
+        <button class="mbtn" id="pd-save-as-btn" style="flex:1">Save As…</button>
+      </div>
+      <div class="pd-hint">${currentProjectPath?`Saving to <span class="settings-code">${esc(currentProjectPath.split(/[\\/]/).pop())}</span> — never touched by autosave.`:'Not linked to a saved file yet — Save will prompt where to put it.'}</div>
+    </div>
+    <div class="pd-sep"></div>
+    <div class="pd-section">
+      <label class="pd-label">Autosave</label>
+      <select class="mi" id="pd-autosave-interval">${intervalOptions}</select>
+      <div class="pd-hint">${lastAutosaveAt?`Last autosave ${fmtRelTime(lastAutosaveAt)}`:'No autosave yet this session'} · writes a new timestamped file only when something changed, never overwrites your saved project.</div>
+    </div>
+    <div class="pd-sep"></div>
+    <div class="pd-section">
+      <label class="pd-label">Saved Projects</label>
+      <div id="pd-projects-list">${projectRows}</div>
+    </div>
+    <div class="pd-sep"></div>
+    <div class="pd-section">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:6px">
+        <label class="pd-label" style="margin-bottom:0">Recent Autosaves</label>
+        <button class="sm-btn danger" id="pd-delete-song-autosaves-btn" style="flex-shrink:0">Delete all for this song</button>
+      </div>
+      <div id="pd-autosaves-list" style="margin-top:6px">${autosaveRows}</div>
+    </div>
+    <div class="pd-section" style="display:flex;gap:6px">
+      <button class="mbtn" id="pd-browse-btn" style="flex:1">Browse for a project file…</button>
+      <button class="mbtn" id="pd-open-folder-btn" style="flex-shrink:0">Open Folder</button>
+    </div>
+  `
+
+  document.getElementById('pd-save-btn').addEventListener('click', async () => {
+    const name = document.getElementById('pd-name-input').value.trim()
+    if (!name) return
+    await saveCurrentProject(name)
+    renderProjectsDropdown()
+  })
+  document.getElementById('pd-save-as-btn').addEventListener('click', async () => {
+    const name = document.getElementById('pd-name-input').value.trim()
+    if (!name) return
+    const fp = await saveCurrentProjectAsFile(name)
+    if (fp) renderProjectsDropdown()
+  })
+  document.getElementById('pd-autosave-interval').addEventListener('change', e => {
+    settings.autosaveIntervalMinutes = parseInt(e.target.value, 10) || 0
+    saveSettings()
+    startProjectAutosaveLoop()
+    renderProjectsDropdown()
+  })
+  document.getElementById('pd-browse-btn').addEventListener('click', async () => {
+    const res = await window.api?.openProjectDialog?.()
+    if (!res?.content) return
+    try {
+      const parsed = JSON.parse(res.content)
+      closeProjectsDropdown()
+      await applyProjectSnapshot(parsed.snapshot || {}, res.path, false)
+    } catch (err) {
+      showRuntimeError(`Couldn't open project file: ${err?.message || err}`)
+    }
+  })
+  document.getElementById('pd-open-folder-btn').addEventListener('click', () => { window.api?.openProjectsFolder?.() })
+  document.getElementById('pd-delete-song-autosaves-btn').addEventListener('click', async () => {
+    const name = getCurrentSongName()
+    showModal('Delete All Autosaves?', `<p style="font-size:13px;color:var(--muted)">This removes every autosave file for "${esc(name)}". Your saved project (if any) is untouched.</p>`, [
+      {label:'Cancel', fn:closeModal},
+      {label:'Delete All', primary:true, fn: async () => {
+        closeModal()
+        await window.api?.deleteAutosavesForSong?.(name)
+        renderProjectsDropdown()
+      }}
+    ])
+  })
+  dd.querySelectorAll('.pd-load-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      closeProjectsDropdown()
+      await loadProjectFromPath(btn.dataset.path, btn.dataset.autosave === '1')
+    })
+  })
+  dd.querySelectorAll('.pd-reveal-btn').forEach(btn => {
+    btn.addEventListener('click', () => { window.api?.showInFolder?.(btn.dataset.path) })
+  })
+  dd.querySelectorAll('.pd-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => { await deleteProjectFile(btn.dataset.path); renderProjectsDropdown() })
+  })
+}
+
+async function checkForCrashRecovery() {
+  if (lines.length || audioFileName) return
+  try {
+    const [projects, autosaves] = await Promise.all([
+      window.api?.listProjects?.() || [],
+      window.api?.listAutosaves?.() || [],
+    ])
+    const candidates = [
+      ...(projects || []).map(p => ({ ...p, isAutosave: false })),
+      ...(autosaves || []).map(p => ({ ...p, isAutosave: true })),
+    ].filter(p => (p.lineCount || 0) > 0)
+    if (!candidates.length) return
+    candidates.sort((a, b) => (b.savedAt || b.mtimeMs || 0) - (a.savedAt || a.mtimeMs || 0))
+    const best = candidates[0]
+    showModal('Recover Unsaved Work?', `
+      <div class="mf">
+        <p style="font-size:13px;line-height:1.6">Your last session didn't close properly, and nothing was restored automatically. We found <strong>${esc(best.name)}</strong>${best.isAutosave?' (autosave)':''} from ${esc(fmtProjTime(best.savedAt))} with ${best.lineCount||0} lines — want to load it back?</p>
+      </div>
+    `, [
+      {label:"Don't Recover", fn:closeModal},
+      {label:'Load It', primary:true, fn: async () => { closeModal(); await loadProjectFromPath(best.path, best.isAutosave) }}
+    ])
+  } catch {}
+}
+
+function getRecentAudio() {
+  try {
+    const raw = localStorage.getItem(RECENT_AUDIO_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch { return [] }
+}
+
+function saveRecentAudioList(list) {
+  try { localStorage.setItem(RECENT_AUDIO_KEY, JSON.stringify(list)) } catch {}
+}
+
+function addRecentAudio(fp, name) {
+  if (!fp) return
+  let list = getRecentAudio().filter(r => r.path !== fp)
+  list.unshift({ path: fp, name: name || fp.split(/[\\/]/).pop(), openedAt: Date.now() })
+  saveRecentAudioList(list.slice(0, MAX_RECENT_AUDIO))
+}
+
+function removeRecentAudio(fp) {
+  saveRecentAudioList(getRecentAudio().filter(r => r.path !== fp))
+}
+
+function toggleRecentAudioDropdown() {
+  const dd = document.getElementById('recent-audio-dropdown')
+  if (!dd) return
+  if (dd.classList.contains('open')) closeRecentAudioDropdown()
+  else { dd.classList.add('open'); renderRecentAudioDropdown() }
+}
+
+function closeRecentAudioDropdown() {
+  document.getElementById('recent-audio-dropdown')?.classList.remove('open')
+}
+
+document.addEventListener('mousedown', e => {
+  const wrap = document.getElementById('recent-audio-wrap')
+  if (wrap && !wrap.contains(e.target)) closeRecentAudioDropdown()
+})
+
+async function renderRecentAudioDropdown() {
+  const dd = document.getElementById('recent-audio-dropdown')
+  if (!dd || !dd.classList.contains('open')) return
+  const list = getRecentAudio()
+  const checked = await Promise.all(list.map(async r => ({ ...r, exists: window.api?.fileExists ? await window.api.fileExists(r.path) : true })))
+  const missing = checked.filter(r => !r.exists)
+  if (missing.length) saveRecentAudioList(checked.filter(r => r.exists))
+  const visible = checked.filter(r => r.exists)
+  dd.innerHTML = visible.length ? visible.map(r => `
+    <div class="lrclib-result">
+      <div class="rt">${esc(r.name)}</div>
+      <div class="ra">${esc(fmtRelTime(r.openedAt))}</div>
+      <div class="rb">
+        <button class="sm-btn ra-load-btn" data-path="${escAttr(r.path)}" data-name="${escAttr(r.name)}">Open</button>
+        <button class="sm-btn danger ra-remove-btn" data-path="${escAttr(r.path)}">Remove</button>
+      </div>
+    </div>
+  `).join('') : `<div class="pd-empty">No recently opened audio yet.</div>`
+  dd.querySelectorAll('.ra-load-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      closeRecentAudioDropdown()
+      currentProjectPath = null
+      clearUndoHistory()
+      await loadAudioFromPath(btn.dataset.path, { showLoader: true })
+      addRecentAudio(btn.dataset.path, btn.dataset.name)
+      scheduleSessionSave()
+    })
+  })
+  dd.querySelectorAll('.ra-remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => { removeRecentAudio(btn.dataset.path); renderRecentAudioDropdown() })
+  })
+}
+
+function compareVersions(a, b) {
+  const pa = String(a||'').replace(/^v/i,'').split('.').map(n => parseInt(n,10)||0)
+  const pb = String(b||'').replace(/^v/i,'').split('.').map(n => parseInt(n,10)||0)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const da = pa[i]||0, db = pb[i]||0
+    if (da > db) return 1
+    if (da < db) return -1
+  }
+  return 0
+}
+
+async function checkForUpdates(manual) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/releases/latest`)
+    if (!res.ok) throw new Error(`GitHub API error ${res.status}`)
+    const data = await res.json()
+    const latestTag = data.tag_name || data.name || ''
+    if (!latestTag) throw new Error('No release found')
+    if (compareVersions(latestTag, APP_VERSION) > 0) {
+      showModal('Update Available', `
+        <div class="mf">
+          <p style="font-size:13px;line-height:1.6">A new version is available: <strong>${esc(latestTag)}</strong> — you're on <strong>v${esc(APP_VERSION)}</strong>.</p>
+          <div class="desc" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;background:var(--surface2);padding:10px;border-radius:6px">${esc((data.body||'').slice(0,700))}</div>
+        </div>
+      `, [
+        {label:'Later', fn:closeModal},
+        {label:'View Release', primary:true, fn:() => {
+          const url = data.html_url || `https://github.com/${UPDATE_REPO}/releases/latest`
+          if (window.api?.openExternal) window.api.openExternal(url)
+          else window.open(url, '_blank')
+          closeModal()
+        }}
+      ])
+    } else if (manual) {
+      showModal('Up to Date', `<p style="font-size:13px;color:var(--muted)">You're on the latest version, v${esc(APP_VERSION)}.</p>`, [{label:'Close', fn:closeModal}])
+    }
+  } catch (err) {
+    if (manual) showRuntimeError(`Update check failed: ${err?.message || err}`)
+  }
 }
 
 function cloneEditorState() {
@@ -976,10 +1479,40 @@ function cloneEditorState() {
   }))
 }
 
+function persistUndoHistory() {
+  clearTimeout(undoPersistTimer)
+  undoPersistTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(UNDO_STORAGE_KEY, JSON.stringify({
+        undo: undoHistory.slice(-MAX_PERSISTED_UNDO),
+        redo: redoHistory.slice(-MAX_PERSISTED_UNDO),
+      }))
+    } catch {}
+  }, 400)
+}
+
+function restoreUndoHistoryFromStorage() {
+  try {
+    const raw = localStorage.getItem(UNDO_STORAGE_KEY)
+    if (!raw) return
+    const parsed = JSON.parse(raw)
+    undoHistory = Array.isArray(parsed.undo) ? parsed.undo : []
+    redoHistory = Array.isArray(parsed.redo) ? parsed.redo : []
+  } catch {}
+}
+
+function clearUndoHistory() {
+  undoHistory = []
+  redoHistory = []
+  try { localStorage.removeItem(UNDO_STORAGE_KEY) } catch {}
+}
+
 function pushHistory(label = 'edit') {
   if (restoringSession || undoRestoring) return
   undoHistory.push({ label, savedAt: Date.now(), state: cloneEditorState() })
   if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift()
+  redoHistory = []
+  persistUndoHistory()
 }
 
 function restoreEditorState(state) {
@@ -1005,7 +1538,19 @@ function restoreEditorState(state) {
 function undoLastEdit() {
   const entry = undoHistory.pop()
   if (!entry) return
+  redoHistory.push({ label: entry.label, savedAt: Date.now(), state: cloneEditorState() })
+  if (redoHistory.length > MAX_UNDO_HISTORY) redoHistory.shift()
   restoreEditorState(entry.state)
+  persistUndoHistory()
+}
+
+function redoLastEdit() {
+  const entry = redoHistory.pop()
+  if (!entry) return
+  undoHistory.push({ label: entry.label, savedAt: Date.now(), state: cloneEditorState() })
+  if (undoHistory.length > MAX_UNDO_HISTORY) undoHistory.shift()
+  restoreEditorState(entry.state)
+  persistUndoHistory()
 }
 
 function showRuntimeError(message) {
@@ -1314,7 +1859,10 @@ function nudgePlaybackSpeed(dir) {
 async function openAudio() {
   const fp = await window.api.openAudio()
   if (!fp) return
+  currentProjectPath = null
+  clearUndoHistory()
   await loadAudioFromPath(fp, { showLoader: true })
+  addRecentAudio(fp)
   scheduleSessionSave()
 }
 
@@ -1669,7 +2217,7 @@ function renderLines() {
     el.className = 'line-item' + (line.id===selectedLineId?' active':'')
     el.dataset.id = line.id
     const untimed = line.words.filter(w=>w.time==null).length
-    el.innerHTML = `<div class="line-time">${fmtMs(line.time)}</div><div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div><div class="line-badges"><span class="badge badge-main">${line.words.length}w</span>${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}</div>`
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:6px"><div class="line-indicators">${line.bgWords?.length?'<span class="li-dot li-bg" title="Has background vocals"></span>':''}${line.duoWords?.length?'<span class="li-dot li-duo" title="Has duo/harmony vocals"></span>':''}</div><div class="line-time">${fmtMs(line.time)}</div></div><div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div><div class="line-badges"><span class="badge badge-main">${line.words.length}w</span>${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}</div>`
     el.addEventListener('click', () => selectLine(line.id))
     el.addEventListener('dblclick', () => {
       selectLine(line.id)
@@ -2029,7 +2577,17 @@ function editWordsText(lineId, type) {
     {label:'Cancel',fn:closeModal},
     {label:'Update',primary:true,fn:()=>{
       const raw = document.getElementById('ew-text').value
-      const rawWords = settings.spicyLyricsPrep ? spicyPrepWords(raw) : splitWords(raw).map(w=>({word:w,tight:false}))
+      const plainTokens = splitWords(raw)
+      const rawWords = []
+      plainTokens.forEach(tok => {
+        if (tok.includes('\\')) {
+          rawWords.push({ word: tok, tight: false })
+        } else if (settings.spicyLyricsPrep) {
+          spicySplitToken(tok).forEach((t,pi) => rawWords.push({ word: t, tight: pi > 0 }))
+        } else {
+          rawWords.push({ word: tok, tight: false })
+        }
+      })
       let updatedRaw = []
       let oldIdx = 0
       rawWords.forEach(rw => {
@@ -2323,11 +2881,27 @@ function appendAppleWords(container, words, className, type) {
   })
 }
 
+function appendPauseDots(container, gapStart, gapEnd) {
+  const dots = document.createElement('div')
+  dots.className = 'am-dots'
+  dots.dataset.start = gapStart
+  dots.dataset.end = gapEnd
+  for (let d = 0; d < 3; d++) {
+    const dot = document.createElement('span')
+    dot.className = 'am-dot'
+    dots.appendChild(dot)
+  }
+  container.appendChild(dots)
+}
+
 function renderPreviewApple(t) {
   const container = document.getElementById('lyrics-preview')
   container.classList.add('apple-mode')
   container.innerHTML = ''
   const timedLines = lines.filter(l => l.time != null)
+  if (timedLines.length && timedLines[0].time >= PAUSE_DOTS_THRESHOLD) {
+    appendPauseDots(container, 0, timedLines[0].time)
+  }
   for (let li = 0; li < lines.length; li++) {
     const line = lines[li]
     const effEnd = effectiveEnd(line)
@@ -2383,16 +2957,7 @@ function renderPreviewApple(t) {
       const gapStart = effEnd
       const gapEnd = nextTimed.time
       if (gapEnd - gapStart >= PAUSE_DOTS_THRESHOLD) {
-        const dots = document.createElement('div')
-        dots.className = 'am-dots'
-        dots.dataset.start = gapStart
-        dots.dataset.end = gapEnd
-        for (let d = 0; d < 3; d++) {
-          const dot = document.createElement('span')
-          dot.className = 'am-dot'
-          dots.appendChild(dot)
-        }
-        container.appendChild(dots)
+        appendPauseDots(container, gapStart, gapEnd)
       }
     }
   }
@@ -2416,18 +2981,14 @@ function updatePreviewLiveApple(t) {
 
   document.querySelectorAll('.am-dots').forEach(el => {
     const start = parseFloat(el.dataset.start), end = parseFloat(el.dataset.end)
-    const active = t >= start && t <= end
-    el.classList.toggle('active', active)
-    const progress = clamp((t - start) / Math.max(0.01, end - start), 0, 1)
-    el.querySelectorAll('.am-dot').forEach((dot, i) => {
-      dot.classList.toggle('lit', active && progress >= (i+1)/3 - 0.02)
-    })
+    el.classList.toggle('active', t >= start && t < end)
   })
 }
 
 let settings = {
   scrollPreview: true,
   wordGlowStyle: 'both',
+  autosaveIntervalMinutes: 5,
   previewFontSize: 17,
   dimPast: true,
   showTimecodes: true,
@@ -2578,7 +3139,19 @@ function applySettings() {
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v)
   document.querySelectorAll('.pline-text').forEach(el => el.style.fontSize = settings.previewFontSize + 'px')
   syncPreviewStyleButton()
+  syncCenterPreviewButton()
   drawWaveform()
+}
+
+function syncCenterPreviewButton() {
+  const btn = document.getElementById('center-preview-btn')
+  if (btn) btn.classList.toggle('active', !!settings.scrollPreview)
+}
+
+function toggleCenterPreview() {
+  settings.scrollPreview = !settings.scrollPreview
+  saveSettings()
+  syncCenterPreviewButton()
 }
 
 function syncPreviewStyleButton() {
@@ -2594,6 +3167,24 @@ function togglePreviewStyle() {
   syncPreviewStyleButton()
   renderPreview(audio.currentTime||0)
 }
+
+function togglePreviewFullscreen() {
+  const panel = document.getElementById('preview-panel')
+  if (!document.fullscreenElement) {
+    panel.requestFullscreen?.().catch(err => showRuntimeError(`Couldn't enter fullscreen: ${err?.message || err}`))
+  } else {
+    document.exitFullscreen?.()
+  }
+}
+
+document.addEventListener('fullscreenchange', () => {
+  const panel = document.getElementById('preview-panel')
+  const isFs = document.fullscreenElement === panel
+  panel.classList.toggle('preview-fullscreen', isFs)
+  const btn = document.getElementById('fullscreen-btn')
+  if (btn) btn.classList.toggle('active', isFs)
+  renderPreview(audio.currentTime||0)
+})
 
 async function showSettings() {
   await ensureWaveformSupport()
@@ -2680,6 +3271,15 @@ async function showSettings() {
         </select>
       </div>
       <div class="settings-note"><strong>${nativeAvailable ? 'Native decoder found.' : 'Native decoder not found.'}</strong> Auto prefers the main-process decoder when it is available and falls back to browser decoding otherwise.</div>
+    </div>
+    <div class="settings-section">
+      <h4>Projects</h4>
+      <div class="settings-row">
+        <div><div>Autosave interval</div><div class="desc">How long to wait between autosaves. Only writes a new timestamped file if something actually changed since the last one — never touches your manually saved project</div></div>
+        <select class="settings-select" id="s-autosave-interval">
+          ${[0,1,3,5,10,15,30].map(m => `<option value="${m}" ${settings.autosaveIntervalMinutes===m?'selected':''}>${m===0?'Off':`Every ${m} minute${m===1?'':'s'}`}</option>`).join('')}
+        </select>
+      </div>
     </div>
     <div class="settings-section">
       <h4>Theme</h4>
@@ -2779,6 +3379,9 @@ async function showSettings() {
       const prevWaveformEngine = settings.waveformEngine
       settings.previewFontSize = parseInt(document.getElementById('s-fontsize').value)
       settings.scrollPreview = document.getElementById('s-scroll').checked
+      settings.autosaveIntervalMinutes = parseInt(document.getElementById('s-autosave-interval').value, 10) || 0
+      startProjectAutosaveLoop()
+      syncCenterPreviewButton()
       settings.dimPast = document.getElementById('s-dim').checked
       settings.wordGlowStyle = document.getElementById('s-glow').value
       settings.showTimecodes = document.getElementById('s-timecodes').checked
@@ -2922,9 +3525,74 @@ function showMetadataModal() {
   }, 50)
 }
 
-function exportTTML() {
+function lineExportLabel(line) {
+  const text = (line.text || line.duoText || '(blank line)').trim()
+  return `"${text.length > 40 ? text.slice(0, 40) + '…' : text}"`
+}
+
+function validateExportIssues(sorted) {
+  const issues = []
+  const EPS = 0.02
+  const checkAltBounds = (line, words, kind) => {
+    if (!words?.length) return
+    const first = words[0], last = words[words.length - 1]
+    if (first.time != null && line.time != null && first.time < line.time - EPS) {
+      issues.push(`${lineExportLabel(line)} — ${kind} vocals start before the line's own start time.`)
+    }
+    if (last.end != null && line.end != null && last.end > line.end + EPS) {
+      issues.push(`${lineExportLabel(line)} — ${kind} vocals end after the line's own end time.`)
+    }
+  }
+  for (let i = 0; i < sorted.length; i++) {
+    const line = sorted[i]
+    const label = lineExportLabel(line)
+    if (line.time == null) { issues.push(`${label} has no start time set.`); continue }
+    if (line.end != null && line.end <= line.time) issues.push(`${label} ends at or before it starts.`)
+    const missingMain = (line.words || []).filter(w => w.time == null).length
+    if (missingMain) issues.push(`${label} has ${missingMain} word${missingMain===1?'':'s'} with no timing.`)
+    for (let w = 0; w < (line.words || []).length - 1; w++) {
+      const a = line.words[w], b = line.words[w + 1]
+      if (a.end != null && b.time != null && a.end > b.time + EPS) {
+        issues.push(`${label} has overlapping word timing ("${a.word}" runs into "${b.word}").`)
+        break
+      }
+    }
+    checkAltBounds(line, line.bgWords, 'background')
+    checkAltBounds(line, line.duoWords, 'duo')
+    const next = sorted[i + 1]
+    if (next && line.end != null && next.time != null && line.end > next.time + EPS) {
+      issues.push(`${label} overlaps into the next line, ${lineExportLabel(next)}.`)
+    }
+  }
+  return issues
+}
+
+function showExportConflictsModal(issues, onContinue) {
+  const shown = issues.slice(0, 14).map(i => `<li style="margin-bottom:6px">${esc(i)}</li>`).join('')
+  const more = issues.length > 14 ? `<div class="desc" style="margin-top:8px">…and ${issues.length - 14} more.</div>` : ''
+  showModal('Potential Conflicts', `
+    <div class="mf">
+      <p style="font-size:13px;line-height:1.6;color:var(--muted)">We found a few things in your timing that might not be intentional:</p>
+      <ul style="font-size:12px;color:var(--text);padding-left:18px;margin-top:10px;max-height:260px;overflow:auto">${shown}</ul>
+      ${more}
+      <div class="desc" style="margin-top:10px">If these are meant to be there, click Continue with Conflicts to export anyway.</div>
+    </div>
+  `, [
+    {label:'Cancel', fn:closeModal},
+    {label:'Continue with Conflicts', primary:true, fn: () => { closeModal(); onContinue() }}
+  ])
+}
+
+function exportTTML(force) {
   if (!lines.length) return
   const sorted = [...lines].sort((a,b)=>(a.time||0)-(b.time||0))
+  if (!force) {
+    const issues = validateExportIssues(sorted)
+    if (issues.length) {
+      showExportConflictsModal(issues, () => exportTTML(true))
+      return
+    }
+  }
   const hasDuet = sorted.some(l => l.duoWords?.length)
   let metaXml = `<ttm:title>${esc(songMeta.musicName||audioFileName||'Unknown')}</ttm:title>`
   if (hasDuet) metaXml += `<ttm:agent type="person" xml:id="v1"/><ttm:agent type="person" xml:id="v2"/>`
@@ -3068,6 +3736,21 @@ document.getElementById('wc-max').addEventListener('click', async () => {
 })
 document.getElementById('wc-close').addEventListener('click', () => window.api.closeWindow?.())
 window.api.onWindowMaximized?.(setWindowMaximizedState)
+window.api.onConfirmClose?.(async () => {
+  if (!projectDirty) { window.api.confirmCloseResult?.(true); return }
+  showModal('Unsaved Changes', `<p style="font-size:13px;line-height:1.6;color:var(--muted)">You've got unsaved changes. Save your project before closing?</p>`, [
+    {label:'Cancel', fn: () => { forceCloseModal(); window.api.confirmCloseResult?.(false) }},
+    {label:"Don't Save", fn: () => { forceCloseModal(); window.api.confirmCloseResult?.(true) }},
+    {label:'Save & Close', primary:true, fn: async () => {
+      const name = getCurrentSongName()
+      let ok = true
+      if (currentProjectPath) await saveCurrentProject(name)
+      else ok = !!(await saveCurrentProjectAsFile(name))
+      forceCloseModal()
+      window.api.confirmCloseResult?.(ok)
+    }}
+  ], { locked: true })
+})
 updateWindowControls()
 document.getElementById('error-log-close').addEventListener('click', () => {
   document.getElementById('error-log').classList.remove('visible')
@@ -3100,9 +3783,19 @@ document.addEventListener('keydown', e => {
     undoLastEdit()
     return
   }
+  if ((e.ctrlKey||e.metaKey) && (e.code==='KeyY' || (e.shiftKey && e.code==='KeyZ')) && tag!=='input' && tag!=='textarea') {
+    e.preventDefault()
+    redoLastEdit()
+    return
+  }
+  if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.code==='KeyS' && tag!=='input' && tag!=='textarea') {
+    e.preventDefault()
+    saveCurrentProject(getCurrentSongName())
+    return
+  }
   if (tag==='input'||tag==='textarea') return
   if (e.code==='Space') { e.preventDefault(); togglePlay() }
-  if (e.code==='KeyS') { e.preventDefault(); setStartNow() }
+  if (e.code==='KeyS' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setStartNow() }
   if (e.code==='KeyE') { e.preventDefault(); setEndNow() }
   if (e.code==='BracketLeft') { e.preventDefault(); nudgePlaybackSpeed(-1) }
   if (e.code==='BracketRight') { e.preventDefault(); nudgePlaybackSpeed(1) }
@@ -3120,9 +3813,19 @@ document.addEventListener('keydown', e => {
 
 loadSettings()
 applySettings()
+restoreUndoHistoryFromStorage()
+const wasSessionUnclean = localStorage.getItem(SESSION_ACTIVE_KEY) === '1'
+try { localStorage.setItem(SESSION_ACTIVE_KEY, '1') } catch {}
 restoreSession().finally(() => {
   renderAll()
   drawWaveform()
   if (selectedWord) selectWord(selectedWord.lineId, selectedWord.idx, selectedWord.type)
+  if (wasSessionUnclean) checkForCrashRecovery()
+})
+setTimeout(() => checkForUpdates(false), 2500)
+startProjectAutosaveLoop()
+window.addEventListener('beforeunload', () => {
+  try { localStorage.setItem(SESSION_ACTIVE_KEY, '0') } catch {}
+  autosaveProjectTick()
 })
 </script>
