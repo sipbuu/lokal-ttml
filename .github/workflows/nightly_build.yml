@@ -111,11 +111,10 @@ jobs:
           name: "Lokal TTML Editor Nightly (${{ inputs.ref || 'main' }})"
           prerelease: true
           body: |
-            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/nightly-${{ inputs.ref || 'main' }}/release-banner.png)
-
+          
             *Requires Node.js v18+ if running from source.*
 
-            ---
+            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/nightly-${{ inputs.ref || 'main' }}/release-banner.png)
 
             *This is a nightly build, code may/may not be fully functional.*
             Last commit note/date: ${{ env.COMMIT_MSG }} at ${{ env.COMMIT_DATE }}

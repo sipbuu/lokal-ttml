@@ -24,7 +24,7 @@ jobs:
 
             ---
 
-            # ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
+            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
 
             [Add brief summary/overview here]
 
