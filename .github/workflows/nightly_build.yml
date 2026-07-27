@@ -19,11 +19,11 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            build_cmd: npx electron-builder --win portable
+            build_cmd: npx electron-builder --win portable --publish never
           - os: macos-latest
-            build_cmd: npx electron-builder --mac dmg zip
+            build_cmd: npx electron-builder --mac dmg zip --publish never
           - os: ubuntu-latest
-            build_cmd: npx electron-builder --linux AppImage deb
+            build_cmd: npx electron-builder --linux AppImage deb --publish never
 
     steps:
       - name: Checkout Code

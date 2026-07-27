@@ -17,13 +17,13 @@ jobs:
         include:
           - os: windows-latest
             artifact_name: Lokal-TTML-Editor-Windows
-            build_cmd: npx electron-builder --win portable
+            build_cmd: npx electron-builder --win portable --publish never
           - os: macos-latest
             artifact_name: Lokal-TTML-Editor-macOS
-            build_cmd: npx electron-builder --mac dmg zip
+            build_cmd: npx electron-builder --mac dmg zip --publish never
           - os: ubuntu-latest
             artifact_name: Lokal-TTML-Editor-Linux
-            build_cmd: npx electron-builder --linux AppImage deb
+            build_cmd: npx electron-builder --linux AppImage deb --publish never
 
     steps:
       - name: Checkout Code
