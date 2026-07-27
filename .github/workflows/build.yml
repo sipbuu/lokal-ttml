@@ -5,7 +5,7 @@ on:
     inputs:
       ref:
         description: 'Git Ref/Tag/Commit to build'
-        required: true
+        required: false
         default: 'main'
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ inputs.ref || 'main' }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
