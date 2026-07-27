@@ -2,6 +2,9 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('api', {
   openAudio: () => ipcRenderer.invoke('dialog:openAudio'),
   openLyrics: () => ipcRenderer.invoke('dialog:openLyrics'),
+  saveTTML: (content, name, defaultDir) => ipcRenderer.invoke('dialog:saveTTML', content, name, defaultDir),
+  saveLRC: (content, name, defaultDir) => ipcRenderer.invoke('dialog:saveLRC', content, name, defaultDir),
+  writeFileDirect: (filePath, content) => ipcRenderer.invoke('file:writeDirect', filePath, content),
   getVersion: () => ipcRenderer.invoke('app:getVersion'),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
   readBinary: (fp) => ipcRenderer.invoke('file:readBinary', fp),
@@ -19,6 +22,8 @@ contextBridge.exposeInMainWorld('api', {
   saveProject: (filePath, json) => ipcRenderer.invoke('project:save', filePath, json),
   saveProjectAs: (json, suggestedName) => ipcRenderer.invoke('project:saveAs', json, suggestedName),
   openProjectDialog: () => ipcRenderer.invoke('project:openDialog'),
+  saveThemeAs: (json, suggestedName) => ipcRenderer.invoke('theme:saveAs', json, suggestedName),
+  openThemeDialog: () => ipcRenderer.invoke('theme:openDialog'),
   listProjects: () => ipcRenderer.invoke('project:list'),
   listAutosaves: () => ipcRenderer.invoke('project:listAutosaves'),
   loadProjectFile: (filePath) => ipcRenderer.invoke('project:load', filePath),
