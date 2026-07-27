@@ -208,16 +208,15 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .pline-duo .pdw{opacity:.6}
 
 #lyrics-preview.apple-mode{gap:0;padding:28px 22px 48px;font-family:'Inter',var(--font);scroll-behavior:auto;--am-font-size:22px;--am-lit:#fff;--am-dim:rgba(255,255,255,.42);--am-glow:rgba(255,255,255,.55);--am-bg-lit:rgba(255,255,255,.92);--am-bg-dim:rgba(255,255,255,.5)}
-.am-line{padding:2px 2px 28px;border-radius:6px;transition:opacity .28s ease,transform .28s cubic-bezier(.2,1.2,.4,1);will-change:transform,opacity;transform-origin:left center;--am-line-blur:0px}
+.am-line{padding:2px 2px 28px;border-radius:6px;transition:opacity .28s ease,transform .28s cubic-bezier(.2,1.2,.4,1),filter .28s ease;will-change:transform,opacity,filter;transform-origin:left center}
 .am-line.preview-seekable{cursor:pointer}
 .am-line.preview-seekable:hover{background:var(--accent-dim2)}
 .am-line.preview-hover{background:var(--accent-dim);outline:1px solid var(--accent-25)}
 .am-line.past{opacity:.22}
-.am-line.current{opacity:1;font-weight:700;transform:scale(1)}
+.am-line.current{opacity:1;font-weight:700;transform:scale(1);filter:blur(0) drop-shadow(0 4px 24px rgba(0,0,0,.4))}
 .am-line.future{opacity:.38;font-weight:400}
 .am-line:not(.current){transform:scale(.88);font-weight:400}
 .am-line.duo-align{transform-origin:right center}
-.am-line:not(.current) .am-main,.am-line:not(.current) .am-duo,.am-line:not(.current) .am-bg{text-shadow:0 0 var(--am-line-blur) rgba(0,0,0,.45)}
 .am-row{display:flex;flex-direction:column;align-items:stretch;gap:2px;transform-origin:inherit}
 .am-main{font-size:var(--am-font-size);font-weight:inherit;line-height:1.16;letter-spacing:-.03em;color:var(--text);text-align:left}
 .am-line.duo-align .am-main{text-align:right}
@@ -1435,6 +1434,10 @@ async function renderProjectsDropdown() {
     </div>
     <div class="pd-sep"></div>
     <div class="pd-section">
+      <button class="mbtn" id="pd-tap-time-btn" style="width:100%" ${!lines.length?'disabled':''}>Tap to Time…</button>
+      <div class="pd-hint">Manually start a tap-along pass for word timings - handy if you skipped or closed the first-run prompt. Space stamps each word; you can slow playback down.</div>
+    </div>
+    <div class="pd-section">
       <button class="mbtn danger" id="pd-reset-btn" style="width:100%">Reset Everything…</button>
       <div class="pd-hint">Clears the audio, lines, words, and metadata for a blank slate. Unlinks from any saved project - doesn't delete files on disk.</div>
     </div>
@@ -1492,6 +1495,25 @@ async function renderProjectsDropdown() {
   })
   dd.querySelectorAll('.pd-delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => { await deleteProjectFile(btn.dataset.path); renderProjectsDropdown() })
+  })
+  document.getElementById('pd-tap-time-btn')?.addEventListener('click', () => {
+    closeProjectsDropdown()
+    if (!lines.length) return
+    if (tapTimingSession) {
+      showModal('Already Tapping', `<p style="font-size:13px;color:var(--muted)">Tap to Time is already running. Use the bar at the bottom, or press Esc to exit.</p>`, [{ label: 'Close', fn: closeModal }])
+      return
+    }
+    const hasTimings = projectHasSolidWordTimings()
+    if (hasTimings) {
+      showModal('Start Tap to Time?', `
+        <p style="font-size:13px;line-height:1.65;color:var(--muted)">This project already has word timings. Starting Tap to Time will clear existing word start/end times and let you stamp them fresh as the song plays.</p>
+      `, [
+        { label: 'Cancel', fn: closeModal },
+        { label: 'Start Tap to Time', primary: true, fn: () => { closeModal(); startTapToTime() } },
+      ])
+      return
+    }
+    startTapToTime()
   })
   document.getElementById('pd-reset-btn').addEventListener('click', () => {
     closeProjectsDropdown()
@@ -4120,6 +4142,12 @@ function renderPreviewApple(t) {
     const div = document.createElement('div')
     div.className = `am-line preview-seekable ${isDuoLead ? 'duo-align ' : ''}${past ? 'past' : cur ? 'current' : 'future'}`
     div.dataset.lineId = line.id
+    const dist = anchorIdx < 0 ? Math.min(li, 8) : Math.abs(li - anchorIdx)
+    const blurAmt = cur || li === anchorIdx ? 0 : Math.min(0.9 + dist * 1.15, 5.5)
+    div.style.filter = `blur(${blurAmt.toFixed(2)}px) drop-shadow(0 4px 24px rgba(0,0,0,.4))`
+    if (!cur && li !== anchorIdx && settings.dimPast) {
+      div.style.opacity = past ? '0.22' : String(Math.max(0.35 - dist * 0.018, 0.14))
+    }
     div.addEventListener('mouseenter', () => div.classList.add('preview-hover'))
     div.addEventListener('mouseleave', () => div.classList.remove('preview-hover'))
     div.addEventListener('click', () => { selectLine(line.id); seekToLine(line, false) })
@@ -4206,13 +4234,13 @@ function updatePreviewLiveApple(t) {
     if (el.className !== newClass) el.className = newClass
     if (highlight || isAnchor) {
       el.style.opacity = ''
-      el.style.setProperty('--am-line-blur', '0px')
+      el.style.filter = 'blur(0px) drop-shadow(0 4px 24px rgba(0,0,0,.4))'
     } else if (settings.dimPast) {
       el.style.opacity = past ? '0.22' : String(restingOpacity)
-      el.style.setProperty('--am-line-blur', `${blur.toFixed(2)}px`)
+      el.style.filter = `blur(${blur.toFixed(2)}px) drop-shadow(0 4px 24px rgba(0,0,0,.4))`
     } else {
       el.style.opacity = ''
-      el.style.setProperty('--am-line-blur', '0px')
+      el.style.filter = `blur(${Math.min(blur, 2.5).toFixed(2)}px) drop-shadow(0 4px 24px rgba(0,0,0,.4))`
     }
     const near = anchorIdx < 0 || dist <= 1
     el.querySelectorAll('.am-word').forEach(w => applyAppleWordUnit(w, time, dt, near))
