@@ -381,10 +381,25 @@ function readProjectFileMeta(fp) {
   let meta = { name: path.basename(fp).replace(/\.ltproj$/i, '') }
   try {
     const parsed = JSON.parse(fs.readFileSync(fp, 'utf8'))
+    const linesArr = Array.isArray(parsed.snapshot?.lines) ? parsed.snapshot.lines : []
+    let totalWords = 0, timedWords = 0
+    for (const line of linesArr) {
+      for (const bucket of [line.words, line.bgWords, line.duoWords]) {
+        if (!Array.isArray(bucket)) continue
+        for (const w of bucket) {
+          totalWords++
+          if (w && w.time != null && w.end != null) timedWords++
+        }
+      }
+    }
     meta = {
       name: parsed.name || meta.name,
       audioFileName: parsed.snapshot?.audioFileName || '',
-      lineCount: Array.isArray(parsed.snapshot?.lines) ? parsed.snapshot.lines.length : 0,
+      lineCount: linesArr.length,
+      totalWords,
+      timedWords,
+      progressPct: totalWords ? Math.round(100 * timedWords / totalWords) : 0,
+      tapTimingCompleted: !!parsed.snapshot?.tapTimingCompleted,
       savedAt: parsed.savedAt || stat.mtimeMs,
     }
   } catch {}
