@@ -207,8 +207,8 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .pline-bg .pbw{opacity:.6}
 .pline-duo .pdw{opacity:.6}
 
-#lyrics-preview.apple-mode{gap:0;padding:28px 22px 48px;font-family:'Inter',var(--font);--am-font-size:22px;--am-lit:#fff;--am-dim:rgba(255,255,255,.42);--am-glow:rgba(255,255,255,.55)}
-.am-line{padding:2px 2px 28px;border-radius:6px;transition:opacity .35s ease,transform .35s cubic-bezier(.2,1.2,.4,1);will-change:transform,opacity;transform-origin:left center;--am-line-blur:0px}
+#lyrics-preview.apple-mode{gap:0;padding:28px 22px 48px;font-family:'Inter',var(--font);scroll-behavior:auto;--am-font-size:22px;--am-lit:#fff;--am-dim:rgba(255,255,255,.42);--am-glow:rgba(255,255,255,.55);--am-bg-lit:rgba(255,255,255,.92);--am-bg-dim:rgba(255,255,255,.5)}
+.am-line{padding:2px 2px 28px;border-radius:6px;transition:opacity .28s ease,transform .28s cubic-bezier(.2,1.2,.4,1);will-change:transform,opacity;transform-origin:left center;--am-line-blur:0px}
 .am-line.preview-seekable{cursor:pointer}
 .am-line.preview-seekable:hover{background:var(--accent-dim2)}
 .am-line.preview-hover{background:var(--accent-dim);outline:1px solid var(--accent-25)}
@@ -216,29 +216,33 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .am-line.current{opacity:1;font-weight:700;transform:scale(1)}
 .am-line.future{opacity:.38;font-weight:400}
 .am-line:not(.current){transform:scale(.88);font-weight:400}
+.am-line.duo-align{transform-origin:right center}
 .am-line:not(.current) .am-main,.am-line:not(.current) .am-duo,.am-line:not(.current) .am-bg{text-shadow:0 0 var(--am-line-blur) rgba(0,0,0,.45)}
-.am-row{display:flex;align-items:baseline;justify-content:space-between;gap:18px;transform-origin:left center}
-.am-main{font-size:var(--am-font-size);font-weight:inherit;line-height:1.16;letter-spacing:-.03em;color:var(--text);flex:1}
-.am-duo{font-size:calc(var(--am-font-size) * .72);font-weight:inherit;line-height:1.16;letter-spacing:-.03em;color:var(--orange);text-align:right;opacity:.9;flex-shrink:0;max-width:45%;transform-origin:right center}
-.am-bg{font-size:calc(var(--am-font-size) * .58);font-weight:600;letter-spacing:-.02em;color:var(--purple);opacity:.72;margin-top:2px;padding-left:.15em}
-.am-bg::before{content:'('}
-.am-bg::after{content:')'}
+.am-row{display:flex;flex-direction:column;align-items:stretch;gap:2px;transform-origin:inherit}
+.am-main{font-size:var(--am-font-size);font-weight:inherit;line-height:1.16;letter-spacing:-.03em;color:var(--text);text-align:left}
+.am-line.duo-align .am-main{text-align:right}
+.am-duo{font-size:calc(var(--am-font-size) * .92);font-weight:inherit;line-height:1.16;letter-spacing:-.03em;text-align:right;opacity:.95;transform-origin:right center;margin-top:2px}
+.am-bg{font-size:calc(var(--am-font-size) * .75);font-weight:600;letter-spacing:-.02em;opacity:.76;margin-top:2px;padding-left:.15em;line-height:1.16}
+.am-line.duo-align .am-bg{padding-left:0;padding-right:.15em;text-align:right}
 .am-word,.am-char{display:inline-block;position:relative;white-space:pre;will-change:transform;transform-origin:center 72%;
   -webkit-text-fill-color:transparent;background-clip:text;-webkit-background-clip:text;
   background-image:linear-gradient(90deg,var(--am-lit) 0%,var(--am-lit) var(--gradient-position,-20%),var(--am-dim) calc(var(--gradient-position,-20%) + 18%),var(--am-dim) 100%);
   text-shadow:0 0 var(--text-shadow-blur-radius,0) color-mix(in srgb,var(--am-glow) calc(var(--text-shadow-opacity,0) * 1%),transparent)}
-.am-duo .am-word,.am-duo .am-char{--am-lit:var(--orange);--am-dim:color-mix(in srgb,var(--orange) 45%,transparent);--am-glow:var(--orange)}
-.am-bgword,.am-bgword .am-char{--am-lit:var(--purple);--am-dim:color-mix(in srgb,var(--purple) 42%,transparent);--am-glow:var(--purple);font-size:1em}
+.am-duo .am-word,.am-duo .am-char{--am-lit:#fff;--am-dim:rgba(255,255,255,.5);--am-glow:rgba(255,255,255,.5)}
+.am-bgword,.am-bgword .am-char{--am-lit:var(--am-bg-lit);--am-dim:var(--am-bg-dim);--am-glow:rgba(255,255,255,.45);font-size:1em}
 .word-seekable{cursor:pointer}
 .word-seekable:hover{filter:brightness(1.12)}
-.am-dots{display:flex;align-items:center;justify-content:flex-start;gap:.34em;height:0;margin:0;opacity:0;overflow:visible;pointer-events:none;transform-origin:left center;transition:opacity .15s ease}
-.am-dots.active{height:1.05em;margin:8px 0 22px;opacity:1;pointer-events:auto}
-.am-dots.pre-hidden,.am-dots:not(.active){height:0;margin:0;opacity:0}
-.am-dot-group{display:flex;align-items:center;gap:.34em;transform-origin:left center;will-change:transform;scale:0;transition:scale .45s cubic-bezier(.32,1.7,.5,1)}
-.am-dots.active:not(.pre-hidden) .am-dot-group{scale:1;transition:scale .35s cubic-bezier(.2,1.2,.4,1)}
-.am-dots.pre-hidden .am-dot-group,.am-dots:not(.active) .am-dot-group{scale:0;transition:scale .45s cubic-bezier(.32,1.7,.5,1)}
-.am-dot{display:inline-block;width:.52em;height:.52em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d8d8d8 70%);opacity:.35;will-change:transform,opacity;transform-origin:center;box-shadow:0 0 var(--text-shadow-blur-radius,0) rgba(255,255,255,calc(var(--text-shadow-opacity,0) / 100))}
+.am-dots{display:flex;align-items:center;justify-content:flex-start;font-size:var(--am-font-size);height:0;margin:0;opacity:0;overflow:visible;pointer-events:none;transform-origin:left center;transition:opacity .15s ease,height .2s ease,margin .2s ease}
+.am-dots.active{height:1.15em;margin:12px 0 28px;opacity:1;pointer-events:auto}
+.am-dots.pre-hidden{opacity:1}
+.am-dot-group{display:flex;align-items:center;gap:.34em;transform:scale(0);transform-origin:left center;will-change:transform;transition:transform .45s cubic-bezier(.32,1.7,.5,1)}
+.am-dots.active:not(.pre-hidden) .am-dot-group{transform:scale(1);transition:transform .35s cubic-bezier(.2,1.2,.4,1)}
+.am-dots.pre-hidden .am-dot-group,.am-dots:not(.active) .am-dot-group{transform:scale(0);transition:transform .45s cubic-bezier(.32,1.7,.5,1)}
+.am-dot{display:block;flex:0 0 auto;width:.52em;height:.52em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d8d8d8 70%);opacity:.35;will-change:transform,opacity;transform-origin:center;box-shadow:0 0 var(--text-shadow-blur-radius,0) rgba(255,255,255,calc(var(--text-shadow-opacity,0) / 100))}
+.am-dots.align-right{justify-content:flex-end}
+.am-dots.align-right .am-dot-group{transform-origin:right center}
 #preview-panel:fullscreen #lyrics-preview.apple-mode,#preview-panel.preview-fullscreen #lyrics-preview.apple-mode{--am-font-size:clamp(2rem,4.2vw,3.6rem)}
+
 #tap-timing-bar{display:none;position:fixed;left:50%;bottom:54px;transform:translateX(-50%);z-index:1200;background:rgba(12,12,14,.92);border:1px solid var(--border2);backdrop-filter:blur(16px);border-radius:12px;padding:10px 14px;gap:12px;align-items:center;box-shadow:0 12px 40px rgba(0,0,0,.45);font-size:12px;max-width:min(720px,92vw)}
 #tap-timing-bar.visible{display:flex}
 #tap-timing-bar .tt-title{font-weight:600;color:var(--accent);white-space:nowrap}
@@ -1082,7 +1086,8 @@ function ensurePreviewTicker() {
   const tick = () => {
     previewAnimationFrame = 0
     if (!audio.paused && !audio.ended) {
-      updatePreviewLive(audio.currentTime || 0)
+      const t = settings.previewStyle === 'apple' ? getAppleClockTime() : (audio.currentTime || 0)
+      updatePreviewLive(t)
       maybeKeepPlayheadVisible()
       updatePlayheads()
       previewAnimationFrame = requestAnimationFrame(tick)
@@ -3747,7 +3752,12 @@ const HELD_WORD_THRESHOLD = 1.0
 const PAUSE_DOTS_THRESHOLD = 3
 const LETTER_END_TRIM = 0.25
 const DOT_PRE_HIDE = 0.5
+const APPLE_SCROLL_ANCHOR = 0.35
 let applePreviewLastTs = 0
+let appleScrollAnchorId = null
+let applePredictedTime = 0
+let appleTimeAnchorMedia = 0
+let appleTimeAnchorPerf = 0
 
 class AmSpring {
   constructor(value, frequencyHz, dampingRatio) {
@@ -3898,9 +3908,9 @@ function appendAppleWords(container, words, className, type) {
   })
 }
 
-function appendPauseDots(container, gapStart, gapEnd) {
+function appendPauseDots(container, gapStart, gapEnd, alignRight = false) {
   const dots = document.createElement('div')
-  dots.className = 'am-dots'
+  dots.className = 'am-dots' + (alignRight ? ' align-right' : '')
   dots.dataset.start = gapStart
   dots.dataset.end = gapEnd
   const group = document.createElement('span')
@@ -3919,6 +3929,44 @@ function appendPauseDots(container, gapStart, gapEnd) {
     if (audioDuration) audio.currentTime = clamp(gapEnd, 0, audioDuration)
   })
   container.appendChild(dots)
+}
+
+function lineHasDuoLead(line) {
+  return !!(line?.duoWords?.length || line?.duoText) && !(line?.words?.length)
+}
+
+function scrollAppleLineToAnchor(el, lineId) {
+  if (!settings.scrollPreview || !el) return
+  if (appleScrollAnchorId === lineId) return
+  appleScrollAnchorId = lineId
+  const container = document.getElementById('lyrics-preview')
+  if (!container) return
+  const top = el.offsetTop - (container.clientHeight * APPLE_SCROLL_ANCHOR) + (el.offsetHeight / 2)
+  container.scrollTop = Math.max(0, top)
+}
+
+function getAppleClockTime() {
+  const raw = audio.currentTime || 0
+  const now = performance.now()
+  if (raw !== appleTimeAnchorMedia) {
+    appleTimeAnchorMedia = raw
+    appleTimeAnchorPerf = now
+  }
+  let predicted = appleTimeAnchorMedia
+  if (!audio.paused && !audio.ended && !audio.seeking) {
+    const elapsed = Math.min((now - appleTimeAnchorPerf) / 1000, 0.28)
+    predicted = appleTimeAnchorMedia + elapsed * (audio.playbackRate || 1)
+  }
+  applePredictedTime = predicted
+  return predicted
+}
+
+function findAppleAnchorIndex(t) {
+  let anchor = -1
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].time != null && lines[i].time <= t) anchor = i
+  }
+  return anchor
 }
 
 function applyAppleWordUnit(wrapper, t, dt, active) {
@@ -4021,7 +4069,7 @@ function applyAppleDots(el, t, dt) {
   const start = parseFloat(el.dataset.start), end = parseFloat(el.dataset.end)
   const active = t >= start && t < end
   const preHidden = active && t > end - DOT_PRE_HIDE
-  el.classList.toggle('active', active && !preHidden)
+  el.classList.toggle('active', active)
   el.classList.toggle('pre-hidden', preHidden)
   el.querySelectorAll('.am-dot').forEach(dot => {
     dot._springs = amEnsureSprings(dot._springs, 'dot')
@@ -4055,17 +4103,22 @@ function renderPreviewApple(t) {
   container.classList.add('apple-mode')
   container.innerHTML = ''
   applePreviewLastTs = performance.now()
+  appleScrollAnchorId = null
+  appleTimeAnchorMedia = t
+  appleTimeAnchorPerf = applePreviewLastTs
   const timedLines = lines.filter(l => l.time != null)
   if (timedLines.length && timedLines[0].time >= PAUSE_DOTS_THRESHOLD) {
-    appendPauseDots(container, 0, timedLines[0].time)
+    appendPauseDots(container, 0, timedLines[0].time, lineHasDuoLead(timedLines[0]))
   }
+  const anchorIdx = findAppleAnchorIndex(t)
   for (let li = 0; li < lines.length; li++) {
     const line = lines[li]
     const effEnd = effectiveEnd(line)
     const past = effEnd > 0 && t > effEnd
     const cur = line.time != null && t >= line.time && !past
+    const isDuoLead = !!(line.duoWords?.length || line.duoText) && !(line.words?.length)
     const div = document.createElement('div')
-    div.className = `am-line preview-seekable ${past ? 'past' : cur ? 'current' : 'future'}`
+    div.className = `am-line preview-seekable ${isDuoLead ? 'duo-align ' : ''}${past ? 'past' : cur ? 'current' : 'future'}`
     div.dataset.lineId = line.id
     div.addEventListener('mouseenter', () => div.classList.add('preview-hover'))
     div.addEventListener('mouseleave', () => div.classList.remove('preview-hover'))
@@ -4073,10 +4126,12 @@ function renderPreviewApple(t) {
 
     const row = document.createElement('div')
     row.className = 'am-row'
-    const mainDiv = document.createElement('div')
-    mainDiv.className = 'am-main'
-    appendAppleWords(mainDiv, line.words, 'am-word', 'main')
-    row.appendChild(mainDiv)
+    if (line.words?.length) {
+      const mainDiv = document.createElement('div')
+      mainDiv.className = 'am-main'
+      appendAppleWords(mainDiv, line.words, 'am-word', 'main')
+      row.appendChild(mainDiv)
+    }
 
     if (line.duoWords?.length) {
       const duoDiv = document.createElement('div')
@@ -4104,14 +4159,16 @@ function renderPreviewApple(t) {
     }
 
     container.appendChild(div)
-    div.querySelectorAll('.am-word').forEach(w => applyAppleWordUnit(w, t, 1 / 60, cur))
-    if (cur && settings.scrollPreview) setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'center' }), 0)
+    div.querySelectorAll('.am-word').forEach(w => applyAppleWordUnit(w, t, 1 / 60, cur || Math.abs(li - anchorIdx) <= 1))
+    if (li === anchorIdx) scrollAppleLineToAnchor(div, line.id)
 
     const nextTimed = timedLines.find(l => l.time > (line.time ?? -Infinity))
     if (nextTimed && line.time != null) {
       const gapStart = effEnd
       const gapEnd = nextTimed.time
-      if (gapEnd - gapStart >= PAUSE_DOTS_THRESHOLD) appendPauseDots(container, gapStart, gapEnd)
+      if (gapEnd - gapStart >= PAUSE_DOTS_THRESHOLD) {
+        appendPauseDots(container, gapStart, gapEnd, !!(nextTimed.duoWords?.length || nextTimed.duoText))
+      }
     }
   }
   container.querySelectorAll('.am-dots').forEach(el => applyAppleDots(el, t, 1 / 60))
@@ -4121,31 +4178,33 @@ function updatePreviewLiveApple(t) {
   const now = performance.now()
   const dt = clamp((now - (applePreviewLastTs || now)) / 1000, 0.001, 0.05)
   applePreviewLastTs = now
+  const clockT = getAppleClockTime()
+  const time = Number.isFinite(t) ? Math.max(t, clockT - 0.002) : clockT
 
   const lineEls = [...document.querySelectorAll('.am-line')]
-  let activeIdx = -1
-  lineEls.forEach((el, i) => {
-    const line = lines.find(l => l.id === el.dataset.lineId) || lines[i]
-    if (!line) return
-    const effEnd = effectiveEnd(line)
-    const past = effEnd > 0 && t > effEnd
-    const cur = line.time != null && t >= line.time && !past
-    if (cur) activeIdx = i
-  })
+  const anchorIdx = findAppleAnchorIndex(time)
+
+  if (anchorIdx >= 0 && lineEls[anchorIdx]) {
+    scrollAppleLineToAnchor(lineEls[anchorIdx], lineEls[anchorIdx].dataset.lineId)
+  } else {
+    appleScrollAnchorId = null
+  }
 
   lineEls.forEach((el, i) => {
     const line = lines.find(l => l.id === el.dataset.lineId) || lines[i]
     if (!line) return
     const effEnd = effectiveEnd(line)
-    const past = effEnd > 0 && t > effEnd
-    const cur = line.time != null && t >= line.time && !past
+    const past = effEnd > 0 && time > effEnd
+    const highlight = line.time != null && time >= line.time && !past
     const hover = el.classList.contains('preview-hover')
-    const dist = activeIdx < 0 ? Math.min(i, 8) : Math.abs(i - activeIdx)
-    const blur = cur ? 0 : Math.min(0.9 + dist * 1.15, 5.5)
+    const isDuoLead = el.classList.contains('duo-align')
+    const dist = anchorIdx < 0 ? Math.min(i, 8) : Math.abs(i - anchorIdx)
+    const blur = (i === anchorIdx) ? 0 : Math.min(0.9 + dist * 1.15, 5.5)
     const restingOpacity = Math.max(0.35 - dist * 0.018, 0.14)
-    const newClass = `am-line preview-seekable ${hover ? 'preview-hover ' : ''}${past && settings.dimPast ? 'past' : cur ? 'current' : 'future'}`
+    const isAnchor = i === anchorIdx
+    const newClass = `am-line preview-seekable ${isDuoLead ? 'duo-align ' : ''}${hover ? 'preview-hover ' : ''}${past && settings.dimPast ? 'past' : (highlight || isAnchor) ? 'current' : 'future'}`
     if (el.className !== newClass) el.className = newClass
-    if (cur) {
+    if (highlight || isAnchor) {
       el.style.opacity = ''
       el.style.setProperty('--am-line-blur', '0px')
     } else if (settings.dimPast) {
@@ -4155,12 +4214,11 @@ function updatePreviewLiveApple(t) {
       el.style.opacity = ''
       el.style.setProperty('--am-line-blur', '0px')
     }
-    const near = activeIdx < 0 || Math.abs(i - activeIdx) <= 1
-    el.querySelectorAll('.am-word').forEach(w => applyAppleWordUnit(w, t, dt, near))
-    if (cur && settings.scrollPreview) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const near = anchorIdx < 0 || dist <= 1
+    el.querySelectorAll('.am-word').forEach(w => applyAppleWordUnit(w, time, dt, near))
   })
 
-  document.querySelectorAll('.am-dots').forEach(el => applyAppleDots(el, t, dt))
+  document.querySelectorAll('.am-dots').forEach(el => applyAppleDots(el, time, dt))
 }
 
 let settings = {
@@ -4335,6 +4393,7 @@ function syncCenterPreviewButton() {
 
 function toggleCenterPreview() {
   settings.scrollPreview = !settings.scrollPreview
+  appleScrollAnchorId = null
   saveSettings()
   syncCenterPreviewButton()
 }
