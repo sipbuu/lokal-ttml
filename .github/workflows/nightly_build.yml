@@ -41,8 +41,47 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Playwright (Linux only)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Build Executables
+        run: ${{ matrix.build_cmd }}
+
+      - name: Rename release files (replace spaces)
+        shell: bash
+        run: |
+          cd release 2>/dev/null || exit 0
+          shopt -s nullglob
+          for f in *\ *; do
+            if [ -f "$f" ]; then
+              mv "$f" "${f// /-}"
+            fi
+          done
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: release
+
+  release:
+    name: Create & Update Nightly Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || 'main' }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Playwright
         run: |
           npm install playwright
           npx playwright install --with-deps chromium
@@ -54,11 +93,10 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=format:"%s")
           COMMIT_DATE=$(git log -1 --format="%cd" --date=format:'%Y-%m-%d %H:%M:%S UTC')
           
-          echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_ENV
-          echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
+          echo "MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "DATE=$COMMIT_DATE" >> $GITHUB_OUTPUT
 
-      - name: Generate Nightly Banner (Linux only)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Generate Nightly Banner
         run: |
           node - <<'EOF'
           const { chromium } = require("playwright");
@@ -82,41 +120,58 @@ jobs:
           })();
           EOF
 
-      - name: Build Executables
-        run: ${{ matrix.build_cmd }}
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
-      - name: Generate Checksums
+      - name: Aggregate artifacts into release_all
         shell: bash
         run: |
-          cd release
-          echo "CHECKSUM_TEXT<<EOF" >> $GITHUB_ENV
-          for file in *.{exe,dmg,zip,AppImage,deb}; do
-            if [ -f "$file" ]; then
-              if command -v sha256sum >/dev/null 2>&1; then
-                hash=$(sha256sum "$file" | awk '{print $1}')
-              elif command -v shasum >/dev/null 2>&1; then
-                hash=$(shasum -a 256 "$file" | awk '{print $1}')
-              else
-                hash=$(certutil -hashfile "$file" SHA256 | sed -n '2p' | tr -d ' \r\n')
-              fi
-              echo "> **$file**: \`$hash\`" >> $GITHUB_ENV
+          mkdir -p release_all
+          shopt -s nullglob
+          for d in artifacts/*; do
+            if [ -d "$d" ]; then
+              cp -R "$d"/* release_all/ || true
             fi
           done
-          echo "EOF" >> $GITHUB_ENV
-          
+
+      - name: Generate checksums for all artifacts
+        id: checksums
+        shell: bash
+        run: |
+          if command -v sha256sum >/dev/null 2>&1; then
+            SHACMD='sha256sum'
+          else
+            SHACMD='shasum -a 256'
+          fi
+
+          echo "HASHES<<EOF" >> $GITHUB_OUTPUT
+          for f in release_all/*; do
+            if [ -f "$f" ] && [ "$(basename "$f")" != ".no_files" ]; then
+              HASH=$($SHACMD "$f" | awk '{print toupper($1)}')
+              NAME=$(basename "$f")
+              echo "> **$NAME**: \`[$HASH]\`" >> $GITHUB_OUTPUT
+            fi
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create / Update Nightly Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "nightly-${{ inputs.ref || 'main' }}"
           name: "Lokal TTML Editor Nightly (${{ inputs.ref || 'main' }})"
           prerelease: true
+          files: |
+            release_all/**/*.*
+            release-banner.png
           body: |
             ![Release Banner](https://github.com/${{ github.repository }}/releases/download/nightly-${{ inputs.ref || 'main' }}/release-banner.png)
 
             ---
 
             *This is a nightly build, code may/may not be fully functional.*
-            Last commit note/date: `${{ env.COMMIT_MSG }}` at `${{ env.COMMIT_DATE }}`
+            Last commit note/date: `${{ steps.commit_info.outputs.MSG }}` at `${{ steps.commit_info.outputs.DATE }}`
 
             ---
 
@@ -126,7 +181,4 @@ jobs:
 
             ### Binary Checksums (SHA-256)
 
-          append_body: true
-          files: |
-            release/*.*
-            release-banner.png
+            ${{ steps.checksums.outputs.HASHES }}
