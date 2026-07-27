@@ -2,8 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('api', {
   openAudio: () => ipcRenderer.invoke('dialog:openAudio'),
   openLyrics: () => ipcRenderer.invoke('dialog:openLyrics'),
-  saveTTML: (content, name) => ipcRenderer.invoke('dialog:saveTTML', content, name),
-  saveLRC: (content, name) => ipcRenderer.invoke('dialog:saveLRC', content, name),
+  getVersion: () => ipcRenderer.invoke('app:getVersion'),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
   readBinary: (fp) => ipcRenderer.invoke('file:readBinary', fp),
   fileExists: (fp) => ipcRenderer.invoke('file:exists', fp),

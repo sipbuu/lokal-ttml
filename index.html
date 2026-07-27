@@ -526,7 +526,17 @@ let previewAnimationFrame = 0
 let autosaveTimer = 0
 let restoringSession = false
 const SESSION_STORAGE_KEY = 'ttml-editor-session'
-const APP_VERSION = '1.1.1'
+let APP_VERSION = '1.2.0'
+async function syncAppVersion() {
+  try {
+    const v = await window.api?.getVersion?.()
+    if (v) {
+      APP_VERSION = v
+      const btn = document.getElementById('update-check-btn')
+      if (btn) btn.title = `Check for updates (currently v${APP_VERSION})`
+    }
+  } catch {}
+}
 const UPDATE_REPO = 'sipbuu/lokal-ttml'
 let currentProjectPath = null
 let projectDirty = false

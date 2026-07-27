@@ -161,6 +161,7 @@ ipcMain.handle('dialog:saveLRC', async (_, content, suggestedName) => {
   fs.writeFileSync(result.filePath, content, 'utf8')
   return result.filePath
 })
+ipcMain.handle('app:getVersion', () => app.getVersion())
 
 ipcMain.handle('app:openExternal', async (_, url) => {
   if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
