@@ -118,12 +118,18 @@ jobs:
           echo "CHECKSUM_TEXT<<EOF" >> $GITHUB_ENV
           for file in *.{exe,dmg,zip,AppImage,deb}; do
             if [ -f "$file" ]; then
-              hash=$(shasum -a 256 "$file" | awk '{print $1}')
+              if command -v sha256sum >/dev/null 2>&1; then
+                hash=$(sha256sum "$file" | awk '{print $1}')
+              elif command -v shasum >/dev/null 2>&1; then
+                hash=$(shasum -a 256 "$file" | awk '{print $1}')
+              else
+                hash=$(certutil -hashfile "$file" SHA256 | sed -n '2p' | tr -d ' \r\n')
+              fi
               echo "> **$file**: \`$hash\`" >> $GITHUB_ENV
             fi
           done
           echo "EOF" >> $GITHUB_ENV
-
+          
       - name: Upload Assets & Append Checksums
         uses: softprops/action-gh-release@v2
         with:
