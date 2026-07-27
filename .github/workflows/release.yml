@@ -10,49 +10,8 @@ permissions:
   contents: write
 
 jobs:
-  create-release:
-    name: Create Draft Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          name: Release ${{ github.ref_name }}
-          body: |
-            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
-
-            ---
-            
-            [Add brief summary/overview here]
-
-            ---
-
-            ## Features added:
-
-            * 
-            
-            ## Quality of Life:
-
-            * 
-            
-            ## Fixed Issues:
-
-            * 
-
-            > Please report any [issues](https://github.com/sipbuu/lokal-ttml/issues) or pull requests for bugs and improvements.
-
-            ---
-
-            ### Binary Checksums (SHA-256)
-
-            **Full Changelog**: https://github.com/sipbuu/lokal-ttml/commits/${{ github.ref_name }}
-
-            ---
-
   build:
     name: Build (${{ matrix.os }})
-    needs: create-release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -77,14 +36,38 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Playwright (Linux only)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Build Executables
+        run: ${{ matrix.build_cmd }}
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: release
+
+  release:
+    name: Create & Publish Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Playwright
         run: |
           npm install playwright
           npx playwright install --with-deps chromium
 
-      - name: Generate Release Banner (Linux only)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Generate Release Banner
         run: |
           node - <<'EOF'
           const { chromium } = require("playwright");
@@ -108,35 +91,79 @@ jobs:
           })();
           EOF
 
-      - name: Build Executables
-        run: ${{ matrix.build_cmd }}
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
-      - name: Generate Checksums
+      - name: Aggregate artifacts into release_all
         shell: bash
         run: |
-          cd release
-          echo "CHECKSUM_TEXT<<EOF" >> $GITHUB_ENV
-          for file in *.{exe,dmg,zip,AppImage,deb}; do
-            if [ -f "$file" ]; then
-              if command -v sha256sum >/dev/null 2>&1; then
-                hash=$(sha256sum "$file" | awk '{print $1}')
-              elif command -v shasum >/dev/null 2>&1; then
-                hash=$(shasum -a 256 "$file" | awk '{print $1}')
-              else
-                hash=$(certutil -hashfile "$file" SHA256 | sed -n '2p' | tr -d ' \r\n')
-              fi
-              echo "> **$file**: \`$hash\`" >> $GITHUB_ENV
+          mkdir -p release_all
+          shopt -s nullglob
+          for d in artifacts/*; do
+            if [ -d "$d" ]; then
+              cp -R "$d"/* release_all/ || true
             fi
           done
-          echo "EOF" >> $GITHUB_ENV
-          
-      - name: Upload Assets & Append Checksums
+
+      - name: Generate checksums for all artifacts
+        id: checksums
+        shell: bash
+        run: |
+          if command -v sha256sum >/dev/null 2>&1; then
+            SHACMD='sha256sum'
+          else
+            SHACMD='shasum -a 256'
+          fi
+
+          echo "HASHES<<EOF" >> $GITHUB_OUTPUT
+          for f in release_all/*; do
+            if [ -f "$f" ] && [ "$(basename "$f")" != ".no_files" ]; then
+              HASH=$($SHACMD "$f" | awk '{print toupper($1)}')
+              NAME=$(basename "$f")
+              echo "> **$NAME**: \`[$HASH]\`" >> $GITHUB_OUTPUT
+            fi
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          append_body: true
-          body: ${{ env.CHECKSUM_TEXT }}
+          name: Release ${{ github.ref_name }}
           files: |
-            release/*.*
+            release_all/**/*.*
             release-banner.png
-            release-banner.png
+          body: |
+            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
+
+            ---
+
+            [Add brief summary/overview here]
+
+            ---
+
+            ## Features added:
+
+            * 
+
+            ## Quality of Life:
+
+            * 
+
+            ## Fixed Issues:
+
+            * 
+
+            > Please report any [issues](https://github.com/sipbuu/lokal-ttml/issues) or pull requests for bugs and improvements.
+
+            ---
+
+            ### Binary Checksums (SHA-256)
+
+            ${{ steps.checksums.outputs.HASHES }}
+
+            ---
+
+            **Full Changelog**: https://github.com/sipbuu/lokal-ttml/commits/${{ github.ref_name }}
