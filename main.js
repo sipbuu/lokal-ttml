@@ -142,9 +142,9 @@ ipcMain.handle('dialog:openLyrics', async () => {
   return { path: fp, content: fs.readFileSync(fp, 'utf8'), ext: path.extname(fp).slice(1).toLowerCase() }
 })
 
-ipcMain.handle('dialog:saveTTML', async (_, content, suggestedName) => {
+ipcMain.handle('dialog:saveTTML', async (_, content, suggestedName, defaultDir) => {
   const result = await dialog.showSaveDialog(win, {
-    defaultPath: suggestedName || 'lyrics.ttml',
+    defaultPath: defaultDir ? path.join(defaultDir, suggestedName || 'lyrics.ttml') : (suggestedName || 'lyrics.ttml'),
     filters: [{ name: 'TTML', extensions: ['ttml'] }]
   })
   if (result.canceled) return null
@@ -152,15 +152,25 @@ ipcMain.handle('dialog:saveTTML', async (_, content, suggestedName) => {
   return result.filePath
 })
 
-ipcMain.handle('dialog:saveLRC', async (_, content, suggestedName) => {
+ipcMain.handle('dialog:saveLRC', async (_, content, suggestedName, defaultDir) => {
   const result = await dialog.showSaveDialog(win, {
-    defaultPath: suggestedName || 'lyrics.lrc',
+    defaultPath: defaultDir ? path.join(defaultDir, suggestedName || 'lyrics.lrc') : (suggestedName || 'lyrics.lrc'),
     filters: [{ name: 'LRC', extensions: ['lrc'] }]
   })
   if (result.canceled) return null
   fs.writeFileSync(result.filePath, content, 'utf8')
   return result.filePath
 })
+
+ipcMain.handle('file:writeDirect', async (_, filePath, content) => {
+  try {
+    fs.writeFileSync(filePath, content, 'utf8')
+    return true
+  } catch {
+    return false
+  }
+})
+
 ipcMain.handle('app:getVersion', () => app.getVersion())
 
 ipcMain.handle('app:openExternal', async (_, url) => {
@@ -338,6 +348,26 @@ ipcMain.handle('project:openDialog', async () => {
   const result = await dialog.showOpenDialog(win, {
     defaultPath: dir,
     filters: [{ name: 'Lokal TTML Project', extensions: ['ltproj', 'json'] }],
+    properties: ['openFile']
+  })
+  if (result.canceled) return null
+  const fp = result.filePaths[0]
+  return { path: fp, content: fs.readFileSync(fp, 'utf8') }
+})
+
+ipcMain.handle('theme:saveAs', async (_, jsonContent, suggestedName) => {
+  const result = await dialog.showSaveDialog(win, {
+    defaultPath: suggestedName || 'theme.lttheme',
+    filters: [{ name: 'Lokal TTML Theme', extensions: ['lttheme'] }, { name: 'JSON', extensions: ['json'] }]
+  })
+  if (result.canceled) return null
+  fs.writeFileSync(result.filePath, jsonContent, 'utf8')
+  return result.filePath
+})
+
+ipcMain.handle('theme:openDialog', async () => {
+  const result = await dialog.showOpenDialog(win, {
+    filters: [{ name: 'Lokal TTML Theme', extensions: ['lttheme', 'json'] }],
     properties: ['openFile']
   })
   if (result.canceled) return null

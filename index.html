@@ -47,6 +47,11 @@ body{position:relative}
 #projects-btn{position:relative}
 #projects-dirty-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:1.5px solid var(--surface);opacity:0;transform:scale(.4);transition:opacity .2s,transform .2s;pointer-events:none}
 #projects-dirty-dot.visible{opacity:1;transform:scale(1)}
+#queue-wrap{position:relative;display:flex}
+.badge-count{display:none;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--accent);color:#111;font-size:9px;font-weight:700;align-items:center;justify-content:center;line-height:16px;text-align:center}
+.badge-count.visible{display:inline-flex}
+#queue-dropdown{position:absolute;top:calc(100% + 8px);left:0;width:300px;max-height:min(65vh,480px);overflow-y:auto;background:var(--surface);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--border2);border-radius:10px;box-shadow:0 16px 32px rgba(0,0,0,.55);padding:12px;z-index:50;display:none}
+#queue-dropdown.open{display:block}
 #projects-dropdown{position:absolute;top:calc(100% + 8px);left:0;width:320px;max-height:min(70vh,560px);overflow-y:auto;background:var(--surface);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--border2);border-radius:10px;box-shadow:0 16px 32px rgba(0,0,0,.55);padding:14px;z-index:50;display:none}
 #projects-dropdown.open{display:block}
 .pd-section{margin-bottom:12px}
@@ -72,6 +77,8 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .line-item{padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:1px;transition:all .1s;user-select:none}
 .line-item:hover{background:var(--surface2)}
 .line-item.active{background:var(--accent-dim);border-color:var(--accent-25)}
+.line-item.multi-selected{border-color:var(--orange);box-shadow:inset 0 0 0 1px var(--orange)}
+.line-item.multi-selected::before{content:'✓ ';color:var(--orange);font-weight:700}
 .line-item.playing{border-color:var(--accent-50)!important}
 .line-time{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:3px}
 .line-indicators{display:flex;gap:3px;align-items:center}
@@ -85,15 +92,32 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .badge-bg{background:var(--purple-dim);color:var(--purple)}
 .badge-duo{background:var(--orange-dim);color:var(--orange)}
 .badge-notimed{background:var(--red-dim);color:var(--red)}
+#bulk-select-bar{margin:6px 6px 0;padding:8px;background:var(--orange-dim);border:1px solid rgba(255,170,87,.35);border-radius:6px;display:flex;flex-direction:column;gap:6px}
+#bulk-select-bar.hidden{display:none}
+#bulk-select-count{font-size:11px;font-weight:600;color:var(--orange)}
+#bulk-select-actions{display:flex;flex-wrap:wrap;gap:5px}
+#bulk-drag-toggle-btn.active{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
 #add-line-btn{margin:6px;padding:8px;background:var(--surface2);border:1px dashed var(--border2);border-radius:6px;color:var(--muted);cursor:pointer;text-align:center;font-size:12px;transition:all .15s}
 #add-line-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim2)}
 
 #editor-panel{flex:1;display:flex;flex-direction:column;min-width:0}
 #waveform-area{height:88px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);position:relative;cursor:crosshair;overflow:hidden}
+#waveform-area.wf-dragging,#waveform-area.wf-edge-hover{cursor:ew-resize}
 #waveform-canvas{width:100%;height:100%;display:block}
 #playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;transform:translateX(-50%);box-shadow:0 0 8px var(--accent)}
 #waveform-time-overlay{position:absolute;top:4px;left:8px;font-family:var(--mono);font-size:10px;color:var(--muted);pointer-events:none}
 #waveform-zoom-overlay{position:absolute;top:4px;right:8px;font-family:var(--mono);font-size:10px;color:var(--muted2);pointer-events:none}
+#waveform-markers{position:absolute;inset:0;pointer-events:none;z-index:3}
+.wf-marker-line{position:absolute;top:0;bottom:0;width:1px;background:var(--purple);opacity:.7;pointer-events:none}
+.wf-marker-flag{position:absolute;top:0;left:0;transform:translateX(-50%);background:var(--purple);color:#111;font-size:9px;font-weight:600;padding:1px 6px 2px;border-radius:0 0 5px 5px;white-space:nowrap;cursor:pointer;pointer-events:auto;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.wf-marker-flag:hover{filter:brightness(1.15)}
+#waveform-marker-toolbar{position:absolute;bottom:4px;right:8px;display:flex;gap:4px;z-index:4}
+#waveform-marker-toolbar button{padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:var(--surface3);color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--font)}
+#waveform-marker-toolbar button:hover{color:var(--text);border-color:var(--border2)}
+#waveform-marker-toolbar button.active{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
+#markers-list-wrap{position:relative}
+#markers-dropdown{position:absolute;bottom:calc(100% + 6px);right:0;width:250px;max-height:min(50vh,320px);overflow-y:auto;background:var(--surface);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--border2);border-radius:10px;box-shadow:0 16px 32px rgba(0,0,0,.55);padding:10px;z-index:50;display:none}
+#markers-dropdown.open{display:block}
 
 #word-editor{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;position:relative}
 #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;position:absolute;inset:0;gap:10px;color:var(--muted);pointer-events:none;z-index:2;background:var(--bg)}
@@ -201,6 +225,8 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .am-bg::before{content:'('}
 .am-bg::after{content:')'}
 .am-word{display:inline-block}
+.word-seekable{cursor:pointer}
+.word-seekable:hover{text-shadow:0 0 10px var(--accent-40)}
 .am-char{display:inline-block;color:var(--muted);opacity:calc(0.3 + var(--fill,0) * 0.7);transition:opacity .1s linear,color .12s linear,transform .18s cubic-bezier(0.34,1.56,0.64,1)}
 .am-char.lit{color:inherit}
 .am-word.singing{animation:am-word-pulse 1s ease-in-out infinite}
@@ -255,6 +281,8 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
 .macts{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
 .mbtn{padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:var(--font);font-size:12px}
 .mbtn.primary{background:var(--accent-dim);border-color:var(--accent-30);color:var(--accent)}
+.mbtn.danger{color:var(--red)}
+.mbtn.danger:hover{background:var(--red-dim);border-color:var(--red)}
 .mbtn:hover{background:var(--surface3)}
 .mbtn.primary:hover{background:rgba(200,255,87,.2)}
 
@@ -338,6 +366,14 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
       </button>
       <div id="projects-dropdown"></div>
     </div>
+    <div id="queue-wrap">
+      <button class="tb-btn" id="queue-btn" onclick="toggleQueueDropdown()" title="Project queue - line up songs to work through">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Queue
+        <span id="queue-count-badge" class="badge-count"></span>
+      </button>
+      <div id="queue-dropdown"></div>
+    </div>
     <div class="tb-sep"></div>
     <div id="recent-audio-wrap">
       <button class="tb-btn" onclick="openAudio()">
@@ -377,11 +413,17 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export TTML
       </button>
+      <button class="tb-btn" id="reexport-ttml-btn" onclick="reExportTTML()" title="Re-export to last TTML path" style="display:none;padding:6px 7px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      </button>
       <button class="tb-btn" onclick="exportLRC()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export LRC
       </button>
-      <button class="tb-btn" onclick="checkForUpdates(true)" title="Check for updates (currently v1.1.1)">
+      <button class="tb-btn" id="reexport-lrc-btn" onclick="reExportLRC()" title="Re-export to last LRC path" style="display:none;padding:6px 7px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      </button>
+      <button class="tb-btn" id="update-check-btn" onclick="checkForUpdates(true)" title="Check for updates (currently v1.2.0)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21,3 21,9 15,9"/></svg>
       </button>
       <button class="tb-btn" onclick="showSettings()">
@@ -394,21 +436,42 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
     <div id="lines-panel">
       <div id="lines-header">
         <h2>Lines <span id="line-count" style="color:var(--accent)">0</span></h2>
-        <button class="sm-btn" onclick="sortLines()">↕ Sort</button>
+        <div style="display:flex;gap:6px">
+          <button class="sm-btn" onclick="showShiftTimingModal()" title="Shift every timing by a fixed offset - handy if you loaded a different audio version with a longer/shorter intro">⏱ Shift</button>
+          <button class="sm-btn" onclick="sortLines()">↕ Sort</button>
+        </div>
       </div>
       <div id="lines-search-wrap">
         <input id="lines-search" placeholder="Filter lines…" oninput="filterLines(this.value)">
       </div>
       <div id="lines-list"></div>
+      <div id="bulk-select-bar" class="hidden">
+        <div id="bulk-select-count">0 selected</div>
+        <div id="bulk-select-actions">
+          <button class="sm-btn" id="bulk-select-rest-btn" title="Also select every line after the last one you picked">+ Rest of Song</button>
+          <button class="sm-btn" id="bulk-drag-toggle-btn" title="Arm this, then drag anywhere on the waveform to slide the whole selection together">⇄ Drag Shift: Off</button>
+          <button class="sm-btn" id="bulk-shift-modal-btn">Shift by…</button>
+          <button class="sm-btn danger" id="bulk-select-clear-btn">Clear</button>
+        </div>
+      </div>
       <div id="add-line-btn" onclick="addLineModal()">+ Add Line</div>
     </div>
 
     <div id="editor-panel">
-      <div id="waveform-area" onmousedown="waveformSeek(event)" onmousemove="waveformDrag(event)">
+      <div id="waveform-area" onmousedown="waveformMouseDown(event)" onmousemove="waveformMouseMove(event)" onmouseleave="if(!wfDrag)this.classList.remove('wf-edge-hover')">
         <canvas id="waveform-canvas"></canvas>
+        <div id="waveform-markers" onmousedown="event.stopPropagation()"></div>
         <div id="playhead" style="left:0"></div>
         <div id="waveform-time-overlay">0:00.000</div>
         <div id="waveform-zoom-overlay">100%</div>
+        <div id="waveform-marker-toolbar" onmousedown="event.stopPropagation()">
+          <button id="drag-retime-toggle-btn" onclick="toggleWaveformDragRetime()" title="When on, dragging a selected word's edge on the waveform retimes it - which can get in the way of clicking to seek">↔ Drag Retime: Off</button>
+          <button id="add-marker-btn" title="Add marker at playhead (M)" onclick="addMarkerAtPlayhead()">🚩 Marker</button>
+          <div id="markers-list-wrap">
+            <button id="markers-list-btn" title="Jump to marker" onclick="toggleMarkersDropdown()">▾</button>
+            <div id="markers-dropdown"></div>
+          </div>
+        </div>
       </div>
       <div id="word-editor">
         <div id="empty-state">
@@ -503,6 +566,11 @@ audio.preservesPitch = true
 audio.mozPreservesPitch = true
 audio.webkitPreservesPitch = true
 let lines = []
+let markers = []
+let multiSelectedLineIds = new Set()
+let multiSelectAnchorId = null
+let bulkShiftArmed = false
+let bulkDrag = null
 let selectedLineId = null
 let selectedWord = null
 let audioDuration = 0
@@ -552,6 +620,7 @@ const MAX_PERSISTED_UNDO = 15
 let undoPersistTimer = 0
 const RECENT_AUDIO_KEY = 'ttml-editor-recent-audio'
 const MAX_RECENT_AUDIO = 10
+const QUEUE_KEY = 'ttml-editor-project-queue'
 
 function genId() { return 'l' + Math.random().toString(36).slice(2, 9) }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
@@ -966,6 +1035,7 @@ async function restoreSession() {
     if (!raw) return
     const session = JSON.parse(raw)
     lines = Array.isArray(session.lines) ? session.lines : []
+    markers = Array.isArray(session.markers) ? session.markers : []
     selectedLineId = session.selectedLineId || null
     selectedWord = session.selectedWord || null
     audioFileName = session.audioFileName || ''
@@ -976,6 +1046,13 @@ async function restoreSession() {
     filterText = session.filterText || ''
     waveformZoom = Number.isFinite(session.waveformZoom) ? session.waveformZoom : 1
     waveformCenter = Number.isFinite(session.waveformCenter) ? session.waveformCenter : 0
+    currentProjectPath = session.currentProjectPath || null
+    if (currentProjectPath && window.api?.fileExists) {
+      try {
+        const exists = await window.api.fileExists(currentProjectPath)
+        if (!exists) currentProjectPath = null
+      } catch {}
+    }
     if (currentAudioPath) {
       await loadAudioFromPath(currentAudioPath, {
         showLoader: false,
@@ -1016,6 +1093,7 @@ function getSessionSnapshot() {
     version: 1,
     savedAt: Date.now(),
     lines,
+    markers,
     selectedLineId,
     selectedWord,
     audioFileName,
@@ -1028,6 +1106,7 @@ function getSessionSnapshot() {
     waveformCenter,
     previewMode,
     filterText,
+    currentProjectPath,
   }
 }
 
@@ -1104,6 +1183,7 @@ async function applyProjectSnapshot(s, filePath, isAutosave) {
   clearUndoHistory()
   try {
     lines = Array.isArray(s.lines) ? s.lines : []
+    markers = Array.isArray(s.markers) ? s.markers : []
     selectedLineId = s.selectedLineId || null
     selectedWord = s.selectedWord || null
     audioFileName = s.audioFileName || ''
@@ -1130,6 +1210,47 @@ async function applyProjectSnapshot(s, filePath, isAutosave) {
   renderAll()
   drawWaveform()
   if (selectedWord) selectWord(selectedWord.lineId, selectedWord.idx, selectedWord.type)
+  saveSessionNow()
+  setProjectDirty(false)
+}
+
+function resetProjectToBlank() {
+  restoringSession = true
+  clearUndoHistory()
+  try {
+    lines = []
+    markers = []
+    multiSelectedLineIds.clear()
+    multiSelectAnchorId = null
+    bulkShiftArmed = false
+    selectedLineId = null
+    selectedWord = null
+    audioFileName = ''
+    songMeta = { musicName: '', album: '', artists: [], songwriters: [] }
+    currentAudioPath = ''
+    currentAudioMetadata = null
+    previewMode = 'karaoke'
+    filterText = ''
+    waveformZoom = 1
+    waveformCenter = 0
+    currentProjectPath = null
+    waveformDecodeToken++
+    waveformPeaks = null
+    audioDuration = 0
+    audio.pause()
+    audio.removeAttribute('src')
+    audio.load()
+    document.getElementById('track-name').textContent = 'No audio loaded'
+    document.getElementById('track-name').style.color = ''
+    document.getElementById('sb-file').textContent = ''
+    document.getElementById('lines-search').value = ''
+  } finally {
+    restoringSession = false
+  }
+  renderAll()
+  syncBulkSelectBar()
+  drawWaveform()
+  updatePlayheads()
   saveSessionNow()
   setProjectDirty(false)
 }
@@ -1219,7 +1340,12 @@ document.addEventListener('mousedown', e => {
   const wrap = document.getElementById('projects-dropdown-wrap')
   if (wrap && !wrap.contains(e.target)) closeProjectsDropdown()
 })
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProjectsDropdown() })
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeProjectsDropdown()
+    if (multiSelectedLineIds.size) clearMultiSelection()
+  }
+})
 
 function projectRowHtml(p, isAutosave) {
   const tag = isAutosave ? ' <span style="color:var(--muted2);font-weight:400">(autosave)</span>' : ''
@@ -1230,6 +1356,7 @@ function projectRowHtml(p, isAutosave) {
       <div class="ra">${esc(p.audioFileName || 'No audio')} · ${esc(fmtProjTime(p.savedAt))} · ${p.lineCount||0} lines</div>
       <div class="rb">
         <button class="sm-btn pd-load-btn" data-path="${escAttr(p.path)}" data-autosave="${isAutosave?'1':'0'}">Load</button>
+        <button class="sm-btn pd-queue-btn" data-path="${escAttr(p.path)}" data-autosave="${isAutosave?'1':'0'}" data-name="${escAttr(p.name)}" data-audio="${escAttr(p.audioFileName||'')}">+ Queue</button>
         <button class="sm-btn pd-reveal-btn" data-path="${escAttr(p.path)}">Reveal</button>
         <button class="sm-btn danger pd-delete-btn" data-path="${escAttr(p.path)}" data-autosave="${isAutosave?'1':'0'}">Delete</button>
       </div>
@@ -1279,6 +1406,11 @@ async function renderProjectsDropdown() {
     <div class="pd-section" style="display:flex;gap:6px">
       <button class="mbtn" id="pd-browse-btn" style="flex:1">Browse for a project file…</button>
       <button class="mbtn" id="pd-open-folder-btn" style="flex-shrink:0">Open Folder</button>
+    </div>
+    <div class="pd-sep"></div>
+    <div class="pd-section">
+      <button class="mbtn danger" id="pd-reset-btn" style="width:100%">Reset Everything…</button>
+      <div class="pd-hint">Clears the audio, lines, words, and metadata for a blank slate. Unlinks from any saved project - doesn't delete files on disk.</div>
     </div>
   `
 
@@ -1334,6 +1466,130 @@ async function renderProjectsDropdown() {
   })
   dd.querySelectorAll('.pd-delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => { await deleteProjectFile(btn.dataset.path); renderProjectsDropdown() })
+  })
+  document.getElementById('pd-reset-btn').addEventListener('click', () => {
+    closeProjectsDropdown()
+    showModal('Reset Everything?', `
+      <div class="mf">
+        <p style="font-size:13px;line-height:1.6;color:var(--muted)">This clears the loaded audio, all lines/words, metadata, and markers so you can start from a blank slate. If this is linked to a saved project, it'll be unlinked (the file itself stays on disk, untouched).</p>
+      </div>
+    `, [
+      { label: 'Cancel', fn: closeModal },
+      { label: 'Reset Everything', primary: true, fn: () => { closeModal(); resetProjectToBlank() } }
+    ])
+  })
+  dd.querySelectorAll('.pd-queue-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addToQueue({
+        path: btn.dataset.path,
+        isAutosave: btn.dataset.autosave === '1',
+        name: btn.dataset.name,
+        audioFileName: btn.dataset.audio,
+      })
+      btn.textContent = 'Queued ✓'
+      setTimeout(() => renderProjectsDropdown(), 700)
+    })
+  })
+}
+
+function getQueue() {
+  try {
+    const raw = localStorage.getItem(QUEUE_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch { return [] }
+}
+
+function saveQueue(list) {
+  try { localStorage.setItem(QUEUE_KEY, JSON.stringify(list)) } catch {}
+  updateQueueBadge()
+}
+
+function updateQueueBadge() {
+  const n = getQueue().length
+  const badge = document.getElementById('queue-count-badge')
+  if (!badge) return
+  badge.textContent = String(n)
+  badge.classList.toggle('visible', n > 0)
+}
+
+function addToQueue(item) {
+  if (!item?.path) return
+  const list = getQueue().filter(q => q.path !== item.path)
+  list.push({ ...item, queuedAt: Date.now() })
+  saveQueue(list)
+  if (document.getElementById('queue-dropdown')?.classList.contains('open')) renderQueueDropdown()
+}
+
+function removeFromQueue(path) {
+  saveQueue(getQueue().filter(q => q.path !== path))
+  renderQueueDropdown()
+}
+
+function clearQueue() {
+  saveQueue([])
+  renderQueueDropdown()
+}
+
+async function loadQueueItem(path, isAutosave) {
+  removeFromQueue(path)
+  closeQueueDropdown()
+  await loadProjectFromPath(path, isAutosave)
+}
+
+async function loadNextInQueue() {
+  const list = getQueue()
+  if (!list.length) return
+  const [next, ...rest] = list
+  saveQueue(rest)
+  closeQueueDropdown()
+  await loadProjectFromPath(next.path, next.isAutosave)
+}
+
+function toggleQueueDropdown() {
+  const dd = document.getElementById('queue-dropdown')
+  if (!dd) return
+  if (dd.classList.contains('open')) closeQueueDropdown()
+  else { dd.classList.add('open'); renderQueueDropdown() }
+}
+
+function closeQueueDropdown() {
+  document.getElementById('queue-dropdown')?.classList.remove('open')
+}
+
+document.addEventListener('mousedown', e => {
+  const wrap = document.getElementById('queue-wrap')
+  if (wrap && !wrap.contains(e.target)) closeQueueDropdown()
+})
+
+function renderQueueDropdown() {
+  const dd = document.getElementById('queue-dropdown')
+  if (!dd || !dd.classList.contains('open')) return
+  const list = getQueue()
+  dd.innerHTML = `
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:8px">
+      <label class="pd-label" style="margin-bottom:0">Up Next (${list.length})</label>
+      ${list.length ? `<button class="sm-btn danger" id="q-clear-btn">Clear</button>` : ''}
+    </div>
+    ${list.length ? `<button class="mbtn primary" id="q-next-btn" style="width:100%;margin-bottom:8px">▶ Load Next & Dequeue</button>` : ''}
+    ${list.length ? list.map((q, i) => `
+      <div class="lrclib-result">
+        <div class="rt">${i===0?'▶ ':''}${esc(q.name)}${q.isAutosave?' <span style="color:var(--muted2);font-weight:400">(autosave)</span>':''}</div>
+        <div class="ra">${esc(q.audioFileName || 'No audio')}</div>
+        <div class="rb">
+          <button class="sm-btn q-load-btn" data-path="${escAttr(q.path)}" data-autosave="${q.isAutosave?'1':'0'}">Load</button>
+          <button class="sm-btn danger q-remove-btn" data-path="${escAttr(q.path)}">Remove</button>
+        </div>
+      </div>
+    `).join('') : `<div class="pd-empty">No songs queued yet. Use "+ Queue" on any project in the Projects dropdown to line it up here.</div>`}
+  `
+  document.getElementById('q-clear-btn')?.addEventListener('click', clearQueue)
+  document.getElementById('q-next-btn')?.addEventListener('click', loadNextInQueue)
+  dd.querySelectorAll('.q-load-btn').forEach(btn => {
+    btn.addEventListener('click', () => loadQueueItem(btn.dataset.path, btn.dataset.autosave === '1'))
+  })
+  dd.querySelectorAll('.q-remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => removeFromQueue(btn.dataset.path))
   })
 }
 
@@ -1780,6 +2036,8 @@ function drawWaveformBars(ctx, width, height, opts = {}) {
   const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#e8ff57'
   const accentDim = getComputedStyle(document.documentElement).getPropertyValue('--accent-dim').trim() || 'rgba(200,255,87,0.12)'
   const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#222'
+  const orange = getComputedStyle(document.documentElement).getPropertyValue('--orange').trim() || '#ffaa57'
+  const orangeDim = getComputedStyle(document.documentElement).getPropertyValue('--orange-dim').trim() || 'rgba(255,170,87,0.2)'
 
   if (waveformPeaks && waveformPeaks.length) {
     const totalPeaks = waveformPeaks.length
@@ -1825,12 +2083,29 @@ function drawWaveformBars(ctx, width, height, opts = {}) {
     if (line.time == null || line.time > end || effectiveEnd(line) < start) continue
     const x1 = clamp(timeToWaveX(line.time, width, view), 0, width)
     const x2 = clamp(timeToWaveX(line.end ?? line.time, width, view), 0, width)
-    ctx.fillStyle = accentDim
+    const isMultiSelected = multiSelectedLineIds.has(line.id)
+    ctx.fillStyle = isMultiSelected ? orangeDim : accentDim
     ctx.fillRect(x1, 0, Math.max(2, x2 - x1), height)
-    ctx.fillStyle = accent
+    ctx.fillStyle = isMultiSelected ? orange : accent
     ctx.fillRect(x1, 0, 2, height)
   }
   drawSelectedWordMarkers(ctx, width, height, view)
+
+  if (markers.length) {
+    const purple = getComputedStyle(document.documentElement).getPropertyValue('--purple').trim() || '#a78bfa'
+    ctx.fillStyle = purple
+    for (const m of markers) {
+      if (m.time < start || m.time > end) continue
+      const x = timeToWaveX(m.time, width, view)
+      ctx.fillRect(x, 0, 1, height)
+      ctx.beginPath()
+      ctx.moveTo(x - 4, 0)
+      ctx.lineTo(x + 4, 0)
+      ctx.lineTo(x, 6)
+      ctx.closePath()
+      ctx.fill()
+    }
+  }
 }
 
 function updatePlayheads() {
@@ -1856,8 +2131,17 @@ function maybeKeepPlayheadVisible(force) {
 const speedSteps = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
 function setPlaybackSpeed(rate) {
   audio.playbackRate = rate
+  audio.preservesPitch = !!settings.preservePitchAtSpeed
+  audio.mozPreservesPitch = !!settings.preservePitchAtSpeed
+  audio.webkitPreservesPitch = !!settings.preservePitchAtSpeed
   const sel = document.getElementById('speed-select')
   if (sel && sel.value !== String(rate)) sel.value = String(rate)
+}
+function captureAudioTime() {
+  const t = audio.currentTime || 0
+  const rate = audio.playbackRate || 1
+  if (rate === 1 || !settings.speedTimingOffsetMs) return t
+  return clamp(t - (settings.speedTimingOffsetMs / 1000), 0, audioDuration || t)
 }
 function nudgePlaybackSpeed(dir) {
   const cur = audio.playbackRate || 1
@@ -1919,6 +2203,151 @@ function waveformSeek(e) {
 }
 function waveformDrag(e) { if (e.buttons===1) waveformSeek(e) }
 
+let wfDrag = null
+const WF_EDGE_HIT_PX = 6
+
+function syncDragRetimeButton() {
+  const btn = document.getElementById('drag-retime-toggle-btn')
+  if (!btn) return
+  btn.classList.toggle('active', !!settings.waveformDragRetime)
+  btn.textContent = `↔ Drag Retime: ${settings.waveformDragRetime ? 'On' : 'Off'}`
+}
+
+function toggleWaveformDragRetime() {
+  settings.waveformDragRetime = !settings.waveformDragRetime
+  saveSettings()
+  syncDragRetimeButton()
+}
+
+function findWordEdgeAtX(x, width, view) {
+  if (!settings.waveformDragRetime || !settings.colorWordMarkers || !selectedLineId || !view?.duration) return null
+  const line = lines.find(l => l.id === selectedLineId)
+  if (!line) return null
+  const type = (selectedWord && selectedWord.lineId === selectedLineId) ? selectedWord.type : 'main'
+  const words = type === 'bg' ? line.bgWords : type === 'duo' ? line.duoWords : line.words
+  if (!words?.length) return null
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i]
+    if (w.time == null) continue
+    const start = w.time
+    const end = w.end != null && w.end > start ? w.end : start + 0.08
+    const x1 = timeToWaveX(start, width, view)
+    const x2 = timeToWaveX(end, width, view)
+    if (Math.abs(x - x2) <= WF_EDGE_HIT_PX) return { line, words, idx: i, edge: 'end', type }
+    if (Math.abs(x - x1) <= WF_EDGE_HIT_PX) return { line, words, idx: i, edge: 'time', type }
+  }
+  return null
+}
+
+function updateWfDragUiTick(drag) {
+  const w = drag.words[drag.idx]
+  if (selectedWord && selectedWord.lineId === drag.line.id && selectedWord.idx === drag.idx && selectedWord.type === drag.type) {
+    const startInput = document.getElementById('timing-start')
+    const endInput = document.getElementById('timing-end')
+    if (startInput) startInput.value = w.time != null ? w.time.toFixed(3) : ''
+    if (endInput) endInput.value = w.end != null ? w.end.toFixed(3) : ''
+  }
+  const container = document.getElementById(`wc-${drag.line.id}-${drag.type}`)
+  const chip = container?.children[drag.idx]
+  if (chip) {
+    const spans = chip.querySelectorAll('.wt span')
+    if (spans[0]) spans[0].textContent = w.time != null ? w.time.toFixed(2) : '??'
+    if (spans[2]) spans[2].textContent = w.end != null ? w.end.toFixed(2) : '??'
+  }
+}
+
+function waveformMouseDown(e) {
+  if (!audioDuration) return
+  const rect = document.getElementById('waveform-canvas').getBoundingClientRect()
+  const x = clamp(e.clientX - rect.left, 0, rect.width)
+  if (bulkShiftArmed && multiSelectedLineIds.size) {
+    e.preventDefault()
+    pushHistory('drag shift selected lines')
+    bulkDrag = { startTime: waveXToTime(x, rect.width, getWaveformView()), appliedDelta: 0 }
+    document.getElementById('waveform-area').classList.add('wf-dragging')
+    return
+  }
+  const hit = findWordEdgeAtX(x, rect.width, getWaveformView())
+  if (hit) {
+    e.preventDefault()
+    if (!selectedWord || selectedWord.lineId !== hit.line.id || selectedWord.idx !== hit.idx || selectedWord.type !== hit.type) {
+      selectWord(hit.line.id, hit.idx, hit.type)
+    }
+    pushHistory('drag word timing')
+    wfDrag = hit
+    document.getElementById('waveform-area').classList.add('wf-dragging')
+    return
+  }
+  waveformSeek(e)
+}
+
+function waveformMouseMove(e) {
+  if (bulkDrag) {
+    const rect = document.getElementById('waveform-canvas').getBoundingClientRect()
+    const x = clamp(e.clientX - rect.left, 0, rect.width)
+    const t = waveXToTime(x, rect.width, getWaveformView())
+    const totalDelta = t - bulkDrag.startTime
+    const step = totalDelta - bulkDrag.appliedDelta
+    if (step !== 0) {
+      shiftLinesByIds(multiSelectedLineIds, step)
+      bulkDrag.appliedDelta = totalDelta
+      renderLines()
+      if (selectedLineId && multiSelectedLineIds.has(selectedLineId)) renderEditorFull()
+      drawWaveform()
+    }
+    return
+  }
+  if (wfDrag) {
+    const rect = document.getElementById('waveform-canvas').getBoundingClientRect()
+    const x = clamp(e.clientX - rect.left, 0, rect.width)
+    const view = getWaveformView()
+    let t = waveXToTime(x, rect.width, view)
+    const { words, idx, edge } = wfDrag
+    const w = words[idx]
+    if (edge === 'time') {
+      const prevEnd = idx > 0 ? (words[idx - 1].end ?? words[idx - 1].time ?? 0) : 0
+      const maxT = (w.end != null ? w.end : audioDuration) - 0.01
+      w.time = clamp(t, prevEnd, Math.max(prevEnd, maxT))
+    } else {
+      const nextStart = idx < words.length - 1 ? (words[idx + 1].time ?? audioDuration) : audioDuration
+      const minT = (w.time != null ? w.time : 0) + 0.01
+      w.end = clamp(t, minT, Math.max(minT, nextStart))
+    }
+    markWordTimingEdited(w)
+    drawWaveform()
+    updateWfDragUiTick(wfDrag)
+    return
+  }
+  if (e.buttons === 1) { waveformSeek(e); return }
+  const rect = document.getElementById('waveform-canvas').getBoundingClientRect()
+  const x = clamp(e.clientX - rect.left, 0, rect.width)
+  const hit = findWordEdgeAtX(x, rect.width, getWaveformView())
+  document.getElementById('waveform-area').classList.toggle('wf-edge-hover', !!hit)
+}
+
+function finishWaveformDrag() {
+  if (bulkDrag) {
+    bulkDrag = null
+    document.getElementById('waveform-area')?.classList.remove('wf-dragging')
+    updateStatus()
+    scheduleSessionSave()
+    return
+  }
+  if (!wfDrag) return
+  const { line, words, idx, edge, type } = wfDrag
+  autoCorrectAfterWordEdit(line, words, idx, edge)
+  syncLineTimingFromWords(line, type)
+  if (type === 'main') propagatePacingToMatches(line.id)
+  renderLines()
+  renderEditorFull()
+  updateStatus()
+  drawWaveform()
+  scheduleSessionSave()
+  document.getElementById('waveform-area')?.classList.remove('wf-dragging')
+  wfDrag = null
+}
+document.addEventListener('mouseup', finishWaveformDrag)
+
 function drawWaveform() {
   const c = document.getElementById('waveform-canvas')
   const W = c.offsetWidth, H = c.offsetHeight
@@ -1931,6 +2360,99 @@ function drawWaveform() {
   drawWaveformBars(mini.getContext('2d'), miniW, miniH, { view: { start: 0, end: audioDuration, duration: audioDuration } })
   updatePlayheads()
   updateWaveformZoomLabel()
+  renderWaveformMarkerFlags()
+}
+
+async function addMarkerAtPlayhead() {
+  if (!audioDuration) return
+  const time = audio.currentTime || 0
+  const label = await showPromptModal('Marker label', `Marker ${markers.length + 1}`)
+  if (label === null) return
+  markers.push({ id: genId(), time, label: label.trim() || `Marker ${markers.length + 1}` })
+  markers.sort((a, b) => a.time - b.time)
+  scheduleSessionSave()
+  drawWaveform()
+  renderMarkersDropdown()
+}
+
+function removeMarker(id) {
+  markers = markers.filter(m => m.id !== id)
+  scheduleSessionSave()
+  drawWaveform()
+  renderMarkersDropdown()
+}
+
+async function renameMarker(id) {
+  const m = markers.find(m => m.id === id)
+  if (!m) return
+  const label = await showPromptModal('Marker label', m.label)
+  if (label === null) return
+  m.label = label.trim() || m.label
+  scheduleSessionSave()
+  drawWaveform()
+  renderMarkersDropdown()
+}
+
+function seekToMarker(id) {
+  const m = markers.find(m => m.id === id)
+  if (!m || !audioDuration) return
+  audio.currentTime = clamp(m.time, 0, audioDuration)
+  if (waveformZoom > 1) waveformCenter = audio.currentTime
+  drawWaveform()
+  updatePlayheads()
+}
+
+function renderWaveformMarkerFlags() {
+  const wrap = document.getElementById('waveform-markers')
+  if (!wrap) return
+  if (!audioDuration || !markers.length) { wrap.innerHTML = ''; return }
+  const width = document.getElementById('waveform-canvas').offsetWidth || 1
+  const view = getWaveformView()
+  wrap.innerHTML = markers
+    .filter(m => m.time >= view.start && m.time <= view.end)
+    .map(m => {
+      const x = timeToWaveX(m.time, width, view)
+      return `<div class="wf-marker-line" style="left:${x}px"></div><div class="wf-marker-flag" style="left:${x}px" title="${escAttr(m.label)} · click to jump, right-click to rename, alt-click to delete" data-id="${escAttr(m.id)}">${esc(m.label)}</div>`
+    }).join('')
+  wrap.querySelectorAll('.wf-marker-flag').forEach(el => {
+    el.addEventListener('click', e => { if (e.altKey) removeMarker(el.dataset.id); else seekToMarker(el.dataset.id) })
+    el.addEventListener('contextmenu', e => { e.preventDefault(); renameMarker(el.dataset.id) })
+  })
+}
+
+function toggleMarkersDropdown() {
+  const dd = document.getElementById('markers-dropdown')
+  if (!dd) return
+  if (dd.classList.contains('open')) closeMarkersDropdown()
+  else { dd.classList.add('open'); renderMarkersDropdown() }
+}
+
+function closeMarkersDropdown() {
+  document.getElementById('markers-dropdown')?.classList.remove('open')
+}
+
+document.addEventListener('mousedown', e => {
+  const wrap = document.getElementById('markers-list-wrap')
+  if (wrap && !wrap.contains(e.target)) closeMarkersDropdown()
+})
+
+function renderMarkersDropdown() {
+  const dd = document.getElementById('markers-dropdown')
+  if (!dd || !dd.classList.contains('open')) return
+  dd.innerHTML = markers.length ? markers.map(m => `
+    <div class="lrclib-result">
+      <div class="rt">${esc(m.label)}</div>
+      <div class="ra">${fmtMs(m.time)}</div>
+      <div class="rb">
+        <button class="sm-btn mk-jump-btn" data-id="${escAttr(m.id)}">Jump</button>
+        <button class="sm-btn mk-rename-btn" data-id="${escAttr(m.id)}">Rename</button>
+        <button class="sm-btn danger mk-remove-btn" data-id="${escAttr(m.id)}">Delete</button>
+      </div>
+    </div>
+  `).join('') : `<div class="pd-empty">No markers yet. Press "M" or "🚩 Marker" to add one at the playhead.</div>`
+  dd.querySelectorAll('.mk-jump-btn').forEach(btn => btn.addEventListener('click', () => { seekToMarker(btn.dataset.id); closeMarkersDropdown() }))
+  dd.querySelectorAll('.mk-rename-btn').forEach(btn => btn.addEventListener('click', () => renameMarker(btn.dataset.id)))
+  dd.querySelectorAll('.mk-remove-btn').forEach(btn => btn.addEventListener('click', () => removeMarker(btn.dataset.id)))
 }
 
 function handleWaveformWheel(e) {
@@ -2155,6 +2677,59 @@ async function openLyricsFile() {
   renderAll(); drawWaveform()
 }
 
+function tokenizeLyricsText(text) {
+  return String(text || '').split(/\s+/).map(w => w.trim()).filter(Boolean)
+}
+
+function normLyricsWord(w) {
+  return String(w || '').toLowerCase().replace(/[^\p{L}\p{N}']/gu, '')
+}
+
+function diffWordArrays(a, b) {
+  const n = a.length, m = b.length
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0))
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = normLyricsWord(a[i]) === normLyricsWord(b[j]) ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1])
+    }
+  }
+  const ops = []
+  let i = 0, j = 0
+  while (i < n && j < m) {
+    if (normLyricsWord(a[i]) === normLyricsWord(b[j])) { ops.push({ type: 'same', word: a[i] }); i++; j++ }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { ops.push({ type: 'remove', word: a[i] }); i++ }
+    else { ops.push({ type: 'add', word: b[j] }); j++ }
+  }
+  while (i < n) { ops.push({ type: 'remove', word: a[i] }); i++ }
+  while (j < m) { ops.push({ type: 'add', word: b[j] }); j++ }
+  return ops
+}
+
+function showLyricsDiffModal(sourceLabel, sourceText) {
+  const currentText = lines.map(l => joinWordsText(l.words || [])).filter(Boolean).join(' ')
+  const cleanedSource = String(sourceText || '').replace(/\[\d+:\d+\.?\d*\]/g, '')
+  const a = tokenizeLyricsText(currentText)
+  const b = tokenizeLyricsText(cleanedSource)
+  const ops = diffWordArrays(a, b)
+  const addCount = ops.filter(o => o.type === 'add').length
+  const removeCount = ops.filter(o => o.type === 'remove').length
+  const html = ops.map(o => {
+    if (o.type === 'same') return `<span>${esc(o.word)}</span>`
+    if (o.type === 'remove') return `<span style="color:var(--red);text-decoration:line-through;opacity:.85" title="In your lyrics, not in ${escAttr(sourceLabel)}">${esc(o.word)}</span>`
+    return `<span style="color:var(--accent);text-decoration:underline" title="In ${escAttr(sourceLabel)}, missing from yours">${esc(o.word)}</span>`
+  }).join(' ')
+  showModal(`Compare with ${esc(sourceLabel)}`, `
+    <div class="mf">
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">
+        <span style="color:var(--red)">Struck-through red</span> words are in your lyrics but not in ${esc(sourceLabel)} - possible typos or extras.
+        <span style="color:var(--accent)">Underlined accent</span> words are in ${esc(sourceLabel)} but missing from yours.
+      </p>
+      <div class="desc" style="margin-top:10px;line-height:1.9;max-height:320px;overflow:auto;background:var(--surface2);padding:10px;border-radius:6px">${html || '<span style="color:var(--muted)">Nothing to compare.</span>'}</div>
+      <div class="pd-hint" style="margin-top:8px">${addCount} missing word${addCount===1?'':'s'} · ${removeCount} extra/mismatched word${removeCount===1?'':'s'}</div>
+    </div>
+  `, [{ label: 'Close', fn: closeModal }])
+}
+
 async function showLRCLIBModal() {
   const guess = extractTrackGuess(audioFileName)
   const preferred = {
@@ -2198,12 +2773,17 @@ async function searchLRCLIB() {
       const dur = r.duration ? `${Math.floor(r.duration/60)}:${String(Math.floor(r.duration%60)).padStart(2,'0')}` : ''
       const el = document.createElement('div')
       el.className = 'lrclib-result'
-      el.innerHTML = `<div class="rt">${esc(r.trackName)}</div><div class="ra">${esc(r.artistName)}${r.albumName?' · '+esc(r.albumName):''}</div><div class="rb">${r.syncedLyrics?'<span class="lrclib-tag tag-synced">Synced</span>':'<span class="lrclib-tag tag-plain">Plain</span>'}${dur?`<span class="lrclib-tag tag-dur">${dur}</span>`:''}</div>`
+      const hasLyrics = !!(r.syncedLyrics || r.plainLyrics)
+      el.innerHTML = `<div class="rt">${esc(r.trackName)}</div><div class="ra">${esc(r.artistName)}${r.albumName?' · '+esc(r.albumName):''}</div><div class="rb">${r.syncedLyrics?'<span class="lrclib-tag tag-synced">Synced</span>':'<span class="lrclib-tag tag-plain">Plain</span>'}${dur?`<span class="lrclib-tag tag-dur">${dur}</span>`:''}${hasLyrics && lines.length ? `<button class="sm-btn lr-compare-btn">Compare to current</button>` : ''}</div>`
       el.addEventListener('click', () => {
         if (r.syncedLyrics) lines = parseLRC(r.syncedLyrics)
         else if (r.plainLyrics) lines = r.plainLyrics.split('\n').filter(l=>l.trim()).map(l=>buildLineFromPlainText(l.trim()))
         scheduleSessionSave()
         closeModal(); renderAll(); drawWaveform()
+      })
+      el.querySelector('.lr-compare-btn')?.addEventListener('click', e => {
+        e.stopPropagation()
+        showLyricsDiffModal(`${r.trackName} (LRCLIB)`, r.syncedLyrics || r.plainLyrics || '')
       })
       container.appendChild(el)
     }
@@ -2216,6 +2796,7 @@ async function searchLRCLIB() {
 function renderAll() {
   scheduleSessionSave()
   renderLines(); renderEditorFull(); renderPreview(audio.currentTime||0); updateStatus()
+  updateReExportButtons()
 }
 
 function renderLines() {
@@ -2224,11 +2805,15 @@ function renderLines() {
   const filtered = lines.filter(l => !filterText || l.text.toLowerCase().includes(filterText.toLowerCase()))
   for (const line of filtered) {
     const el = document.createElement('div')
-    el.className = 'line-item' + (line.id===selectedLineId?' active':'')
+    el.className = 'line-item' + (line.id===selectedLineId?' active':'') + (multiSelectedLineIds.has(line.id)?' multi-selected':'')
     el.dataset.id = line.id
     const untimed = line.words.filter(w=>w.time==null).length
     el.innerHTML = `<div style="display:flex;align-items:center;gap:6px"><div class="line-indicators">${line.bgWords?.length?'<span class="li-dot li-bg" title="Has background vocals"></span>':''}${line.duoWords?.length?'<span class="li-dot li-duo" title="Has duo/harmony vocals"></span>':''}</div><div class="line-time">${fmtMs(line.time)}</div></div><div class="line-text-preview">${esc(line.text)||'<em style="color:var(--muted)">(empty)</em>'}</div><div class="line-badges"><span class="badge badge-main">${line.words.length}w</span>${line.bgWords?.length?`<span class="badge badge-bg">bg ${line.bgWords.length}w</span>`:''}${line.duoWords?.length?`<span class="badge badge-duo">duo ${line.duoWords.length}w</span>`:''}${untimed?`<span class="badge badge-notimed">${untimed} untimed</span>`:''}</div>`
-    el.addEventListener('click', () => selectLine(line.id))
+    el.addEventListener('click', (e) => {
+      if (e.ctrlKey || e.metaKey) { toggleMultiSelectLine(line.id); return }
+      if (e.shiftKey) { rangeSelectLinesTo(line.id); return }
+      selectLine(line.id)
+    })
     el.addEventListener('dblclick', () => {
       selectLine(line.id)
       seekToLine(line, true)
@@ -2237,6 +2822,114 @@ function renderLines() {
   }
   document.getElementById('line-count').textContent = lines.length
 }
+
+function toggleMultiSelectLine(id) {
+  if (multiSelectedLineIds.has(id)) multiSelectedLineIds.delete(id)
+  else multiSelectedLineIds.add(id)
+  multiSelectAnchorId = id
+  renderLines()
+  syncBulkSelectBar()
+}
+
+function rangeSelectLinesTo(id) {
+  const anchorIdx = lines.findIndex(l => l.id === (multiSelectAnchorId || id))
+  const targetIdx = lines.findIndex(l => l.id === id)
+  if (anchorIdx === -1 || targetIdx === -1) { toggleMultiSelectLine(id); return }
+  const [from, to] = anchorIdx <= targetIdx ? [anchorIdx, targetIdx] : [targetIdx, anchorIdx]
+  for (let i = from; i <= to; i++) multiSelectedLineIds.add(lines[i].id)
+  multiSelectAnchorId = id
+  renderLines()
+  syncBulkSelectBar()
+}
+
+function selectRestOfSongFromSelection() {
+  if (!multiSelectedLineIds.size) return
+  let lastIdx = -1
+  lines.forEach((l, i) => { if (multiSelectedLineIds.has(l.id)) lastIdx = Math.max(lastIdx, i) })
+  for (let i = lastIdx + 1; i < lines.length; i++) multiSelectedLineIds.add(lines[i].id)
+  renderLines()
+  syncBulkSelectBar()
+}
+
+function clearMultiSelection() {
+  multiSelectedLineIds.clear()
+  multiSelectAnchorId = null
+  bulkShiftArmed = false
+  renderLines()
+  syncBulkSelectBar()
+  drawWaveform()
+}
+
+function syncBulkSelectBar() {
+  const bar = document.getElementById('bulk-select-bar')
+  if (!bar) return
+  const n = multiSelectedLineIds.size
+  bar.classList.toggle('hidden', n === 0)
+  const countEl = document.getElementById('bulk-select-count')
+  if (countEl) countEl.textContent = `${n} line${n===1?'':'s'} selected (${n>0?'Ctrl/Shift+click lines to adjust':''})`
+  syncBulkDragButton()
+}
+
+function syncBulkDragButton() {
+  const btn = document.getElementById('bulk-drag-toggle-btn')
+  if (!btn) return
+  btn.classList.toggle('active', bulkShiftArmed)
+  btn.textContent = `⇄ Drag Shift: ${bulkShiftArmed ? 'On' : 'Off'}`
+}
+
+function toggleBulkDragArm() {
+  if (!multiSelectedLineIds.size) return
+  bulkShiftArmed = !bulkShiftArmed
+  syncBulkDragButton()
+}
+
+function shiftLinesByIds(ids, delta) {
+  const idSet = ids instanceof Set ? ids : new Set(ids)
+  const shiftWords = (words) => {
+    if (!words?.length) return
+    for (const w of words) {
+      if (w.time != null) w.time = Math.max(0, w.time + delta)
+      if (w.end != null) w.end = Math.max(0, w.end + delta)
+    }
+  }
+  for (const line of lines) {
+    if (!idSet.has(line.id)) continue
+    if (line.time != null) line.time = Math.max(0, line.time + delta)
+    if (line.end != null) line.end = Math.max(0, line.end + delta)
+    shiftWords(line.words)
+    shiftWords(line.bgWords)
+    shiftWords(line.duoWords)
+  }
+}
+
+function showShiftSelectedModal() {
+  if (!multiSelectedLineIds.size) return
+  const n = multiSelectedLineIds.size
+  showModal(`Shift ${n} Selected Line${n===1?'':'s'}`, `
+    <div class="mf">
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Moves only the selected lines (and their words) by the same offset - handy when just part of the song has drifted, like a longer intro that only threw off everything after it.</p>
+      <label style="margin-top:8px">Offset (seconds)</label>
+      <input class="mi" id="shift-selected-seconds-input" type="number" step="0.05" placeholder="e.g. 2.5 or -1.2">
+      <div class="desc" style="margin-top:6px">Positive pushes later, negative pulls earlier. Clamped so nothing goes below 0:00.</div>
+    </div>
+  `, [
+    { label: 'Cancel', fn: closeModal },
+    { label: 'Apply Shift', primary: true, fn: () => {
+        const delta = parseFloat(document.getElementById('shift-selected-seconds-input').value)
+        closeModal()
+        if (!Number.isFinite(delta) || delta === 0) return
+        pushHistory('shift selected lines')
+        shiftLinesByIds(multiSelectedLineIds, delta)
+        renderLines(); renderEditorFull(); updateStatus(); drawWaveform(); scheduleSessionSave()
+      } }
+  ])
+  setTimeout(() => document.getElementById('shift-selected-seconds-input')?.focus(), 50)
+}
+
+document.getElementById('bulk-select-rest-btn')?.addEventListener('click', selectRestOfSongFromSelection)
+document.getElementById('bulk-drag-toggle-btn')?.addEventListener('click', toggleBulkDragArm)
+document.getElementById('bulk-shift-modal-btn')?.addEventListener('click', showShiftSelectedModal)
+document.getElementById('bulk-select-clear-btn')?.addEventListener('click', clearMultiSelection)
 
 function effectiveEnd(line) {
   let end = line.end ?? 0
@@ -2487,13 +3180,13 @@ function updateWordTime(field, val) {
 
 function setStartNow() {
   if (!selectedWord) return
-  const t = audio.currentTime
+  const t = captureAudioTime()
   document.getElementById('timing-start').value = t.toFixed(3)
   updateWordTime('time', t)
 }
 function setEndNow() {
   if (!selectedWord) return
-  const t = audio.currentTime
+  const t = captureAudioTime()
   const target = getWordsForSelection(selectedWord)
   if (!target) return
   const { line, words } = target
@@ -2547,6 +3240,7 @@ function deleteLine(id) {
   pushHistory('delete line')
   lines = lines.filter(l=>l.id!==id)
   if (selectedLineId===id) { selectedLineId=null; selectedWord=null }
+  if (multiSelectedLineIds.has(id)) { multiSelectedLineIds.delete(id); syncBulkSelectBar() }
   renderAll(); drawWaveform()
   scheduleSessionSave()
 }
@@ -2659,7 +3353,7 @@ function addLineModal() {
       const text = document.getElementById('al-text').value.trim()
       if (!text) return
       const useNow = document.getElementById('al-now').checked
-      const time = useNow ? audio.currentTime : null
+      const time = useNow ? captureAudioTime() : null
       pushHistory('add line')
       lines.push({id:genId(),time,end:null,text,words:splitWords(text).map(w=>({word:w,time:null,end:null})),bgWords:[],bgText:null,duoWords:[],duoText:null})
       sortLines(); closeModal(); renderAll(); drawWaveform()
@@ -2683,11 +3377,22 @@ function getWordProgress(word, t) {
   return 1 - Math.pow(1 - raw, 0.72)
 }
 
+function seekToWord(word) {
+  if (!word || word.time == null || !audioDuration) return
+  audio.currentTime = clamp(word.time, 0, audioDuration)
+  if (waveformZoom > 1) { waveformCenter = audio.currentTime; drawWaveform() }
+  updatePlayheads()
+}
+
 function buildSyncWord(word, className, index, t, type = 'main') {
   const wrapper = document.createElement('span')
   wrapper.className = className
   wrapper.dataset.wi = index
   applyWordColor(wrapper, index, type)
+  if (word.time != null) {
+    wrapper.classList.add('word-seekable')
+    wrapper.addEventListener('click', e => { e.stopPropagation(); seekToWord(word) })
+  }
   const chars = Array.from(word.word || '')
   const progress = getWordProgress(word, t)
   const litCount = progress * chars.length
@@ -2870,6 +3575,10 @@ function buildAppleWord(word, className, index, type) {
   wrapper.className = className
   wrapper.dataset.wi = index
   applyWordColor(wrapper, index, type)
+  if (word?.time != null) {
+    wrapper.classList.add('word-seekable')
+    wrapper.addEventListener('click', e => { e.stopPropagation(); seekToWord(word) })
+  }
   const dur = word?.time!=null && word?.end!=null ? word.end - word.time : 0
   const held = dur >= HELD_WORD_THRESHOLD
   wrapper.classList.add(held ? 'am-wave' : 'am-fill')
@@ -3003,12 +3712,15 @@ let settings = {
   dimPast: true,
   showTimecodes: true,
   colorWordMarkers: true,
+  waveformDragRetime: false,
   previewStyle: 'lightweight',
   preserveTimingOnWordSplit: true,
   autoScrollWaveform: false,
   syncMatchingLinePacing: false,
   spicyLyricsPrep: true,
   autoCorrectWordTimings: true,
+  preservePitchAtSpeed: true,
+  speedTimingOffsetMs: 0,
   waveformEngine: 'auto',
   theme: 'dark',
   themeOverrides: {},
@@ -3150,6 +3862,10 @@ function applySettings() {
   document.querySelectorAll('.pline-text').forEach(el => el.style.fontSize = settings.previewFontSize + 'px')
   syncPreviewStyleButton()
   syncCenterPreviewButton()
+  syncDragRetimeButton()
+  audio.preservesPitch = !!settings.preservePitchAtSpeed
+  audio.mozPreservesPitch = !!settings.preservePitchAtSpeed
+  audio.webkitPreservesPitch = !!settings.preservePitchAtSpeed
   drawWaveform()
 }
 
@@ -3273,6 +3989,14 @@ async function showSettings() {
         <label class="settings-toggle"><input type="checkbox" id="s-auto-correct-words" ${settings.autoCorrectWordTimings?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
+        <div><div>Preserve pitch at non-1x speed</div><div class="desc">Keeps pitch normal when slowed/sped up, but the pitch-correction processing itself adds a small audio delay, worse at lower speeds, which can throw off "Set Start/End" capture. Turn off for near-zero latency (audio will sound higher/lower pitched) if you're finding slow-speed timings feel off</div></div>
+        <label class="settings-toggle"><input type="checkbox" id="s-preserve-pitch" ${settings.preservePitchAtSpeed!==false?'checked':''}><div class="toggle-track"></div></label>
+      </div>
+      <div class="settings-row">
+        <div><div>Slow/fast speed timing offset (ms)</div><div class="desc">Manual correction subtracted from "Set Start/End" and "use current time" captures whenever playback speed isn't 1x. If your captured timings consistently land late while playing slower, try a small positive value like 50-150</div></div>
+        <input type="number" step="10" class="settings-select" id="s-speed-timing-offset" style="width:80px" value="${settings.speedTimingOffsetMs||0}">
+      </div>
+      <div class="settings-row">
         <div><div>Waveform backend</div><div class="desc">Choose how the waveform gets generated</div></div>
         <select class="settings-select" id="s-waveform-engine">
           <option value="auto" ${getWaveformEngine()==='auto'?'selected':''}>Auto</option>
@@ -3372,6 +4096,13 @@ async function showSettings() {
           </div>
         `).join('')}
       </div>
+      <div class="settings-row">
+        <div><div>Share this theme</div><div class="desc">Export your current preset + overrides as a shareable <span class="settings-code">.lttheme</span> file, or import someone else's</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="mbtn" type="button" id="s-theme-export">Export…</button>
+          <button class="mbtn" type="button" id="s-theme-import">Import…</button>
+        </div>
+      </div>
     </div>
     <div class="settings-note">Theme settings are saved locally in your browser.</div>
   `, [
@@ -3402,6 +4133,8 @@ async function showSettings() {
       settings.syncMatchingLinePacing = document.getElementById('s-sync-matching-lines').checked
       settings.spicyLyricsPrep = document.getElementById('s-spicy-lyrics-prep').checked
       settings.autoCorrectWordTimings = document.getElementById('s-auto-correct-words').checked
+      settings.preservePitchAtSpeed = document.getElementById('s-preserve-pitch').checked
+      settings.speedTimingOffsetMs = parseInt(document.getElementById('s-speed-timing-offset').value, 10) || 0
       settings.waveformEngine = document.getElementById('s-waveform-engine').value || 'auto'
       settings.theme = document.getElementById('s-theme').value || 'dark'
       settings.showAdvancedTheme = !document.getElementById('s-advanced-wrap').classList.contains('settings-hidden')
@@ -3472,6 +4205,39 @@ async function showSettings() {
   document.getElementById('s-advanced-toggle').addEventListener('click', () => {
     advancedWrap.classList.toggle('settings-hidden')
     document.getElementById('s-advanced-toggle').textContent = advancedWrap.classList.contains('settings-hidden') ? 'Show Advanced Overrides' : 'Hide Advanced Overrides'
+  })
+  document.getElementById('s-theme-export')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget
+    const themeKey = document.getElementById('s-theme')?.value || settings.theme
+    const overrides = collectThemeOverridesFromModal()
+    const payload = JSON.stringify({ version: 1, kind: 'lokal-ttml-theme', theme: themeKey, themeOverrides: overrides }, null, 2)
+    const suggested = `${sanitizeFileBase((THEMES[themeKey]||{}).name || themeKey)}.lttheme`
+    try {
+      const fp = await window.api?.saveThemeAs?.(payload, suggested)
+      if (!fp) return
+      const original = btn.textContent
+      btn.textContent = 'Exported ✓'
+      setTimeout(() => { btn.textContent = original }, 1200)
+    } catch (err) {
+      showRuntimeError(`Couldn't export theme: ${err?.message || err}`)
+    }
+  })
+  document.getElementById('s-theme-import')?.addEventListener('click', async () => {
+    try {
+      const res = await window.api?.openThemeDialog?.()
+      if (!res?.content) return
+      const parsed = JSON.parse(res.content)
+      const importedTheme = THEMES[parsed.theme] ? parsed.theme : (themeInput.value || 'dark')
+      const importedOverrides = parsed.themeOverrides && typeof parsed.themeOverrides === 'object' ? parsed.themeOverrides : {}
+      settings.theme = importedTheme
+      settings.themeOverrides = importedOverrides
+      saveSettings()
+      applySettings()
+      closeModal()
+      showSettings()
+    } catch (err) {
+      showRuntimeError(`Couldn't import theme file: ${err?.message || err}`)
+    }
   })
 }
 
@@ -3552,6 +4318,8 @@ function validateExportIssues(sorted) {
     if (last.end != null && line.end != null && last.end > line.end + EPS) {
       issues.push(`${lineExportLabel(line)} - ${kind} vocals end after the line's own end time.`)
     }
+    const missing = words.filter(w => w.time == null).length
+    if (missing) issues.push(`${lineExportLabel(line)} has ${missing} ${kind} word${missing===1?'':'s'} missing timing.`)
   }
   for (let i = 0; i < sorted.length; i++) {
     const line = sorted[i]
@@ -3559,7 +4327,7 @@ function validateExportIssues(sorted) {
     if (line.time == null) { issues.push(`${label} has no start time set.`); continue }
     if (line.end != null && line.end <= line.time) issues.push(`${label} ends at or before it starts.`)
     const missingMain = (line.words || []).filter(w => w.time == null).length
-    if (missingMain) issues.push(`${label} has ${missingMain} word${missingMain===1?'':'s'} with no timing.`)
+    if (missingMain) issues.push(`${label} has ${missingMain} word${missingMain===1?'':'s'} missing timing.`)
     for (let w = 0; w < (line.words || []).length - 1; w++) {
       const a = line.words[w], b = line.words[w + 1]
       if (a.end != null && b.time != null && a.end > b.time + EPS) {
@@ -3593,16 +4361,7 @@ function showExportConflictsModal(issues, onContinue) {
   ])
 }
 
-function exportTTML(force) {
-  if (!lines.length) return
-  const sorted = [...lines].sort((a,b)=>(a.time||0)-(b.time||0))
-  if (!force) {
-    const issues = validateExportIssues(sorted)
-    if (issues.length) {
-      showExportConflictsModal(issues, () => exportTTML(true))
-      return
-    }
-  }
+function buildTTMLXml(sorted) {
   const hasDuet = sorted.some(l => l.duoWords?.length)
   let metaXml = `<ttm:title>${esc(songMeta.musicName||audioFileName||'Unknown')}</ttm:title>`
   if (hasDuet) metaXml += `<ttm:agent type="person" xml:id="v1"/><ttm:agent type="person" xml:id="v2"/>`
@@ -3654,14 +4413,86 @@ function exportTTML(force) {
     xml += `</p>\n`
   }
   xml += `    </div>\n  </body>\n</tt>`
+  return xml
+}
+
+const EXPORT_PRESETS_KEY = 'ttml-editor-export-presets'
+
+function getExportPresets() {
+  try {
+    const raw = localStorage.getItem(EXPORT_PRESETS_KEY)
+    const parsed = raw ? JSON.parse(raw) : {}
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch { return {} }
+}
+
+function exportPresetKey() {
+  return sanitizeFileBase(getCurrentSongName()).toLowerCase()
+}
+
+function saveExportPreset(kind, filePath) {
+  const all = getExportPresets()
+  const key = exportPresetKey()
+  all[key] = { ...(all[key] || {}), [kind]: filePath, updatedAt: Date.now() }
+  try { localStorage.setItem(EXPORT_PRESETS_KEY, JSON.stringify(all)) } catch {}
+  updateReExportButtons()
+}
+
+function getExportPreset(kind) {
+  return getExportPresets()[exportPresetKey()]?.[kind] || null
+}
+
+function updateReExportButtons() {
+  const ttmlBtn = document.getElementById('reexport-ttml-btn')
+  const lrcBtn = document.getElementById('reexport-lrc-btn')
+  const ttmlPath = getExportPreset('ttml')
+  const lrcPath = getExportPreset('lrc')
+  if (ttmlBtn) {
+    ttmlBtn.style.display = ttmlPath ? 'inline-flex' : 'none'
+    ttmlBtn.title = ttmlPath ? `Re-export straight to ${ttmlPath}` : ''
+  }
+  if (lrcBtn) {
+    lrcBtn.style.display = lrcPath ? 'inline-flex' : 'none'
+    lrcBtn.title = lrcPath ? `Re-export straight to ${lrcPath}` : ''
+  }
+}
+
+function exportTTML(force, quickPath) {
+  if (!lines.length) return
+  const sorted = [...lines].sort((a,b)=>(a.time||0)-(b.time||0))
+  if (!force) {
+    const issues = validateExportIssues(sorted)
+    if (issues.length) {
+      showExportConflictsModal(issues, () => exportTTML(true, quickPath))
+      return
+    }
+  }
+  const xml = buildTTMLXml(sorted)
+  if (quickPath) {
+    window.api.writeFileDirect(quickPath, xml).then(ok => {
+      if (!ok) { showRuntimeError('Re-export failed - the remembered path may no longer exist.'); return }
+      flashProjectsButton()
+      showModal('Re-exported!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(quickPath.replace(/\\/g,'/').split('/').pop())}</strong><div class="es-path">${esc(quickPath)}</div></div>`, [{label:'Close',fn:closeModal}])
+    })
+    return
+  }
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.ttml'
-  window.api.saveTTML(xml, suggestedName).then(fp => {
+  const lastDir = getExportPreset('ttmlDir')
+  window.api.saveTTML(xml, suggestedName, lastDir).then(fp => {
     if (!fp) return
+    saveExportPreset('ttml', fp)
+    saveExportPreset('ttmlDir', fp.replace(/\\/g,'/').split('/').slice(0,-1).join('/'))
     const parts = fp.replace(/\\/g,'/').split('/')
     const fileName = parts.pop()
     const dir = parts.join('/')
     showModal('Saved!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(fileName)}</strong><div class="es-path">${esc(dir)}</div><div class="es-note">Feel free to use this in Lokal by importing it from the lyrics view, or use it in any other program that supports TTML files. Thanks!</div></div>`, [{label:'Close',fn:closeModal}])
   })
+}
+
+function reExportTTML() {
+  const path = getExportPreset('ttml')
+  if (!path) { exportTTML(); return }
+  exportTTML(false, path)
 }
 
 function fmtLRCTime(t) {
@@ -3678,14 +4509,37 @@ function lrcLineText(line) {
   return t.trim()
 }
 
-function exportLRC() {
-  const timed = lines.filter(l => l.time != null).sort((a,b) => a.time - b.time)
-  if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
+function buildLRCText(timed) {
   let out = ''
   for (const line of timed) out += `[${fmtLRCTime(line.time)}]${lrcLineText(line)}\n`
+  return out
+}
+
+function exportLRC(force, quickPath) {
+  const timed = lines.filter(l => l.time != null).sort((a,b) => a.time - b.time)
+  if (!timed.length) { showRuntimeError('No timed lines to export, please add line timing first.'); return }
+  if (!force) {
+    const issues = validateExportIssues(timed)
+    if (issues.length) {
+      showExportConflictsModal(issues, () => exportLRC(true, quickPath))
+      return
+    }
+  }
+  const out = buildLRCText(timed)
+  if (quickPath) {
+    window.api.writeFileDirect(quickPath, out).then(ok => {
+      if (!ok) { showRuntimeError('Re-export failed - the remembered path may no longer exist.'); return }
+      flashProjectsButton()
+      showModal('Re-exported!', `<div class="export-success"><div class="es-icon">✓</div><strong>${esc(quickPath.replace(/\\/g,'/').split('/').pop())}</strong><div class="es-path">${esc(quickPath)}</div></div>`, [{label:'Close',fn:closeModal}])
+    })
+    return
+  }
   const suggestedName = audioFileName.replace(/\.[^.]+$/,'')+'.lrc'
-  window.api.saveLRC(out, suggestedName).then(fp => {
+  const lastDir = getExportPreset('lrcDir')
+  window.api.saveLRC(out, suggestedName, lastDir).then(fp => {
     if (!fp) return
+    saveExportPreset('lrc', fp)
+    saveExportPreset('lrcDir', fp.replace(/\\/g,'/').split('/').slice(0,-1).join('/'))
     const parts = fp.replace(/\\/g,'/').split('/')
     const fileName = parts.pop()
     const dir = parts.join('/')
@@ -3693,9 +4547,46 @@ function exportLRC() {
   })
 }
 
+function reExportLRC() {
+  const path = getExportPreset('lrc')
+  if (!path) { exportLRC(); return }
+  exportLRC(false, path)
+}
+
 function sortLines() {
   lines.sort((a,b)=>(a.time??Infinity)-(b.time??Infinity))
   renderAll()
+}
+
+function showShiftTimingModal() {
+  if (!lines.length) return
+  showModal('Shift All Timings', `
+    <div class="mf">
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">Moves every line, word, and marker timing by the same offset - handy if you swapped in a different version of the audio with a longer or shorter intro and everything is now off by a fixed amount.</p>
+      <label style="margin-top:8px">Offset (seconds)</label>
+      <input class="mi" id="shift-seconds-input" type="number" step="0.05" placeholder="e.g. 2.5 or -1.2">
+      <div class="desc" style="margin-top:6px">Positive pushes everything later, negative pulls everything earlier. Results are clamped so nothing goes below 0:00.</div>
+    </div>
+  `, [
+    { label: 'Cancel', fn: closeModal },
+    { label: 'Apply Shift', primary: true, fn: () => {
+        const delta = parseFloat(document.getElementById('shift-seconds-input').value)
+        if (!Number.isFinite(delta) || delta === 0) { closeModal(); return }
+        closeModal()
+        shiftAllTimings(delta)
+      } }
+  ])
+  setTimeout(() => document.getElementById('shift-seconds-input')?.focus(), 50)
+}
+
+function shiftAllTimings(delta) {
+  pushHistory('shift all timings')
+  shiftLinesByIds(lines.map(l => l.id), delta)
+  for (const m of markers) {
+    if (m.time != null) m.time = Math.max(0, m.time + delta)
+  }
+  sortLines()
+  drawWaveform()
 }
 function filterLines(val) { filterText=val; renderLines(); scheduleSessionSave() }
 function updateStatus() {
@@ -3704,6 +4595,36 @@ function updateStatus() {
   for (const l of lines) for (const w of l.words) { w.time!=null?timed++:missing++ }
   document.getElementById('sb-timed').textContent = timed
   document.getElementById('sb-missing').textContent = missing
+}
+
+function showPromptModal(title, defaultValue = '', placeholder = '') {
+  return new Promise(resolve => {
+    let settled = false
+    const settle = (val) => {
+      if (settled) return
+      settled = true
+      observer.disconnect()
+      document.removeEventListener('keydown', keyHandler)
+      resolve(val)
+    }
+    showModal(title, `<div class="mf"><input class="mi" id="prompt-modal-input" value="${escAttr(defaultValue)}" placeholder="${escAttr(placeholder)}"></div>`, [
+      { label: 'Cancel', fn: () => { settle(null); closeModal() } },
+      { label: 'OK', primary: true, fn: () => { settle(document.getElementById('prompt-modal-input')?.value ?? null); closeModal() } }
+    ])
+    const overlay = document.getElementById('modal-overlay')
+    const observer = new MutationObserver(() => {
+      if (overlay.classList.contains('hidden')) settle(null)
+    })
+    observer.observe(overlay, { attributes: true, attributeFilter: ['class'] })
+    const keyHandler = (e) => {
+      if (e.key === 'Enter') { settle(document.getElementById('prompt-modal-input')?.value ?? null); closeModal() }
+    }
+    setTimeout(() => {
+      const input = document.getElementById('prompt-modal-input')
+      if (input) { input.focus(); input.select() }
+      document.addEventListener('keydown', keyHandler)
+    }, 50)
+  })
 }
 
 function showModal(title, bodyHtml, buttons) {
@@ -3807,6 +4728,7 @@ document.addEventListener('keydown', e => {
   if (e.code==='Space') { e.preventDefault(); togglePlay() }
   if (e.code==='KeyS' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setStartNow() }
   if (e.code==='KeyE') { e.preventDefault(); setEndNow() }
+  if (e.code==='KeyM') { e.preventDefault(); addMarkerAtPlayhead() }
   if (e.code==='BracketLeft') { e.preventDefault(); nudgePlaybackSpeed(-1) }
   if (e.code==='BracketRight') { e.preventDefault(); nudgePlaybackSpeed(1) }
   if (e.code==='ArrowRight') { e.preventDefault(); audio.currentTime=Math.min(audioDuration,audio.currentTime+(e.shiftKey?1:.1)) }
@@ -3832,8 +4754,10 @@ restoreSession().finally(() => {
   if (selectedWord) selectWord(selectedWord.lineId, selectedWord.idx, selectedWord.type)
   if (wasSessionUnclean) checkForCrashRecovery()
 })
-setTimeout(() => checkForUpdates(false), 2500)
+syncAppVersion().then(() => setTimeout(() => checkForUpdates(false), 2500))
 startProjectAutosaveLoop()
+updateQueueBadge()
+updateReExportButtons()
 window.addEventListener('beforeunload', () => {
   try { localStorage.setItem(SESSION_ACTIVE_KEY, '0') } catch {}
   autosaveProjectTick()
