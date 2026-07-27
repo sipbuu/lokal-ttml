@@ -1,4 +1,4 @@
-name: Build Electron Executable
+name: Build Electron Executable (Manual Build)
 
 on:
   workflow_dispatch:
@@ -10,7 +10,20 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: Lokal-TTML-Editor-Windows
+            build_cmd: npx electron-builder --win portable
+          - os: macos-latest
+            artifact_name: Lokal-TTML-Editor-macOS
+            build_cmd: npx electron-builder --mac dmg zip
+          - os: ubuntu-latest
+            artifact_name: Lokal-TTML-Editor-Linux
+            build_cmd: npx electron-builder --linux AppImage deb
 
     steps:
       - name: Checkout Code
@@ -27,11 +40,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Portable Windows App
-        run: npm run build
+      - name: Build Executables
+        run: ${{ matrix.build_cmd }}
 
-      - name: Upload Artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Lokal-TTML-Editor-Executable
-          path: release/Lokal-TTML-Editor.exe
+          name: ${{ matrix.artifact_name }}
+          path: release/*.*
