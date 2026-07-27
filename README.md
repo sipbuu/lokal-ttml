@@ -5,7 +5,7 @@
 
 A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating and editing TTML lyric files with word-level timing. Made to make files compatible with Lokal Music's synced lyrics system, and any program that supports TTML. (like Spicy Lyrics)
 
-[![Compatible with Spicy Lyrics](https://img.shields.io/badge/Spicy_Lyrics-Compatible-ff4500?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com) [![Lokal TTML](https://img.shields.io/badge/Lokal_TTML-v1.2.0-007acc?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)
+[![Compatible with Spicy Lyrics](https://img.shields.io/badge/Spicy_Lyrics-Compatible-ff4500?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com) [![Lokal TTML](https://img.shields.io/badge/Lokal_TTML-v1.3.0-007acc?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT-4c1?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)
 [![Discord](https://img.shields.io/badge/Discord-Join_Server-7289DA?style=for-the-badge&logo=discord&logoColor=white&labelColor=222222)](https://discord.gg/Wv3zfpG6UT)
 ---
