@@ -1,0 +1,99 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: Lokal TTML Editor ${{ github.ref_name }}
+          body: |
+            *Requires Node.js v18+ if running from source.*
+
+            ---
+
+            # Lokal TTML Editor ${{ github.ref_name }}
+
+            [Add brief summary/overview here]
+
+            ---
+
+            ## Features added:
+
+            * 
+
+            ## Fixed Issues
+
+            * 
+
+            > Please report any [issues](https://github.com/sipbuu/lokal-ttml/issues) or pull requests for bugs and improvements.
+
+            ---
+
+            ### Binary Checksums (SHA-256)
+
+            **Full Changelog**: https://github.com/sipbuu/lokal-ttml/commits/${{ github.ref_name }}
+
+            ---
+
+  build:
+    name: Build (${{ matrix.os }})
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            build_cmd: npx electron-builder --win portable
+          - os: macos-latest
+            build_cmd: npx electron-builder --mac dmg zip
+          - os: ubuntu-latest
+            build_cmd: npx electron-builder --linux AppImage deb
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Executables
+        run: ${{ matrix.build_cmd }}
+
+      - name: Generate Checksums
+        shell: bash
+        run: |
+          cd release
+          echo "CHECKSUM_TEXT<<EOF" >> $GITHUB_ENV
+          for file in *.{exe,dmg,zip,AppImage,deb}; do
+            if [ -f "$file" ]; then
+              hash=$(shasum -a 256 "$file" | awk '{print $1}')
+              echo "> **$file**: \`$hash\`" >> $GITHUB_ENV
+            fi
+          done
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Upload Assets & Append Checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          append_body: true
+          body: ${{ env.CHECKSUM_TEXT }}
+          files: release/*.*
