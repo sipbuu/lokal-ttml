@@ -18,15 +18,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          name: Lokal TTML Editor ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
-            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
-
             *Requires Node.js v18+ if running from source.*
 
             ---
 
-            # Lokal TTML Editor ${{ github.ref_name }}
+            # ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
 
             [Add brief summary/overview here]
 
@@ -133,8 +131,10 @@ jobs:
       - name: Upload Assets & Append Checksums
         uses: softprops/action-gh-release@v2
         with:
+          draft: true
           append_body: true
           body: ${{ env.CHECKSUM_TEXT }}
           files: |
             release/*.*
+            release-banner.png
             release-banner.png
