@@ -20,6 +20,8 @@ jobs:
           draft: true
           name: Lokal TTML Editor ${{ github.ref_name }}
           body: |
+            ![Release Banner](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png)
+
             *Requires Node.js v18+ if running from source.*
 
             ---
@@ -75,6 +77,37 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Install Playwright (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Generate Release Banner (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          node - <<'EOF'
+          const { chromium } = require("playwright");
+
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage({
+              viewport: { width: 1200, height: 600 }
+            });
+
+            await page.goto(
+              "https://sipbuu.me/lokalver/?v=${{ github.ref_name }}&type=release&app=ttml",
+              { waitUntil: "networkidle" }
+            );
+
+            await page.locator(".title-card").screenshot({
+              path: "release-banner.png"
+            });
+
+            await browser.close();
+          })();
+          EOF
+
       - name: Build Executables
         run: ${{ matrix.build_cmd }}
 
@@ -96,4 +129,6 @@ jobs:
         with:
           append_body: true
           body: ${{ env.CHECKSUM_TEXT }}
-          files: release/*.*
+          files: |
+            release/*.*
+            release-banner.png
