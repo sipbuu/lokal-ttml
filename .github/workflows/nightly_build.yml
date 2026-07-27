@@ -59,7 +59,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.os }}
-          path: release
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
+            release/*.yml
+            release/*.blockmap
+          if-no-files-found: ignore
 
   release:
     name: Create & Update Nightly Release
@@ -163,7 +171,7 @@ jobs:
           name: "Lokal TTML Editor Nightly (${{ inputs.ref || 'main' }})"
           prerelease: true
           files: |
-            release_all/**/*.*
+            release_all/*
             release-banner.png
           body: |
             ![Release Banner](https://github.com/${{ github.repository }}/releases/download/nightly-${{ inputs.ref || 'main' }}/release-banner.png)
