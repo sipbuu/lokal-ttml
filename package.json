@@ -2,7 +2,10 @@
   "name": "lokal-ttml",
   "version": "1.2.0",
   "description": "TTML Editor for the Lokal program, used to create Apple-Like synced lyrics.",
-  "author": "sipbuu",
+  "author": {
+    "name": "sipbuu",
+    "email": "97703296+sipbuu@users.noreply.github.com"
+  },
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -44,14 +47,21 @@
       "unpackDirName": "lokal-ttml-temp"
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.music",
       "icon": "public/icon.png"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Audio",
-      "icon": "public/icon.png"
+      "icon": "public/icon.png",
+      "maintainer": "sipbuu <97703296+sipbuu@users.noreply.github.com>"
     }
   }
 }
