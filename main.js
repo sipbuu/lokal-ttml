@@ -393,7 +393,7 @@ function readProjectFileMeta(fp) {
         if (!Array.isArray(bucket)) continue
         for (const w of bucket) {
           totalWords++
-          if (w && w.time != null && w.end != null) timedWords++
+          if (w && w.timingEdited && w.time != null && w.end != null) timedWords++
         }
       }
     }

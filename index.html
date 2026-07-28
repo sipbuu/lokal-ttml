@@ -1375,7 +1375,7 @@ function projectRowHtml(p, isAutosave) {
     <div class="lrclib-result">
       <div class="rt">${esc(p.name)}${tag}${cur}</div>
       <div class="ra">${esc(p.audioFileName || 'No audio')} · ${esc(fmtProjTime(p.savedAt))} · ${p.lineCount||0} lines</div>
-      <div class="pd-progress" title="${timed}/${total} words timed">
+      <div class="pd-progress" title="${timed}/${total} words manually timed">
         <div class="pd-progress-track"><div class="pd-progress-fill" style="width:${pct}%"></div></div>
         <div class="pd-progress-label">${pct}%</div>
       </div>
@@ -2905,6 +2905,7 @@ function startTapToTime() {
   for (const { line, word } of refs) {
     word.time = null
     word.end = null
+    word.timingEdited = false
     line.time = null
     line.end = null
   }
@@ -2926,12 +2927,14 @@ function undoTapToTime() {
   if (prev) {
     prev.word.time = stamp?.time ?? null
     prev.word.end = null
+    prev.word.timingEdited = prev.word.time != null
     if (prevIdx === 0) prev.line.time = prev.word.time
   }
   if (index < refs.length) {
     const cur = refs[index]
     cur.word.time = null
     cur.word.end = null
+    cur.word.timingEdited = false
   }
   tapTimingSession.index = prevIdx
   if (prev) {
@@ -2951,9 +2954,11 @@ function tapToTimeStamp() {
   const t = captureAudioTime()
   const cur = refs[index]
   cur.word.time = t
+  markWordTimingEdited(cur.word)
   if (index > 0) {
     const prev = refs[index - 1]
     if (prev.word.time != null && t > prev.word.time) prev.word.end = t
+    markWordTimingEdited(prev.word)
     syncLineTimingFromWords(prev.line, 'main')
   }
   if (index === 0 || cur.line.time == null || t < cur.line.time) cur.line.time = t
@@ -2963,6 +2968,7 @@ function tapToTimeStamp() {
     const last = refs[refs.length - 1]
     if (last.word.time != null) {
       last.word.end = last.word.time + 0.35
+      markWordTimingEdited(last.word)
       syncLineTimingFromWords(last.line, 'main')
     }
     endTapToTime(true)
@@ -2985,6 +2991,7 @@ function endTapToTime(markDone) {
       cur.word.end = next?.word?.time != null && next.word.time > cur.word.time
         ? next.word.time
         : cur.word.time + 0.35
+      markWordTimingEdited(cur.word)
     }
     syncLineTimingFromWords(cur.line, 'main')
   }
@@ -5249,7 +5256,7 @@ function filterLines(val) { filterText=val; renderLines(); scheduleSessionSave()
 function updateStatus() {
   document.getElementById('sb-lines').textContent = lines.length
   let timed=0, missing=0
-  for (const l of lines) for (const w of l.words) { w.time!=null?timed++:missing++ }
+  for (const l of lines) for (const w of l.words) { (w.timingEdited && w.time!=null)?timed++:missing++ }
   document.getElementById('sb-timed').textContent = timed
   document.getElementById('sb-missing').textContent = missing
 }
