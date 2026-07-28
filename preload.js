@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
   saveLRC: (content, name, defaultDir) => ipcRenderer.invoke('dialog:saveLRC', content, name, defaultDir),
   writeFileDirect: (filePath, content) => ipcRenderer.invoke('file:writeDirect', filePath, content),
   getVersion: () => ipcRenderer.invoke('app:getVersion'),
+  getPlatform: () => ipcRenderer.invoke('app:getPlatform'),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
   readBinary: (fp) => ipcRenderer.invoke('file:readBinary', fp),
   fileExists: (fp) => ipcRenderer.invoke('file:exists', fp),

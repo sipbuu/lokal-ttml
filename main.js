@@ -173,6 +173,11 @@ ipcMain.handle('file:writeDirect', async (_, filePath, content) => {
 
 ipcMain.handle('app:getVersion', () => app.getVersion())
 
+ipcMain.handle('app:getPlatform', () => ({
+  platform: process.platform,
+  arch: process.arch,
+}))
+
 ipcMain.handle('app:openExternal', async (_, url) => {
   if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
     await shell.openExternal(url)

@@ -1750,6 +1750,85 @@ function compareVersions(a, b) {
   return 0
 }
 
+function openUpdateUrl(url) {
+  if (!url) return
+  if (window.api?.openExternal) window.api.openExternal(url)
+  else window.open(url, '_blank')
+}
+
+async function getUpdatePlatformInfo() {
+  try {
+    const info = await window.api?.getPlatform?.()
+    if (info?.platform) return { platform: info.platform, arch: info.arch || 'x64' }
+  } catch {}
+  const ua = navigator.userAgent || ''
+  if (/Mac/i.test(ua)) return { platform: 'darwin', arch: /arm|aarch64/i.test(ua) ? 'arm64' : 'x64' }
+  if (/Linux/i.test(ua)) return { platform: 'linux', arch: /aarch64|arm64/i.test(ua) ? 'arm64' : 'x64' }
+  return { platform: 'win32', arch: 'x64' }
+}
+
+function assetMatchesArch(name, arch) {
+  const n = String(name || '').toLowerCase()
+  const hasArm = /arm64|aarch64/.test(n)
+  const hasX64 = /x64|amd64|x86_64/.test(n)
+  if (arch === 'arm64') {
+    if (hasArm) return 2
+    if (!hasX64) return 1
+    return 0
+  }
+  if (hasX64) return 2
+  if (!hasArm) return 1
+  return 0
+}
+
+function pickReleaseAsset(assets, platform, arch) {
+  const list = Array.isArray(assets) ? assets.filter(a => a?.browser_download_url && a?.name) : []
+  if (!list.length) return null
+
+  const scored = []
+  for (const asset of list) {
+    const name = String(asset.name)
+    const lower = name.toLowerCase()
+    if (/\.(blockmap|yml|yaml|png|jpg|jpeg|gif|txt|md)$/i.test(lower)) continue
+    if (/builder-debug/i.test(lower)) continue
+
+    let platformScore = 0
+    let kindScore = 0
+    if (platform === 'win32') {
+      if (!/\.exe$/i.test(lower)) continue
+      platformScore = 3
+      kindScore = /lokal-ttml-editor\.exe$/i.test(lower) ? 3 : 2
+    } else if (platform === 'darwin') {
+      if (!/\.(dmg|zip)$/i.test(lower)) continue
+      if (!/(mac|darwin|osx|\.dmg$)/i.test(lower) && !/-mac\.zip$/i.test(lower)) continue
+      platformScore = 3
+      kindScore = /\.dmg$/i.test(lower) ? 3 : 2
+    } else if (platform === 'linux') {
+      if (!/\.(appimage|deb|rpm)$/i.test(lower)) continue
+      platformScore = 3
+      if (/\.appimage$/i.test(lower)) kindScore = 3
+      else if (/\.deb$/i.test(lower)) kindScore = 2
+      else kindScore = 1
+    } else {
+      continue
+    }
+
+    const archScore = assetMatchesArch(name, arch)
+    if (!archScore && (platform === 'darwin' || platform === 'linux')) continue
+    scored.push({ asset, score: platformScore * 100 + kindScore * 10 + archScore })
+  }
+
+  scored.sort((a, b) => b.score - a.score)
+  return scored[0]?.asset || null
+}
+
+function platformLabel(platform) {
+  if (platform === 'darwin') return 'macOS'
+  if (platform === 'linux') return 'Linux'
+  if (platform === 'win32') return 'Windows'
+  return platform || 'this platform'
+}
+
 async function checkForUpdates(manual) {
   try {
     const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/releases/latest`)
@@ -1758,20 +1837,31 @@ async function checkForUpdates(manual) {
     const latestTag = data.tag_name || data.name || ''
     if (!latestTag) throw new Error('No release found')
     if (compareVersions(latestTag, APP_VERSION) > 0) {
+      const { platform, arch } = await getUpdatePlatformInfo()
+      const asset = pickReleaseAsset(data.assets, platform, arch)
+      const releaseUrl = data.html_url || `https://github.com/${UPDATE_REPO}/releases/latest`
+      const downloadUrl = asset?.browser_download_url || null
+      const assetName = asset?.name || ''
+      const plat = platformLabel(platform)
+      const assetHint = downloadUrl
+        ? `<p style="font-size:12px;color:var(--muted);margin-top:8px">Download for ${esc(plat)}: <strong>${esc(assetName)}</strong></p>`
+        : `<p style="font-size:12px;color:var(--muted);margin-top:8px">No direct ${esc(plat)} build was found in this release — open the release page to pick a download.</p>`
+      const buttons = [
+        {label:'Later', fn:closeModal},
+        {label:'View Release', fn:() => { openUpdateUrl(releaseUrl); closeModal() }},
+      ]
+      if (downloadUrl) {
+        buttons.push({label:'Download Update', primary:true, fn:() => { openUpdateUrl(downloadUrl); closeModal() }})
+      } else {
+        buttons[1].primary = true
+      }
       showModal('Update Available', `
         <div class="mf">
           <p style="font-size:13px;line-height:1.6">A new version is available: <strong>${esc(latestTag)}</strong> - you're on <strong>v${esc(APP_VERSION)}</strong>.</p>
+          ${assetHint}
           <div class="desc" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;background:var(--surface2);padding:10px;border-radius:6px">${esc((data.body||'').slice(0,700))}</div>
         </div>
-      `, [
-        {label:'Later', fn:closeModal},
-        {label:'View Release', primary:true, fn:() => {
-          const url = data.html_url || `https://github.com/${UPDATE_REPO}/releases/latest`
-          if (window.api?.openExternal) window.api.openExternal(url)
-          else window.open(url, '_blank')
-          closeModal()
-        }}
-      ])
+      `, buttons)
     } else if (manual) {
       showModal('Up to Date', `<p style="font-size:13px;color:var(--muted)">You're on the latest version, v${esc(APP_VERSION)}.</p>`, [{label:'Close', fn:closeModal}])
     }
