@@ -67,6 +67,15 @@ jobs:
           npm install playwright
           npx playwright install --with-deps chromium
 
+      - name: Get Latest Commit Message
+        id: latest_commit
+        shell: bash
+        run: |
+          MSG=$(git log -1 --pretty=%s)
+          echo "LATEST<<EOF" >> $GITHUB_OUTPUT
+          echo "$MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Generate Release Banner
         run: |
           node - <<'EOF'
@@ -128,6 +137,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
@@ -167,3 +177,32 @@ jobs:
             ---
 
             **Full Changelog**: https://github.com/sipbuu/lokal-ttml/commits/${{ github.ref_name }}
+
+      - name: Discord Notification (Build Complete)
+        shell: bash
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          LATEST_MSG="${{ steps.latest_commit.outputs.LATEST }}"
+          BANNER_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-banner.png"
+          
+          PAYLOAD=$(jq -n \
+            --arg version "${{ github.ref_name }}" \
+            --arg url "${{ steps.create_release.outputs.html_url }}" \
+            --arg msg "$LATEST_MSG" \
+            --arg image "$BANNER_URL" \
+            --arg footer_icon "https://i.imgur.com/ZC3mEUC.png" \
+            --argjson color 3447003 \
+            '{
+              embeds: [{
+                title: "Build Complete: Lokal TTML Editor \($version)",
+                description: "All platform binaries for version **\($version)** have been successfully built and uploaded to the release draft. \n\n**Status:** Draft Ready\n**Last Commit:** \($msg)",
+                url: $url,
+                color: $color,
+                image: { url: $image },
+                footer: { text: "Lokal Build System", icon_url: $footer_icon }
+              }]
+            }'
+          )
+
+          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
