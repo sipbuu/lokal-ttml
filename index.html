@@ -4997,6 +4997,23 @@ function showExportConflictsModal(issues, onContinue) {
   ])
 }
 
+function hasSongwriterMetadata() {
+  return (songMeta.songwriters || []).some(s => String(s || '').trim())
+}
+
+function showMissingMetadataModal(onContinue) {
+  showModal('Missing Metadata', `
+    <div class="mf">
+      <p style="font-size:13px;line-height:1.6;color:var(--muted)">No songwriters have been added yet. You can still export, but Spicy Lyrics may reject the song without them.</p>
+      <div class="desc" style="margin-top:10px">Spicy Lyrics require songwriters for the song to be added, they can be found under Genius or spotify's normal lyrics.</div>
+    </div>
+  `, [
+    {label:'Cancel', fn:closeModal},
+    {label:'Edit Metadata', fn:() => { closeModal(); showMetadataModal() }},
+    {label:'Export Anyway', primary:true, fn:() => { closeModal(); onContinue() }}
+  ])
+}
+
 function buildTTMLXml(sorted) {
   const hasDuet = sorted.some(l => l.duoWords?.length)
   let metaXml = `<ttm:title>${esc(songMeta.musicName||audioFileName||'Unknown')}</ttm:title>`
@@ -5093,13 +5110,17 @@ function updateReExportButtons() {
   }
 }
 
-function exportTTML(force, quickPath) {
+function exportTTML(force, quickPath, metaOk) {
   if (!lines.length) return
+  if (!metaOk && !hasSongwriterMetadata()) {
+    showMissingMetadataModal(() => exportTTML(force, quickPath, true))
+    return
+  }
   const sorted = [...lines].sort((a,b)=>(a.time||0)-(b.time||0))
   if (!force) {
     const issues = validateExportIssues(sorted)
     if (issues.length) {
-      showExportConflictsModal(issues, () => exportTTML(true, quickPath))
+      showExportConflictsModal(issues, () => exportTTML(true, quickPath, true))
       return
     }
   }
