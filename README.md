@@ -1,103 +1,107 @@
-# ![Local TTML Editor](https://i.imgur.com/NzDrtAq.png)
+ # ![Lokal TTML Editor](https://i.imgur.com/NzDrtAq.png)
 
-![icon](https://i.imgur.com/3Id3RPj.png)
-![kuro!!!](https://i.imgur.com/3LoTeml.png)
 
-A standalone tool (from [Lokal](https://github.com/sipbuu/lokal/)) for creating and editing TTML lyric files with word-level timing. Made to make files compatible with Lokal Music's synced lyrics system, and any program that supports TTML. (like Spicy Lyrics)
+![icon](https://i.imgur.com/3Id3RPj.png) ![kuro!!!](https://i.imgur.com/3LoTeml.png)
 
-[![Compatible with Spicy Lyrics](https://img.shields.io/badge/Spicy_Lyrics-Compatible-ff4500?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com) [![Lokal TTML](https://img.shields.io/badge/Lokal_TTML-v1.3.0-007acc?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)
-[![License](https://img.shields.io/badge/License-MIT-4c1?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)
-[![Discord](https://img.shields.io/badge/Discord-Join_Server-7289DA?style=for-the-badge&logo=discord&logoColor=white&labelColor=222222)](https://discord.gg/Wv3zfpG6UT)
+A standalone desktop editor for creating, timing, and fine-tuning word-level TTML lyric files. Built primarily for [Lokal Music](https://github.com/sipbuu/lokal/), but fully compatible with any system supporting rich TTML (including Spicy Lyrics).
+
+[![Compatible with Spicy Lyrics](https://img.shields.io/badge/Spicy_Lyrics-Compatible-ff4500?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)[![Lokal TTML](https://img.shields.io/badge/Lokal_TTML-v1.4.0-007acc?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com/sipbuu/lokal-ttml/releases)[![License](https://img.shields.io/badge/License-MIT-4c1?style=for-the-badge&logoColor=white&labelColor=222222)](https://github.com)[![Discord](https://img.shields.io/badge/Discord-Join_Server-7289DA?style=for-the-badge&logo=discord&logoColor=white&labelColor=222222)](https://discord.gg/Wv3zfpG6UT) 
+
 ---
 
-## What it does
+## Key Features
 
-- Pulls lyrics automatically from **LRCLIB.net** by title + artist
-- Import existing `.lrc`, `.ttml`, or `.txt` files
-- Edit word-by-word timing by ear: press S to set a word's start, E to set its end, with estimated timing happening after each change.
-- Supports **background vocals** (`x-bg`) and **duo / harmony** lines per line
-- Live karaoke preview that lights up words as they pass
-- Exports valid TTML that Lokal and other compatible players can read
+* **Project & Session Management:** Dedicated project workspaces with automatic background saving (up to 20 restore points), crash recovery, and persistent state across launches.
+* **Smart Lyric Ingestion:** Automatic search & pull via **LRCLIB.net**, or import local `.lrc`, `.ttml`, and `.txt` files. Includes side-by-side spellcheck/diff with LRCLIB sources.
+* **Spicy Lyrics Automation:** Auto-normalizes text on input (splits compound words, moves parenthetical text to background vocal tracks, and handles punctuation cleanly). Includes metadata validation on export.
+* **Waveform Editing:** Interactive audio waveform with zoom support (`Ctrl + Scroll`), region markers, colored vocal boundaries, and bulk timestamp shifting (`Ctrl + Click + Drag`).
+* **Multi-Layer Vocal Support:** Native support for Main, Background (`x-bg`), and Duo/Harmony (`x-alt`) vocal layers with instant slot swapping.
+* **Live Karaoke Preview:** Refactored real-time preview with customizable styles, smooth auto-scrolling, lyric blur effects, and click-any-word-to-seek playback.
+* **Audio Engine Tuning:** Speed playback dropdown, pitch preservation toggle, and manual audio latency offset adjustments to counteract audio buffer delays.
+* **Theme & Preset System:** Fully customizable UI themes with exportable/importable `.lttheme` preset files.
 
 ---
 
 ## Getting Started
 
+### Development
+
 ```bash
 npm install
 npm run dev
+
 ```
 
-To build a portable `.exe`:
+### Packaging
 
 ```bash
 npm run build
-# outputs: dist/lokal-ttml-editor.exe
+
 ```
 
 ---
 
 ## How to Use
 
-1. **Open Audio** - load your audio file (mp3, flac, m4a, ogg, wav, aac, opus)
-2. **Get Lyrics** - click **Search LRCLIB** to pull synced or plain lyrics by title/artist, or **Import File** to load a local `.lrc` / `.ttml` / `.txt`
-3. **Select a line** from the left panel
-4. **Select a word** from the editor (the word chips)
-5. Play the audio, and when the word starts press `S` - when it ends press `E`
-6. Use `Tab` / `Shift+Tab` to move between words without clicking
-7. Add **background vocals** or **duo/harmony** to any line using the buttons below the main word row
-8. **Export TTML** when done
+1. **Load Audio:** Open your local track (`.mp3`, `.flac`, `.m4a`, `.ogg`, `.wav`, `.aac`, `.opus`).
+2. **Import Lyrics:** Click **Search LRCLIB** to fetch lyrics online, or **Import File** to load an existing `.lrc`, `.ttml`, or `.txt`.
+3. **Prep & Structure:**
+* Enable **Spicy Lyrics Prep** in settings to auto-sort background vocals and hyphenated words.
+* Manually split words with `\` in the editor box if needed.
+
+
+4. **Time Words:**
+* Select a line and word chip.
+* Play audio and hit `S` to mark start times, `E` to mark end times.
+* Use `Tab` / `Shift+Tab` to move between word chips smoothly.
+
+
+5. **Adjust & Refine:**
+* `Ctrl + Click + Drag` on the waveform to bulk-shift timing (great for mismatched intro lengths).
+* Toggle **Tap-to-Time** or use the speed dropdown for precise millisecond alignment.
+
+
+6. **Export:** Click **Export TTML** (or **Export LRC**). The built-in validator will warn you of any missing metadata or overlapping timestamps before saving.
 
 ---
 
-## Shortcuts
+## Shortcuts & Controls
 
-| Key | Action |
-|-----|--------|
-| `Space` | Play / pause |
-| `S` | Set selected word start to current time |
-| `E` | Set selected word end to current time |
-| `Tab` | Next word |
-| `Shift+Tab` | Previous word |
-| `→` | Seek +0.1s |
-| `←` | Seek -0.1s |
-| `Shift+→` | Seek +1s |
-| `Shift+←` | Seek -1s |
-| Double-click word | Jump audio to that word's start time |
-
----
-
-## TTML Vocal Types
-
-| Type | TTML Role | Color |
-|------|-----------|-------|
-| Main vocals | *(default)* | White / green when active |
-| Background vocals | `ttm:role="x-bg"` | Purple |
-| Duo / harmony | `ttm:role="x-alt"` | Orange |
-
-Both `x-bg` and `x-alt` are parsed correctly by Lokal.
+| Input | Action |
+| --- | --- |
+| `Space` | Play / Pause audio |
+| `S` | Set selected word **Start** to current playhead |
+| `E` | Set selected word **End** to current playhead |
+| `Tab` / `Shift+Tab` | Next / Previous word chip |
+| `→` / `←` | Seek ±0.1s |
+| `Shift + →` / `Shift + ←` | Seek ±1.0s |
+| `Ctrl + Scroll` | Zoom in / out on audio waveform |
+| `Ctrl + Click + Drag` | Bulk shift lyrics on waveform |
+| Double-click word | Jump playhead directly to word start time |
+| Click Preview Word | Jump playhead to word in Live Preview |
 
 ---
 
-## Tips
+## Vocal Roles & Formatting
 
-- Look into settings to tune the settings to your needs, especially if you're using this tool for Spicy Lyrics, or any other "community-upload" TTML service.
-- If LRCLIB returns synced lyrics, word timings are pre-estimated from line timings, you'll want to likely fine-tune them
-- If it returns plain lyrics, all words start with no timing, work through each line with the S/E keys
-- The waveform bar at the top shows green markers for each line's start position so it's easier to track
-- Double-clicking a word chip in the editor jumps the audio to that word's start so you can re-sync it
-- The status bar at the bottom shows how many words are still missing timing
-- Each word chip in a line section is highlighted for ease of use.
-- Estimation will attempt to match the song to the line length, and will work around your words to improve syncing.
+| Type | TTML Role | Color Identifier |
+| --- | --- | --- |
+| **Main Vocals** | *(default)* | White / Active Highlight |
+| **Background Vocals** | `ttm:role="x-bg"` | Purple |
+| **Duo / Harmony** | `ttm:role="x-alt"` | Orange |
+
 ---
 
 ## Importing into Lokal
 
-After exporting, open the fullscreen lyrics view (of the song you just synced) in Lokal -> click the Import button (top right) -> select your newly created `.ttml` file. The lyrics will load immediately with word-level sync.
+Once exported:
 
+1. Open **Lokal Music** and play the corresponding track.
+2. Open the Fullscreen Lyrics view.
+3. Click **Import** (top right) and select your `.ttml` file.
 
 ---
 
-## Further usage? 
+## License
 
-There are plans to use this to later create an easily accessible by many API for TTML files, so that many aren't restricted to only word-line.
+Distributed under the MIT License.
