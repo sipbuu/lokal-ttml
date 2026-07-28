@@ -2849,10 +2849,19 @@ function maybeOfferTapToTime(source) {
   if (!projectNeedsFirstTapTiming(source)) return
   setTimeout(() => {
     if (!projectNeedsFirstTapTiming(source)) return
-    showModal('Tap to Time?', `
-      <p style="font-size:13px;line-height:1.65;color:var(--muted)">This looks like a first pass on this project. You can tap along to the audio to mark each word live (great first draft), or skip and keep the automated word timings / edit manually.</p>
+    const isLrc = source === 'lrc'
+    const body = isLrc ? `
+      <p style="font-size:13px;line-height:1.65;color:var(--muted)">Your lyrics already have <strong>line</strong> timings (e.g. from LRCLIB). Word start/end times were only <strong>auto-estimated</strong> by evenly spreading each line's duration across its words — they are not real word-synced timings.</p>
+      <p style="font-size:13px;line-height:1.65;color:var(--muted);margin-top:10px"><strong>Start Tap to Time</strong> does <em>not</em> auto-estimate anything for you. It clears those estimates so you can stamp each word yourself while the song plays.</p>
+      <p style="font-size:13px;line-height:1.65;color:var(--muted);margin-top:10px"><strong>Skip for now</strong> keeps the current auto-estimated version from those LRCLIB/line timings, and you can still edit words manually later.</p>
       <p style="font-size:12px;line-height:1.6;color:var(--muted2);margin-top:10px">During tap mode: <kbd>Space</kbd> stamps the next word, <kbd>[</kbd>/<kbd>]</kbd> change speed, <kbd>Esc</kbd> exits. Slowing playback down is recommended.</p>
-    `, [
+    ` : `
+      <p style="font-size:13px;line-height:1.65;color:var(--muted)">This looks like a first pass on this project. Word timings are not locked in yet.</p>
+      <p style="font-size:13px;line-height:1.65;color:var(--muted);margin-top:10px"><strong>Start Tap to Time</strong> does <em>not</em> auto-estimate words for you — you stamp each word live while the song plays (great first draft).</p>
+      <p style="font-size:13px;line-height:1.65;color:var(--muted);margin-top:10px"><strong>Skip for now</strong> leaves things as they are so you can edit timings manually instead.</p>
+      <p style="font-size:12px;line-height:1.6;color:var(--muted2);margin-top:10px">During tap mode: <kbd>Space</kbd> stamps the next word, <kbd>[</kbd>/<kbd>]</kbd> change speed, <kbd>Esc</kbd> exits. Slowing playback down is recommended.</p>
+    `
+    showModal('Tap to Time?', body, [
       { label: 'Skip for now', fn: () => {
         tapTimingCompleted = true
         scheduleSessionSave()
