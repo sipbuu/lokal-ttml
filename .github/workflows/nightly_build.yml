@@ -165,6 +165,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create / Update Nightly Release
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "nightly-${{ inputs.ref || 'main' }}"
@@ -190,3 +191,31 @@ jobs:
             ### Binary Checksums (SHA-256)
 
             ${{ steps.checksums.outputs.HASHES }}
+
+      - name: Discord Notification (Build Complete)
+        shell: bash
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          BANNER_URL="https://github.com/${{ github.repository }}/releases/download/nightly-${{ inputs.ref || 'main' }}/release-banner.png"
+
+          PAYLOAD=$(jq -n \
+            --arg version "Nightly (${{ inputs.ref || 'main' }})" \
+            --arg url "${{ steps.create_release.outputs.html_url }}" \
+            --arg msg "${{ steps.commit_info.outputs.MSG }}" \
+            --arg image "$BANNER_URL" \
+            --arg footer_icon "https://i.imgur.com/ZC3mEUC.png" \
+            --argjson color 15105570 \
+            '{
+              embeds: [{
+                title: "Build Complete: Lokal TTML Editor \($version)",
+                description: "All platform binaries for **\($version)** have been successfully built and uploaded to the nightly pre-release.\n\n**Status:** Nightly Ready\n**Last Commit:** \($msg)",
+                url: $url,
+                color: $color,
+                image: { url: $image },
+                footer: { text: "Lokal Build System", icon_url: $footer_icon }
+              }]
+            }'
+          )
+
+          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
