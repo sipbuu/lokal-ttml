@@ -3992,8 +3992,19 @@ function amEnsureSprings(store, kind) {
     glow: new AmSpring(0, 1.18, 0.56),
   }
 }
-function amWriteTransform(el, yEm, scale) {
-  el.style.transform = `translate3d(0, calc(var(--am-font-size) * ${yEm}), 0) scale(${scale})`
+function amWriteTransform(el, yEm, scale, pullX = 0) {
+  el.style.transform = `translate3d(${pullX}px, calc(var(--am-font-size) * ${yEm}), 0) scale(${scale})`
+}
+
+function amTightPullX(el, scale) {
+  if (!el?._tightPrev && !el?._tightNext) return 0
+  const w = el.offsetWidth || 0
+  if (!w) return 0
+  const inset = w * (1 - scale) / 2
+  let pull = 0
+  if (el._tightPrev) pull -= inset
+  if (el._tightNext) pull += inset
+  return pull
 }
 
 function buildAppleWord(word, className, index, type) {
@@ -4032,7 +4043,10 @@ function buildAppleWord(word, className, index, type) {
 function appendAppleWords(container, words, className, type) {
   words.forEach((w, i) => {
     if (i > 0 && !w.tight) container.appendChild(document.createTextNode(' '))
-    container.appendChild(buildAppleWord(w, className, i, type))
+    const el = buildAppleWord(w, className, i, type)
+    el._tightPrev = !!w.tight
+    el._tightNext = !!words[i + 1]?.tight
+    container.appendChild(el)
   })
 }
 
@@ -4188,7 +4202,7 @@ function applyAppleWordUnit(wrapper, t, dt, active) {
   const y = wrapper._springs.yOffset.step(dt)
   const glow = wrapper._springs.glow.step(dt)
   wrapper.style.setProperty('--gradient-position', `${targetGradient}%`)
-  amWriteTransform(wrapper, y, scale)
+  amWriteTransform(wrapper, y, scale, amTightPullX(wrapper, scale))
   wrapper.style.setProperty('--text-shadow-blur-radius', `${4 + 2 * glow}px`)
   wrapper.style.setProperty('--text-shadow-opacity', `${Math.min(glow * 35, 100)}`)
 }
