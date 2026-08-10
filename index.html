@@ -401,6 +401,10 @@ kbd{display:inline-block;padding:1px 5px;background:var(--surface3);border:1px s
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
       Import File
     </button>
+    <button class="tb-btn" onclick="showPasteLyricsModal()" title="Paste plain lyrics, LRC, or TTML text">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+      Paste Lyrics
+    </button>
     <div class="tb-sep"></div>
     <button class="tb-btn" onclick="addLineModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -878,9 +882,11 @@ function drawSelectedWordMarkers(ctx, width, height, view) {
 function seekToLine(line, play = true) {
   if (!line || line.time == null) return
   audio.currentTime = clamp(line.time, 0, audioDuration || line.time)
+  noteAudioSeek()
   waveformCenter = audio.currentTime
   updatePlayheads()
   if (waveformZoom > 1) drawWaveform()
+  updatePreviewLive(getPreviewClockTime())
   if (play) {
     audio.play()
     setPlayIcon(false)
@@ -1080,13 +1086,41 @@ async function restoreSession() {
   }
 }
 
+function getMediaTime() {
+  return audio.currentTime || 0
+}
+
+function applyPlaybackLatency(t) {
+  const latency = Math.max(0, Number(settings.playbackLatencyMs) || 0) / 1000
+  return Math.max(0, (Number.isFinite(t) ? t : 0) - latency)
+}
+
+function getPlaybackClockTime() {
+  return applyPlaybackLatency(getMediaTime())
+}
+
+function getPreviewClockTime() {
+  return settings.previewStyle === 'apple' ? getAppleClockTime() : getPlaybackClockTime()
+}
+
+function resetAppleClock() {
+  appleTimeAnchorMedia = getMediaTime()
+  appleTimeAnchorPerf = performance.now()
+  applePredictedTime = appleTimeAnchorMedia
+}
+
+function noteAudioSeek() {
+  resetAppleClock()
+}
+
 function ensurePreviewTicker() {
   if (previewAnimationFrame) return
   const tick = () => {
     previewAnimationFrame = 0
     if (!audio.paused && !audio.ended) {
-      const t = settings.previewStyle === 'apple' ? getAppleClockTime() : (audio.currentTime || 0)
+      const t = getPreviewClockTime()
       updatePreviewLive(t)
+      updateEditorActiveWords(t)
       maybeKeepPlayheadVisible()
       updatePlayheads()
       previewAnimationFrame = requestAnimationFrame(tick)
@@ -2276,7 +2310,7 @@ function setPlaybackSpeed(rate) {
   if (sel && sel.value !== String(rate)) sel.value = String(rate)
 }
 function captureAudioTime() {
-  const t = audio.currentTime || 0
+  const t = getMediaTime()
   const rate = audio.playbackRate || 1
   if (rate === 1 || !settings.speedTimingOffsetMs) return t
   return clamp(t - (settings.speedTimingOffsetMs / 1000), 0, audioDuration || t)
@@ -2309,17 +2343,24 @@ function setPlayIcon(paused) {
     : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
 }
 audio.addEventListener('ended', () => setPlayIcon(true))
-audio.addEventListener('play', ensurePreviewTicker)
+audio.addEventListener('play', () => { resetAppleClock(); ensurePreviewTicker() })
 audio.addEventListener('pause', stopPreviewTicker)
 audio.addEventListener('ended', stopPreviewTicker)
+audio.addEventListener('seeking', noteAudioSeek)
+audio.addEventListener('seeked', () => {
+  noteAudioSeek()
+  updatePreviewLive(getPreviewClockTime())
+  updateEditorActiveWords(getPreviewClockTime())
+})
 audio.addEventListener('timeupdate', () => {
-  const t = audio.currentTime
-  document.getElementById('track-time').textContent = fmtMs(t)
-  document.getElementById('waveform-time-overlay').textContent = fmtMs(t)
-  document.getElementById('tp-time').textContent = fmtSec(t)
-  document.getElementById('prog-fill').style.width = (audioDuration ? t/audioDuration*100 : 0) + '%'
-  updateEditorActiveWords(t)
-  updatePreviewLive(t)
+  const mediaT = getMediaTime()
+  const previewT = getPreviewClockTime()
+  document.getElementById('track-time').textContent = fmtMs(mediaT)
+  document.getElementById('waveform-time-overlay').textContent = fmtMs(mediaT)
+  document.getElementById('tp-time').textContent = fmtSec(mediaT)
+  document.getElementById('prog-fill').style.width = (audioDuration ? mediaT/audioDuration*100 : 0) + '%'
+  updateEditorActiveWords(previewT)
+  updatePreviewLive(previewT)
   maybeKeepPlayheadVisible()
   updatePlayheads()
 })
@@ -2328,7 +2369,9 @@ function progressSeek(e) {
   if (!audioDuration) return
   const r = document.getElementById('prog-track').getBoundingClientRect()
   audio.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * audioDuration
+  noteAudioSeek()
   updatePlayheads()
+  updatePreviewLive(getPreviewClockTime())
   if (waveformZoom > 1) maybeKeepPlayheadVisible(true)
 }
 function waveformSeek(e) {
@@ -2336,7 +2379,9 @@ function waveformSeek(e) {
   const r = document.getElementById('waveform-canvas').getBoundingClientRect()
   const view = getWaveformView()
   audio.currentTime = waveXToTime(clamp(e.clientX-r.left, 0, r.width), r.width, view)
+  noteAudioSeek()
   updatePlayheads()
+  updatePreviewLive(getPreviewClockTime())
   if (waveformZoom > 1) drawWaveform()
 }
 function waveformDrag(e) { if (e.buttons===1) waveformSeek(e) }
@@ -2535,9 +2580,11 @@ function seekToMarker(id) {
   const m = markers.find(m => m.id === id)
   if (!m || !audioDuration) return
   audio.currentTime = clamp(m.time, 0, audioDuration)
+  noteAudioSeek()
   if (waveformZoom > 1) waveformCenter = audio.currentTime
   drawWaveform()
   updatePlayheads()
+  updatePreviewLive(getPreviewClockTime())
 }
 
 function renderWaveformMarkerFlags() {
@@ -2805,17 +2852,89 @@ function parseTTML(xml) {
   return out.sort((a,b)=>(a.time||0)-(b.time||0))
 }
 
+function cleanPastedLyricsText(text) {
+  let raw = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  raw = raw.replace(/\)([A-Z])/g, ')\n$1')
+  const rows = raw.split('\n')
+  const out = []
+  for (let i = 0; i < rows.length; i++) {
+    if (/^\s*you might also like\s*$/i.test(rows[i])) {
+      i++
+      while (i < rows.length) {
+        const l = rows[i].trim()
+        if (!l) { i++; continue }
+        if (l.length >= 40 || /[,.!?"]/.test(l) || /\([^)]+\)/.test(l)) break
+        i++
+      }
+      i--
+      continue
+    }
+    out.push(rows[i])
+  }
+  return out.join('\n')
+}
+
+function detectLyricsTextSource(content) {
+  const text = String(content || '').trim()
+  if (!text) return 'plain'
+  if (/<\s*tt\b/i.test(text) || /<\s*div\b[^>]*>\s*<\s*p\b/i.test(text)) return 'ttml'
+  if (/\[\d{1,2}:\d{2}(?:\.\d{1,3})?\]/.test(text)) return 'lrc'
+  return 'plain'
+}
+
+function importLyricsFromText(content, preferredSource) {
+  const cleaned = cleanPastedLyricsText(content)
+  if (!cleaned.trim()) {
+    showRuntimeError('No lyrics found in the pasted text.')
+    return false
+  }
+  const source = preferredSource || detectLyricsTextSource(cleaned)
+  pushHistory('import lyrics')
+  if (source === 'lrc') lines = parseLRC(cleaned)
+  else if (source === 'ttml') lines = parseTTML(cleaned)
+  else {
+    lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean).map(l => buildLineFromPlainText(l))
+  }
+  if (!lines.length) {
+    showRuntimeError('Could not parse any lyric lines from that text.')
+    return false
+  }
+  selectedLineId = lines[0]?.id || null
+  selectedWord = null
+  tapTimingCompleted = source === 'ttml' && projectHasSolidWordTimings()
+  renderAll()
+  drawWaveform()
+  maybeOfferTapToTime(source)
+  return true
+}
+
+function showPasteLyricsModal() {
+  showModal('Paste Lyrics', `
+    <div class="mf">
+      <label>Lyrics text</label>
+      <textarea class="mi mta" id="paste-lyrics-text" placeholder="Paste plain lyrics here (one line per lyric)&#10;&#10;LRC timestamps and TTML also work if you paste those." style="min-height:220px"></textarea>
+      <div class="desc" style="margin-top:8px">Plain text becomes untimed lines you can tap/time. Genius "You might also like" blocks get stripped when possible.</div>
+    </div>
+  `, [
+    { label: 'Cancel', fn: closeModal },
+    { label: 'Import', primary: true, fn: () => {
+      const text = document.getElementById('paste-lyrics-text')?.value || ''
+      if (!text.trim()) return
+      closeModal()
+      importLyricsFromText(text)
+    }},
+  ])
+  setTimeout(() => document.getElementById('paste-lyrics-text')?.focus(), 50)
+}
+
 async function openLyricsFile() {
   const result = await window.api.openLyrics()
   if (!result) return
   const { content, ext } = result
-  let source = 'plain'
-  if (ext==='lrc') { lines = parseLRC(content); source = 'lrc' }
-  else if (ext==='ttml'||ext==='xml') { lines = parseTTML(content); source = 'ttml' }
-  else lines = content.split('\n').filter(l=>l.trim()).map(l=>buildLineFromPlainText(l.trim()))
-  tapTimingCompleted = source === 'ttml' && projectHasSolidWordTimings()
-  renderAll(); drawWaveform()
-  maybeOfferTapToTime(source)
+  let preferred = 'plain'
+  if (ext === 'lrc') preferred = 'lrc'
+  else if (ext === 'ttml' || ext === 'xml') preferred = 'ttml'
+  importLyricsFromText(content, preferred)
 }
 
 function collectMainWordRefs() {
@@ -3427,7 +3546,13 @@ function buildWordRow(words, label, labelClass, lineId, type) {
     chip.appendChild(wtText)
     if (settings.showTimecodes) chip.appendChild(wtTimes)
     chip.addEventListener('click', () => selectWord(lineId, i, type))
-    chip.addEventListener('dblclick', () => { if (w.time!=null) { audio.currentTime=w.time; audio.play(); setPlayIcon(false) } })
+    chip.addEventListener('dblclick', () => {
+      if (w.time == null) return
+      audio.currentTime = w.time
+      noteAudioSeek()
+      audio.play()
+      setPlayIcon(false)
+    })
     container.appendChild(chip)
   })
   row.appendChild(container)
@@ -3718,8 +3843,11 @@ function getWordProgress(word, t) {
 function seekToWord(word) {
   if (!word || word.time == null || !audioDuration) return
   audio.currentTime = clamp(word.time, 0, audioDuration)
+  noteAudioSeek()
   if (waveformZoom > 1) { waveformCenter = audio.currentTime; drawWaveform() }
   updatePlayheads()
+  updatePreviewLive(getPreviewClockTime())
+  updateEditorActiveWords(getPreviewClockTime())
 }
 
 function buildSyncWord(word, className, index, t, type = 'main') {
@@ -4088,11 +4216,16 @@ function scrollAppleLineToAnchor(el, lineId) {
 }
 
 function getAppleClockTime() {
-  const raw = audio.currentTime || 0
+  const raw = getMediaTime()
   const now = performance.now()
   if (raw !== appleTimeAnchorMedia) {
+    const jump = Math.abs(raw - appleTimeAnchorMedia)
     appleTimeAnchorMedia = raw
     appleTimeAnchorPerf = now
+    if (jump > 0.04) {
+      applePredictedTime = raw
+      return applyPlaybackLatency(raw)
+    }
   }
   let predicted = appleTimeAnchorMedia
   if (!audio.paused && !audio.ended && !audio.seeking) {
@@ -4100,7 +4233,7 @@ function getAppleClockTime() {
     predicted = appleTimeAnchorMedia + elapsed * (audio.playbackRate || 1)
   }
   applePredictedTime = predicted
-  return predicted
+  return applyPlaybackLatency(predicted)
 }
 
 function findAppleAnchorIndex(t) {
@@ -4386,6 +4519,7 @@ let settings = {
   autoCorrectWordTimings: true,
   preservePitchAtSpeed: true,
   speedTimingOffsetMs: 0,
+  playbackLatencyMs: 0,
   waveformEngine: 'auto',
   theme: 'dark',
   themeOverrides: {},
@@ -4655,11 +4789,15 @@ async function showSettings() {
         <label class="settings-toggle"><input type="checkbox" id="s-auto-correct-words" ${settings.autoCorrectWordTimings?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
+        <div><div>Playback latency offset (ms)</div><div class="desc">Shifts lyric preview / highlight timing later to match what you actually hear. Use this when clicks or reimports look early vs Spicy Lyrics (try 40-150). Does not change exported TTML or Set Start/End capture</div></div>
+        <input type="number" min="0" step="10" class="settings-select" id="s-playback-latency" style="width:80px" value="${settings.playbackLatencyMs||0}">
+      </div>
+      <div class="settings-row">
         <div><div>Preserve pitch at non-1x speed</div><div class="desc">Keeps pitch normal when slowed/sped up, but the pitch-correction processing itself adds a small audio delay, worse at lower speeds, which can throw off "Set Start/End" capture. Turn off for near-zero latency (audio will sound higher/lower pitched) if you're finding slow-speed timings feel off</div></div>
         <label class="settings-toggle"><input type="checkbox" id="s-preserve-pitch" ${settings.preservePitchAtSpeed!==false?'checked':''}><div class="toggle-track"></div></label>
       </div>
       <div class="settings-row">
-        <div><div>Slow/fast speed timing offset (ms)</div><div class="desc">Manual correction subtracted from "Set Start/End" and "use current time" captures whenever playback speed isn't 1x. If your captured timings consistently land late while playing slower, try a small positive value like 50-150</div></div>
+        <div><div>Slow/fast speed timing offset (ms)</div><div class="desc">Capture-only correction for Set Start/End / tap-to-time / "use current time" when speed isn't 1x. Separate from playback latency above. If captures land late while slowed down, try 50-150</div></div>
         <input type="number" step="10" class="settings-select" id="s-speed-timing-offset" style="width:80px" value="${settings.speedTimingOffsetMs||0}">
       </div>
       <div class="settings-row">
@@ -4801,6 +4939,7 @@ async function showSettings() {
       settings.autoCorrectWordTimings = document.getElementById('s-auto-correct-words').checked
       settings.preservePitchAtSpeed = document.getElementById('s-preserve-pitch').checked
       settings.speedTimingOffsetMs = parseInt(document.getElementById('s-speed-timing-offset').value, 10) || 0
+      settings.playbackLatencyMs = Math.max(0, parseInt(document.getElementById('s-playback-latency').value, 10) || 0)
       settings.waveformEngine = document.getElementById('s-waveform-engine').value || 'auto'
       settings.theme = document.getElementById('s-theme').value || 'dark'
       settings.showAdvancedTheme = !document.getElementById('s-advanced-wrap').classList.contains('settings-hidden')
@@ -5423,8 +5562,16 @@ document.addEventListener('keydown', e => {
   if (e.code==='KeyM') { e.preventDefault(); addMarkerAtPlayhead() }
   if (e.code==='BracketLeft') { e.preventDefault(); nudgePlaybackSpeed(-1) }
   if (e.code==='BracketRight') { e.preventDefault(); nudgePlaybackSpeed(1) }
-  if (e.code==='ArrowRight') { e.preventDefault(); audio.currentTime=Math.min(audioDuration,audio.currentTime+(e.shiftKey?1:.1)) }
-  if (e.code==='ArrowLeft') { e.preventDefault(); audio.currentTime=Math.max(0,audio.currentTime-(e.shiftKey?1:.1)) }
+  if (e.code==='ArrowRight') {
+    e.preventDefault()
+    audio.currentTime = Math.min(audioDuration, audio.currentTime + (e.shiftKey ? 1 : .1))
+    noteAudioSeek()
+  }
+  if (e.code==='ArrowLeft') {
+    e.preventDefault()
+    audio.currentTime = Math.max(0, audio.currentTime - (e.shiftKey ? 1 : .1))
+    noteAudioSeek()
+  }
   if (e.code==='Tab' && selectedWord) {
     e.preventDefault()
     const line = lines.find(l=>l.id===selectedWord.lineId)
