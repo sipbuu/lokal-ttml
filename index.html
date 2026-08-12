@@ -2882,13 +2882,168 @@ function detectLyricsTextSource(content) {
   return 'plain'
 }
 
-function importLyricsFromText(content, preferredSource) {
+function normalizeLyricToken(word) {
+  return String(word || '')
+    .toLowerCase()
+    .replace(/^[("'[{]+|[)"'\].,:;!?]+$/g, '')
+    .replace(/[^a-z0-9']/g, '')
+    .replace(/'+/g, "'")
+}
+
+function lyricTokenSimilarity(a, b) {
+  if (!a || !b) return 0
+  if (a === b) return 1
+  if (a.length >= 3 && b.length >= 3 && (a.includes(b) || b.includes(a))) return 0.88
+  const maxLen = Math.max(a.length, b.length)
+  if (maxLen <= 1) return 0
+  let mismatches = 0
+  const minLen = Math.min(a.length, b.length)
+  for (let i = 0; i < minLen; i++) if (a[i] !== b[i]) mismatches++
+  mismatches += maxLen - minLen
+  const score = 1 - (mismatches / maxLen)
+  return score >= 0.72 ? score : 0
+}
+
+function flattenTimedWordTimeline(lineArr) {
+  const out = []
+  for (const line of lineArr || []) {
+    for (const w of (line.words || [])) {
+      if (w?.time == null) continue
+      const norm = normalizeLyricToken(w.word)
+      if (!norm) continue
+      out.push({
+        norm,
+        time: w.time,
+        end: w.end != null && w.end > w.time ? w.end : w.time,
+      })
+    }
+  }
+  return out
+}
+
+function applyRemappedWordTimings(newRefs, matched) {
+  for (let i = 0; i < newRefs.length; i++) {
+    const hit = matched[i]
+    if (!hit) continue
+    newRefs[i].word.time = hit.time
+    newRefs[i].word.end = hit.end
+    newRefs[i].word.timingEdited = false
+  }
+  let i = 0
+  while (i < newRefs.length) {
+    if (matched[i]) { i++; continue }
+    let j = i
+    while (j < newRefs.length && !matched[j]) j++
+    const prev = i > 0 ? newRefs[i - 1].word : null
+    const next = j < newRefs.length ? newRefs[j].word : null
+    const start = prev?.end != null ? prev.end : prev?.time
+    const end = next?.time
+    if (start != null && end != null && end > start) {
+      const n = j - i
+      const step = (end - start) / n
+      for (let k = 0; k < n; k++) {
+        newRefs[i + k].word.time = start + step * k
+        newRefs[i + k].word.end = start + step * (k + 1)
+        newRefs[i + k].word.timingEdited = false
+      }
+    }
+    i = j
+  }
+}
+
+function remapPlainLyricsOntoCurrentTimings(content) {
+  const cleaned = cleanPastedLyricsText(content)
+  const plainRows = cleaned.split('\n').map(l => l.trim()).filter(Boolean)
+  if (!plainRows.length) {
+    showRuntimeError('No lyrics found in the pasted text.')
+    return false
+  }
+  const timedSource = [...lines].filter(l => l.time != null).sort((a, b) => (a.time || 0) - (b.time || 0))
+  const timeline = flattenTimedWordTimeline(timedSource)
+  if (!timeline.length) {
+    showRuntimeError('No timed words to keep. Import the LRCLIB/LRC timings first, then paste the better lyrics with "Keep timings" on.')
+    return false
+  }
+
+  pushHistory('remap lyrics keep timings')
+  const built = plainRows.map(t => buildLineFromPlainText(t))
+  const newRefs = []
+  built.forEach(line => {
+    ;(line.words || []).forEach((word, wi) => {
+      newRefs.push({ line, wi, word, norm: normalizeLyricToken(word.word) })
+    })
+  })
+
+  const matched = new Array(newRefs.length).fill(null)
+  let oi = 0
+  let matchedCount = 0
+  for (let ni = 0; ni < newRefs.length; ni++) {
+    const nw = newRefs[ni]
+    if (!nw.norm) continue
+    let bestScore = 0
+    let bestIdx = -1
+    const nearEnd = Math.min(timeline.length, oi + 14)
+    for (let j = oi; j < nearEnd; j++) {
+      const score = lyricTokenSimilarity(nw.norm, timeline[j].norm)
+      if (score > bestScore) { bestScore = score; bestIdx = j }
+    }
+    if (bestScore < 0.55) {
+      const farEnd = Math.min(timeline.length, oi + 48)
+      for (let j = nearEnd; j < farEnd; j++) {
+        const score = lyricTokenSimilarity(nw.norm, timeline[j].norm)
+        if (score > bestScore) { bestScore = score; bestIdx = j }
+      }
+    }
+    if (bestScore >= 0.55 && bestIdx >= 0) {
+      matched[ni] = timeline[bestIdx]
+      oi = bestIdx + 1
+      matchedCount++
+    }
+  }
+
+  applyRemappedWordTimings(newRefs, matched)
+
+  for (const line of built) {
+    const timedWords = (line.words || []).filter(w => w.time != null)
+    if (timedWords.length) {
+      line.time = timedWords[0].time
+      const last = timedWords[timedWords.length - 1]
+      line.end = last.end != null ? last.end : last.time
+      autoFillWordTimings(line, line.words, true)
+      if (line.bgWords?.length) autoFillWordTimings(line, line.bgWords, true)
+    }
+  }
+
+  lines = built
+  selectedLineId = lines[0]?.id || null
+  selectedWord = null
+  tapTimingCompleted = matchedCount > 0
+  renderAll()
+  drawWaveform()
+  const pct = newRefs.filter(r => r.norm).length
+    ? Math.round(100 * matchedCount / newRefs.filter(r => r.norm).length)
+    : 0
+  showModal('Timings Kept', `
+    <p style="font-size:13px;line-height:1.6;color:var(--muted)">Remapped your pasted lyrics onto the current timings.</p>
+    <p style="font-size:12px;color:var(--muted2);margin-top:8px">Matched about <strong>${pct}%</strong> of words to the old timed source. Intro/extra lines with no match stay untimed (or get filled between neighbors). Double-check splits that differ a lot from LRCLIB.</p>
+  `, [{ label: 'Close', fn: closeModal }])
+  return true
+}
+
+function importLyricsFromText(content, preferredSource, opts = {}) {
   const cleaned = cleanPastedLyricsText(content)
   if (!cleaned.trim()) {
     showRuntimeError('No lyrics found in the pasted text.')
     return false
   }
   const source = preferredSource || detectLyricsTextSource(cleaned)
+  if (opts.keepTimings) {
+    if (source !== 'plain') {
+      showRuntimeError('"Keep timings" only works with plain lyrics text. Paste the Genius/plain version, not another LRC.')
+      return false
+    }
+    return remapPlainLyricsOntoCurrentTimings(cleaned)
+  }
   pushHistory('import lyrics')
   if (source === 'lrc') lines = parseLRC(cleaned)
   else if (source === 'ttml') lines = parseTTML(cleaned)
@@ -2909,19 +3064,27 @@ function importLyricsFromText(content, preferredSource) {
 }
 
 function showPasteLyricsModal() {
+  const hasTimed = lines.some(l => l.time != null && (l.words || []).some(w => w.time != null))
   showModal('Paste Lyrics', `
     <div class="mf">
       <label>Lyrics text</label>
       <textarea class="mi mta" id="paste-lyrics-text" placeholder="Paste plain lyrics here (one line per lyric)&#10;&#10;LRC timestamps and TTML also work if you paste those." style="min-height:220px"></textarea>
       <div class="desc" style="margin-top:8px">Plain text becomes untimed lines you can tap/time. Genius "You might also like" blocks get stripped when possible.</div>
     </div>
+    <div class="mf" style="display:flex;align-items:flex-start;gap:8px;margin-top:4px">
+      <input type="checkbox" id="paste-keep-timings" ${hasTimed ? 'checked' : 'disabled'} style="margin-top:3px">
+      <label for="paste-keep-timings" style="text-transform:none;letter-spacing:0;font-size:12px;line-height:1.5;color:var(--muted)">
+        Keep current timings (remap this text onto existing LRCLIB/LRC word times). ${hasTimed ? 'Use after importing the timed version first.' : 'Import timed lyrics first to enable this.'}
+      </label>
+    </div>
   `, [
     { label: 'Cancel', fn: closeModal },
     { label: 'Import', primary: true, fn: () => {
       const text = document.getElementById('paste-lyrics-text')?.value || ''
       if (!text.trim()) return
+      const keepTimings = !!document.getElementById('paste-keep-timings')?.checked
       closeModal()
-      importLyricsFromText(text)
+      importLyricsFromText(text, null, { keepTimings })
     }},
   ])
   setTimeout(() => document.getElementById('paste-lyrics-text')?.focus(), 50)
